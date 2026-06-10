@@ -1,3 +1,81 @@
+options(stringsAsFactors = FALSE)
+library(dplyr)
+library(tidyr)
+library(foreach)
+
+# Create Captions and Labels ----------------------------------------------
+caption.percents <-
+  "Values represent percentage of respondents +- 95% confidence intervals with sample size given in parenthesis."
+caption.means <-
+  "Values represent mean response +- 95% confidence intervals with sample size given in parenthesis."
+caption.medians <-
+  "Values represent lower 95% median confidence limit, median response, and upper 95% median confidence limit with sample size given in parenthesis"
+labels.distance <-
+  "Answers included: 10 or less miles, 11 to 20 miles, 21 to 40 miles, 41 to 60 miles, 61 to 100 miles, 101 to 250 miles, 251 to 500 miles, and Over 500 miles."
+labels.agree <-
+  "Answers included (from 1 to 5): Strongly Disagree, Disagree, Neutral, Agree, Strongly Agree."
+labels.importance <-
+  "Answers included (from 1 to 5): Not At All Important, Slightly Important, Moderately Important, Very Important, Extremely Important."
+labels.importance2 <-
+  "Answers included (from 1 to 5): Not At All Important, Not Very Important, Somewhat Important, Very Important, Extremely Important."
+labels.release <-
+  "Answers included (from 1 to 5): Kept All, Kept Many, Kept Half, Kept A Few, Kept None."
+labels.freq <-
+  "Answers included: Did Not Fish, 1, 2, 3, 4, 5, 6-8, 9-11, 12-14, 15-17, 18-20, and Over 20."
+labels.satisfaction <-
+  "Answers included (from 1 to 5): Very Satisfied, Somewhat Satisfied, Neutral, Somewhat Dissatisfied, and Very Dissatisfied."
+labels.barriers <-
+  "Answers included (from 1 to 4): I would fish the same amount, I may go fishing more, I would likely go fishing more, I would definitely go fishing more."
+caption.raked <- "These results were weighted.  Please consult the survey methodology for details."
+
+# Create Generic Functions ------------------------------------------------
+RoundTable <- function(myDataFrame, includesHeaderColumn = FALSE) {
+  numCols = ncol(myDataFrame)
+  startCol = 1
+  if (includesHeaderColumn == TRUE) {
+    startCol = 2
+  }
+  for (i in startCol:ncol(myDataFrame)) {
+    myDataFrame[, i] <- round(myDataFrame[, i] * 100, 1)
+  }
+  return(myDataFrame)
+}
+
+SubstitueQuesForResponse <- function(
+  myData,
+  myQuestionList,
+  myQuestion,
+  myYear,
+  responseField = "Response"
+) {
+  myQuestion <- enquo(myQuestion)
+
+  l <- myQuestionList %>%
+    filter(
+      str_detect(.$Field, rlang::quo_text(myQuestion)) & Year == myYear
+    ) %>%
+    select(Field, Question) %>%
+    unique()
+
+  op <- myData %>%
+    mutate(Response2 = as.character(get(responseField))) %>%
+    left_join(l, by = c("Response2" = "Field")) %>%
+    mutate(!!rlang::sym(responseField) := Question) %>%
+    select(-Question, -Response2)
+
+  return(op)
+}
+
+LabelResponses <- function(myData, myLabels, responseField = "Response") {
+  op <- myData %>%
+    mutate(Response2 = as.character(get(responseField))) %>%
+    left_join(myLabels, by = c("Response2" = "Response")) %>%
+    #arrange(Response) %>%
+    mutate(!!rlang::sym(responseField) := Label) %>%
+    select(-Label, -Response2)
+
+  return(op)
+}
 # Arrange Tables - takes calculations and lays out table in a dataframe ------
 ArrangeTableA <- function(myData, roundDigits = 1, ordered = FALSE) {
   if ("CI" %in% names(myData)) {
