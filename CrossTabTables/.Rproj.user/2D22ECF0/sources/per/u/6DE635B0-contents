@@ -1,0 +1,20 @@
+library(ngpcFisheries)
+library(tidyverse)
+library(stringr)
+
+NGPC_getCodes_waterbodycodespublic_byname("Spencer")
+
+NGPC_getCodes_waterbodycodespublic_bycode(66)
+
+NGPC_getCodes_waterbody_byname("Morrill")
+
+NGPC_getCodes_waterbody_bycode(1525)
+
+NGPC_getCodes_waterbodygislinks_bywaterbodycode(2521)
+
+NGPC_getCodes_waterbodygislinks_bypublicwaterid(576)
+
+NGPC_getCodes_waterbodycodespubliclinks_bywaterbodycode(2521)
+
+d<-NGPC_getCodes_waterbodygislinks_all()
+d %>% filter(str_detect(geometryId, "6055"))
