@@ -1,0 +1,9 @@
+.Rproj.user/
+*.Rhistory
+*.RData
+Thumbs.db
+UPDATED_FUNCTIONS*.R
+FUNCTION_UPDATES*.md
+IMPLEMENTATION_GUIDE*.md
+*.html
+*_files/
