@@ -4,13 +4,23 @@
 .Rproj.user/
 *.Rproj
 
+# R binary data files
+*.rData
+*.rdata
+
 # Rendered output
 *.html
 *_files/
 *.docx
+*.pdf
+*.png
+*.jpeg
+*.jpg
 
 # Temp / lock files
 ~$*
+~WRL*.tmp
+Thumbs.db
 New Text Document.txt
 
 # Staging / working notes (not source)
