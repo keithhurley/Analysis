@@ -1,4 +1,4 @@
----
+﻿---
 title: "2025 Licensed Angler Survey Crosstabs"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -117,7 +117,7 @@ CreateFlex(CreateTableB_selectOne_percent(d %>% mutate(postWeight = 1), A1, orde
 CreateFlex(CreateTableA_selectOne_percent(d, A2))
 ```
 
-`r paste(trimws(GetQuestion(q, A2, 2025)),"  ", caption.percents,"  ", caption.percents, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, A2, 2025)),"  ", caption.percents,"  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, A2))
@@ -173,13 +173,13 @@ CreateFlex(CreateTableB_selectOne_percent(d, A12))
 
 ### Park Entry Permit
 
-`r paste(trimws(GetQuestion(q, A10, 2025)),"  ", caption.means, " ", labels.satisfaction, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, A10, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableA_selectOne_percent(d, A10))
 ```
 
-`r paste(trimws(GetQuestion(q, A10, 2025)),"  ", caption.means, "  ", labels.satisfaction, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, A10, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, A10))
@@ -425,13 +425,13 @@ CreateFlex(CreateTableB_selectOne_percent(d, A9))
 
 <!---CHUNK_PAGEBREAK--->
 
-`r paste(trimws(GetQuestion(q, A9, 2025)),"  ", caption.percents, " ", labels.satisfaction, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, A9, 2025)),"  ", caption.means, "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(SubstitueQuesForResponse(CreateTableA_means(d, "A9"),q, A9, 2025))
 ```
 
-`r paste(trimws(GetQuestion(q, A9, 2025)),"  ", caption.percents, " ", labels.satisfaction, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, A9, 2025)),"  ", caption.means, "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(SubstitueQuesForResponse(CreateTableB_means(d, "A9"),q, A9, 2025))
