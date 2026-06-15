@@ -1,0 +1,19 @@
+# R session artifacts
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# Rendered output
+*.html
+*_files/
+*.docx
+
+# Temp / lock files
+~$*
+New Text Document.txt
+
+# Staging / working notes (not source)
+UPDATED_FUNCTIONS*.R
+FUNCTION_UPDATES*.md
+IMPLEMENTATION_GUIDE*.md
