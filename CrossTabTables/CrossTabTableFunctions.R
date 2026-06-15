@@ -26,7 +26,10 @@ labels.satisfaction <-
   "Answers included (from 1 to 5): Very Satisfied, Somewhat Satisfied, Neutral, Somewhat Dissatisfied, and Very Dissatisfied."
 labels.barriers <-
   "Answers included (from 1 to 4): I would fish the same amount, I may go fishing more, I would likely go fishing more, I would definitely go fishing more."
-caption.raked <- "These results were weighted.  Please consult the survey methodology for details."
+caption.raked <-
+  "These results were weighted.  Please consult the survey methodology for details."
+caption.reversed <-
+  "Items marked with a dagger (\u2020) were reverse coded during data aggregation so that all items in this question scale in the same direction.  Their response values were inverted (1=5, 2=4, 4=2, 5=1) before analysis."
 
 # Create Generic Functions ------------------------------------------------
 RoundTable <- function(myDataFrame, includesHeaderColumn = FALSE) {
@@ -66,18 +69,88 @@ SubstitueQuesForResponse <- function(
   return(op)
 }
 
+# Append a dagger marker to the displayed label of reverse-coded items.
+# Call this AFTER SubstitueQuesForResponse, when `responseField` holds the
+# question text. It looks up which question texts correspond to reverse-coded
+# Fields (Reversed == TRUE) for the given year and marks those rows.
+MarkReversedItems <- function(
+  myData,
+  myQuestionList,
+  myYear,
+  responseField = "Response",
+  marker = " \u2020"
+) {
+  reversedQuestions <- myQuestionList %>%
+    filter(Reversed %in% c(TRUE, "TRUE", "True", "true") & Year == myYear) %>%
+    pull(Question) %>%
+    unique()
+
+  op <- myData %>%
+    mutate(
+      !!rlang::sym(responseField) := ifelse(
+        trimws(as.character(get(responseField))) %in% trimws(reversedQuestions),
+        paste0(as.character(get(responseField)), marker),
+        as.character(get(responseField))
+      )
+    )
+
+  return(op)
+}
+
 LabelResponses <- function(myData, myLabels, responseField = "Response") {
   op <- myData %>%
     mutate(Response2 = as.character(get(responseField))) %>%
     left_join(myLabels, by = c("Response2" = "Response")) %>%
-    #arrange(Response) %>%
     mutate(!!rlang::sym(responseField) := Label) %>%
     select(-Label, -Response2)
 
   return(op)
 }
+
+GetQuestion <- function(myQuestionFactors, myField, myYear) {
+  myField <- enquo(myField)
+
+  if (rlang::quo_text(myField) %in% c("C2", "E1", "D14", "D3", "D4")) {
+    switch(
+      rlang::quo_text(myField),
+      C2 = {
+        op <- "Indicate the importance for each item as a reason why you fish."
+      },
+      E1 = {
+        op <- "Indicate how much you agree with each of the following statements about fishing."
+      },
+      D14 = {
+        op <- "Thinking about your fishing in Nebraska during 2025, how often are each of the following statements true?"
+      },
+      D3 = {
+        op <- "Please complete the following statements."
+      },
+      D4 = {
+        op <- "Thinking about the one type of fish that you prefer to fish for, how much do you agree or disagree with the following about your fishing in Nebraska during 2025?."
+      }
+    )
+  } else {
+    op <- myQuestionFactors %>%
+      filter(str_detect(.$Field, rlang::quo_text(myField)) & Year == myYear) %>%
+      pull(Question) %>%
+      unique() %>%
+      as.character()
+  }
+
+  return(op[1])
+}
+
 # Arrange Tables - takes calculations and lays out table in a dataframe ------
 ArrangeTableA <- function(myData, roundDigits = 1, ordered = FALSE) {
+  # For selectAll data: Variable holds the sub-question field name,
+  # Response holds "Checked"/"Unchecked". Use Variable as the row key and keep only Checked rows.
+  if ("Variable" %in% names(myData)) {
+    myData <- myData %>%
+      filter(trimws(as.character(Response)) != "Unchecked") %>%
+      mutate(Response = Variable) %>%
+      select(-Variable)
+  }
+
   if ("CI" %in% names(myData)) {
     myData <- myData %>%
       mutate(
@@ -113,14 +186,26 @@ ArrangeTableA <- function(myData, roundDigits = 1, ordered = FALSE) {
       distinct() %>%
       spread(Group, text) %>%
       select(-Year)
+  } else if ("Median" %in% names(myData)) {
+    myData <- myData %>%
+      mutate(
+        Q1 = round(Q1, roundDigits),
+        Median = round(Median, roundDigits),
+        Q3 = round(Q3, roundDigits)
+      ) %>%
+      mutate(text = paste(Q1, "/", Median, "/", Q3, " (", N, ")", sep = "")) %>%
+      select(Response, Group, text, Year) %>%
+      distinct() %>%
+      spread(Group, text) %>%
+      select(-Year)
   }
 
-  if (ordered == TRUE) {
+  if (ordered == TRUE && "Overall" %in% names(myData)) {
     myData <- myData %>%
       separate(Overall, c("val", "deleteMe"), sep = "\\+-", remove = FALSE) %>%
       mutate(val = as.numeric(val)) %>%
       arrange(-val) %>%
-      select(-val, -deleteMe)
+      select(-val, -deleteMe, -Overall)
   }
 
   myData <- myData %>%
@@ -129,16 +214,27 @@ ArrangeTableA <- function(myData, roundDigits = 1, ordered = FALSE) {
       any_of(c("Overall", "Resident", "Non-Resident", "Male", "Female"))
     )
 
-  # remove NA
-  myData[, 2:ncol(myData)] <-
-    lapply(myData[, 2:ncol(myData)], function(x) {
-      ifelse(is.na(x), "", x)
-    })
+  if (ncol(myData) > 1 && nrow(myData) > 0) {
+    myData[, 2:ncol(myData)] <- lapply(
+      myData[, 2:ncol(myData), drop = FALSE],
+      function(x) {
+        ifelse(is.na(x), "", x)
+      }
+    )
+  }
 
   return(myData)
 }
 
 ArrangeTableB <- function(myData, roundDigits = 1, ordered = FALSE) {
+  # For selectAll data: use Variable as row key, keep only Checked rows
+  if ("Variable" %in% names(myData)) {
+    myData <- myData %>%
+      filter(trimws(as.character(Response)) != "Unchecked") %>%
+      mutate(Response = Variable) %>%
+      select(-Variable)
+  }
+
   if ("CI" %in% names(myData)) {
     myData <- myData %>%
       mutate(
@@ -174,9 +270,21 @@ ArrangeTableB <- function(myData, roundDigits = 1, ordered = FALSE) {
       distinct() %>%
       spread(Group, text) %>%
       select(-Year)
+  } else if ("Median" %in% names(myData)) {
+    myData <- myData %>%
+      mutate(
+        Q1 = round(Q1, roundDigits),
+        Median = round(Median, roundDigits),
+        Q3 = round(Q3, roundDigits)
+      ) %>%
+      mutate(text = paste(Q1, "/", Median, "/", Q3, " (", N, ")", sep = "")) %>%
+      select(Response, Group, text, Year) %>%
+      distinct() %>%
+      spread(Group, text) %>%
+      select(-Year)
   }
 
-  if (ordered == TRUE) {
+  if (ordered == TRUE && "Overall" %in% names(myData)) {
     myData <- myData %>%
       separate(Overall, c("val", "deleteMe"), sep = "\\+-", remove = FALSE) %>%
       mutate(val = as.numeric(val)) %>%
