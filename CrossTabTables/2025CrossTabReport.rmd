@@ -944,6 +944,129 @@ CreateFlex(LabelResponses(op,l))
 
 <!---CHUNK_PAGEBREAK--->
 
+### Low Water Levels
+
+```{r Q23setup}
+optoutQ23 <- "I did not experience low water levels in 2025"
+q23Fields <- c("Q23_1", "Q23_2", "Q23_3")
+likertQ23 <- c("Never", "Rarely", "Sometimes", "Often", "Always")
+
+# Fallback: compute Q23_Answered if the loaded data predates the aggregation fix
+if (!"Q23_Answered" %in% names(d)) {
+  d <- d %>%
+    mutate(Q23_Answered = rowSums(sapply(d[q23Fields], function(x) !is.na(x)), na.rm = TRUE) > 0)
+}
+
+# "Did not experience" subset: each Q23 item coded checked/unchecked
+dQ23all <- d %>%
+  filter(Q23_Answered) %>%
+  mutate(across(all_of(q23Fields),
+    ~ factor(ifelse(as.character(.) == optoutQ23, "Did not experience low water", "Unchecked"),
+             levels = c("Unchecked", "Did not experience low water"))))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_1)) %>%
+  mutate(Q23_1 = factor(as.character(Q23_1), levels = c(likertQ23, optoutQ23)))
+CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_1"))
+```
+
+`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_1"))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_2)) %>%
+  mutate(Q23_2 = factor(as.character(Q23_2), levels = c(likertQ23, optoutQ23)))
+CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_2"))
+```
+
+`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_2"))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_3)) %>%
+  mutate(Q23_3 = factor(as.character(Q23_3), levels = c(likertQ23, optoutQ23)))
+CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_3"))
+```
+
+`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_3"))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_1) != optoutQ23 & !is.na(Q23_1)) %>%
+  mutate(Q23_1 = factor(as.character(Q23_1), levels = likertQ23))
+CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_1"))
+```
+
+`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_1"))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_2) != optoutQ23 & !is.na(Q23_2)) %>%
+  mutate(Q23_2 = factor(as.character(Q23_2), levels = likertQ23))
+CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_2"))
+```
+
+`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_2"))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_3) != optoutQ23 & !is.na(Q23_3)) %>%
+  mutate(Q23_3 = factor(as.character(Q23_3), levels = likertQ23))
+CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_3"))
+```
+
+`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_3"))
+```
+
+
+<!---CHUNK_PAGEBREAK--->
+
+
+
+
 ### Fish Sought
 
 `r paste(trimws(GetQuestion(q, B2, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
@@ -1225,126 +1348,6 @@ op<-foreach(i=myFields, .combine="rbind") %do% {
   CreateTableB_means(d %>% filter(get(paste(i,"_AnsweredAll", sep=""))==TRUE), i)
 }
 CreateFlex(LabelResponses(op,l))
-```
-
-
-<!---CHUNK_PAGEBREAK--->
-
-### Low Water Levels
-
-```{r Q23setup}
-optoutQ23 <- "I did not experience low water levels in 2025"
-q23Fields <- c("Q23_1", "Q23_2", "Q23_3")
-likertQ23 <- c("Never", "Rarely", "Sometimes", "Often", "Always")
-
-# Fallback: compute Q23_Answered if the loaded data predates the aggregation fix
-if (!"Q23_Answered" %in% names(d)) {
-  d <- d %>%
-    mutate(Q23_Answered = rowSums(sapply(d[q23Fields], function(x) !is.na(x)), na.rm = TRUE) > 0)
-}
-
-# "Did not experience" subset: each Q23 item coded checked/unchecked
-dQ23all <- d %>%
-  filter(Q23_Answered) %>%
-  mutate(across(all_of(q23Fields),
-    ~ factor(ifelse(as.character(.) == optoutQ23, "Did not experience low water", "Unchecked"),
-             levels = c("Unchecked", "Did not experience low water"))))
-```
-
-<!---CHUNK_PAGEBREAK--->
-
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_1)) %>%
-  mutate(Q23_1 = factor(as.character(Q23_1), levels = c(likertQ23, optoutQ23)))
-CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_1"))
-```
-
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_1"))
-```
-
-<!---CHUNK_PAGEBREAK--->
-
-`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_2)) %>%
-  mutate(Q23_2 = factor(as.character(Q23_2), levels = c(likertQ23, optoutQ23)))
-CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_2"))
-```
-
-`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_2"))
-```
-
-<!---CHUNK_PAGEBREAK--->
-
-`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_3)) %>%
-  mutate(Q23_3 = factor(as.character(Q23_3), levels = c(likertQ23, optoutQ23)))
-CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_3"))
-```
-
-`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_3"))
-```
-
-<!---CHUNK_PAGEBREAK--->
-
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_1) != optoutQ23 & !is.na(Q23_1)) %>%
-  mutate(Q23_1 = factor(as.character(Q23_1), levels = likertQ23))
-CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_1"))
-```
-
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_1"))
-```
-
-<!---CHUNK_PAGEBREAK--->
-
-`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_2) != optoutQ23 & !is.na(Q23_2)) %>%
-  mutate(Q23_2 = factor(as.character(Q23_2), levels = likertQ23))
-CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_2"))
-```
-
-`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_2"))
-```
-
-<!---CHUNK_PAGEBREAK--->
-
-`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_3) != optoutQ23 & !is.na(Q23_3)) %>%
-  mutate(Q23_3 = factor(as.character(Q23_3), levels = likertQ23))
-CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_3"))
-```
-
-`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
-
-```{r }
-CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_3"))
 ```
 
 
