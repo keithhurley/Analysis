@@ -563,7 +563,7 @@ CreateFlex(CreateTableB_selectAll_percent(dQ18hired, myFields, Q18_Answered, ord
 ```{r }
 dQ18hired_raw <- d %>% filter(Q18_Answered & is.na(Q18c))
 op <- foreach(i = c("Q18a", "Q18b"), .combine = "rbind") %do% {
-  CreateTableA_means(dQ18hired_raw, i)
+  CreateTableA_means(dQ18hired_raw %>% filter(get(i) > 0), i)
 }
 CreateFlex(LabelResponses(op, l))
 ```
@@ -572,7 +572,7 @@ CreateFlex(LabelResponses(op, l))
 
 ```{r }
 op <- foreach(i = c("Q18a", "Q18b"), .combine = "rbind") %do% {
-  CreateTableB_means(dQ18hired_raw, i)
+  CreateTableB_means(dQ18hired_raw %>% filter(get(i) > 0), i)
 }
 CreateFlex(LabelResponses(op, l))
 ```
