@@ -527,10 +527,6 @@ CreateFlex(CreateTableA_selectAll_percent(dQ18hired, myFields, Q18_Answered, ord
 ```{r }
 CreateFlex(CreateTableB_selectAll_percent(dQ18hired, myFields, Q18_Answered, ordered = FALSE))
 ```
-
-
-
-
 <!---CHUNK_PAGEBREAK--->
 
 ### Trout Locations
