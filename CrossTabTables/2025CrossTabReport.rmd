@@ -512,6 +512,30 @@ CreateFlex(CreateTableB_selectAll_percent(dQ18all, "Q18c", Q18_Answered, ordered
 
 <!---CHUNK_PAGEBREAK--->
 
+`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  The percentages below reflect the proportion of ALL respondants to this question that hired guides in each location.  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+dQ18all_hired <- d %>%
+  filter(Q18_Answered) %>%
+  mutate(
+    Q18a    = factor(ifelse(!is.na(Q18a) & Q18a > 0, "Hired in Nebraska",      "Unchecked"), levels = c("Unchecked", "Hired in Nebraska")),
+    Q18b    = factor(ifelse(!is.na(Q18b) & Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska")),
+    Q18both = factor(ifelse(!is.na(Q18a) & !is.na(Q18b) &
+                              Q18a == "Hired in Nebraska" & Q18b == "Hired outside Nebraska",
+                            "Hired in both", "Unchecked"), levels = c("Unchecked", "Hired in both"))
+  )
+myFields <- c("Q18a", "Q18b", "Q18both")
+CreateFlex(CreateTableA_selectAll_percent(dQ18all_hired, myFields, Q18_Answered, ordered = FALSE))
+```
+
+`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  The percentages below reflect the proportion of ALL respondants to this question that hired guides in each location.  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_selectAll_percent(dQ18all_hired, myFields, Q18_Answered, ordered = FALSE))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
 `r paste(trimws(GetQuestion(q, Q18c, 2025)),"  Only respondants that hired at least one guide are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
 
 ```{r }
@@ -531,6 +555,30 @@ CreateFlex(CreateTableA_selectAll_percent(dQ18hired, myFields, Q18_Answered, ord
 ```{r }
 CreateFlex(CreateTableB_selectAll_percent(dQ18hired, myFields, Q18_Answered, ordered = FALSE))
 ```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  Only respondants that hired at least one guide are included in this calculation.  ", caption.means, "  ", caption.raked, sep="")`
+
+```{r }
+dQ18hired_raw <- d %>% filter(Q18_Answered & is.na(Q18c))
+op <- foreach(i = c("Q18a", "Q18b"), .combine = "rbind") %do% {
+  CreateTableA_means(dQ18hired_raw, i)
+}
+CreateFlex(LabelResponses(op, l))
+```
+
+`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  Only respondants that hired at least one guide are included in this calculation.  ", caption.means, "  ", caption.raked, sep="")`
+
+```{r }
+op <- foreach(i = c("Q18a", "Q18b"), .combine = "rbind") %do% {
+  CreateTableB_means(dQ18hired_raw, i)
+}
+CreateFlex(LabelResponses(op, l))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
 ### Trout Locations
 
 `r paste(trimws(GetQuestion(q, D13oga, 2025)),"  ", caption.percents, "  These values only represent the respondants that selected they fished for TROUT elsewhere in the survey.", "  ", caption.raked,sep="")`
