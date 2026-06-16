@@ -33,7 +33,7 @@ source("CrossTabTableFunctions.R") #load file of cross tab report functions
 setwd("D:/Survey/Analysis/CrossTabTables/")
 
 #load data
-load(file="../../Data/DataAggregation1/aggregateData_20260615.rData")
+load(file="../../Data/DataAggregation1/aggregateData_20260616.rData")
 d<-d %>% filter(surveyYear==2025)
 #q<-base.loaddata.factorlevels()
 #save(q, file="q_20190802")
@@ -657,7 +657,7 @@ grid::grid.draw(draw.quad.venn(area1 = sum(op$Freq[op$D13lrp==1], na.rm=TRUE),
 
 <!---CHUNK_PAGEBREAK--->
 
-# Preferred Fish
+### Preferred Fish
 
 `r paste(trimws(GetQuestion(q, B1, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
 
@@ -1045,6 +1045,130 @@ CreateFlex(LabelResponses(op,l))
 
 <!---CHUNK_PAGEBREAK--->
 
+### Ice Fishing
+
+```{r iceSetup}
+# Q26 is the gate for the ice fishing section.
+# dQ26  = everyone who answered Q26 (base for the Q26 tables)
+# iceBase = ice anglers only (Q26 == "Yes"), base for Q27-Q29
+dQ26 <- d %>%
+  filter(!is.na(Q26)) %>%
+  mutate(Q26 = factor(Q26, levels = c("Yes", "No")))
+
+iceBase <- d %>% filter(Q26 == "Yes")
+```
+
+`r paste(trimws(GetQuestion(q, Q26, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableA_selectOne_percent(dQ26, "Q26"))
+```
+
+`r paste(trimws(GetQuestion(q, Q26, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_selectOne_percent(dQ26, "Q26"))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q27, 2025)),"  Only respondants that ice fished at least one day are included in this calculation.  ", caption.medians, "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableA_medians(iceBase %>% filter(Q27 > 0), "Q27") %>% select(-Response))
+```
+
+`r paste(trimws(GetQuestion(q, Q27, 2025)),"  Only respondants that ice fished at least one day are included in this calculation.  ", caption.medians, "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_medians(iceBase %>% filter(Q27 > 0), "Q27") %>% select(-Response))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q28_1, 2025)),"  Proportion of harvest taken while ice fishing.  Only respondants that ice fished are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+myFields <- iceBase %>% dplyr::select(contains("Q28")) %>% select(-contains("Answered")) %>% names()
+op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
+  data.frame(Species = myFields[i], CreateTableA_selectOne_percent(iceBase %>% filter(!is.na(get(myFields[i]))), myFields[i]), check.names = FALSE)
+}
+CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
+```
+
+`r paste(trimws(GetQuestion(q, Q28_1, 2025)),"  Proportion of harvest taken while ice fishing.  Only respondants that ice fished are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
+  data.frame(Species = myFields[i], CreateTableB_selectOne_percent(iceBase %>% filter(!is.na(get(myFields[i]))), myFields[i]), check.names = FALSE)
+}
+CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q28_1, 2025)),"  Proportion of harvest taken while ice fishing.  Only respondants that ice fished and harvested at least one of these species are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+optoutQ28 <- "I did not harvest any of these fish in 2025"
+op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
+  data.frame(Species = myFields[i], CreateTableA_selectOne_percent(iceBase %>% filter(!is.na(get(myFields[i])) & as.character(get(myFields[i])) != optoutQ28), myFields[i]), check.names = FALSE)
+}
+CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
+```
+
+`r paste(trimws(GetQuestion(q, Q28_1, 2025)),"  Proportion of harvest taken while ice fishing.  Only respondants that ice fished and harvested at least one of these species are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
+  data.frame(Species = myFields[i], CreateTableB_selectOne_percent(iceBase %>% filter(!is.na(get(myFields[i])) & as.character(get(myFields[i])) != optoutQ28), myFields[i]), check.names = FALSE)
+}
+CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q29_1, 2025)),"  Of legal fish caught while ice fishing, the proportion that were harvested.  Only respondants that ice fished are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+myFields <- iceBase %>% dplyr::select(contains("Q29")) %>% select(-contains("Answered")) %>% names()
+op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
+  data.frame(Species = myFields[i], CreateTableA_selectOne_percent(iceBase %>% filter(!is.na(get(myFields[i]))), myFields[i]), check.names = FALSE)
+}
+CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
+```
+
+`r paste(trimws(GetQuestion(q, Q29_1, 2025)),"  Of legal fish caught while ice fishing, the proportion that were harvested.  Only respondants that ice fished are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
+  data.frame(Species = myFields[i], CreateTableB_selectOne_percent(iceBase %>% filter(!is.na(get(myFields[i]))), myFields[i]), check.names = FALSE)
+}
+CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q29_1, 2025)),"  Of legal fish caught while ice fishing, the proportion that were harvested.  Only respondants that ice fished and caught at least one of these species are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+optoutQ29 <- "I did not catch any of these fish while ice fishing in 2025"
+op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
+  data.frame(Species = myFields[i], CreateTableA_selectOne_percent(iceBase %>% filter(!is.na(get(myFields[i])) & as.character(get(myFields[i])) != optoutQ29), myFields[i]), check.names = FALSE)
+}
+CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
+```
+
+`r paste(trimws(GetQuestion(q, Q29_1, 2025)),"  Of legal fish caught while ice fishing, the proportion that were harvested.  Only respondants that ice fished and caught at least one of these species are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
+  data.frame(Species = myFields[i], CreateTableB_selectOne_percent(iceBase %>% filter(!is.na(get(myFields[i])) & as.character(get(myFields[i])) != optoutQ29), myFields[i]), check.names = FALSE)
+}
+CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
+```
+
+<!---CHUNK_PAGEBREAK--->
 
 ### Angler Motivations
 
@@ -1127,27 +1251,9 @@ dQ23all <- d %>%
              levels = c("Unchecked", "Did not experience low water"))))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants that did not experience low water levels in 2025.  ", caption.percents, "  ", caption.raked, sep="")`
-
-```{r }
-op <- foreach(i = q23Fields, .combine = "rbind") %do% {
-  data.frame(Item = i, CreateTableA_selectAll_percent(dQ23all, i, Q23_Answered, ordered = FALSE), check.names = FALSE)
-}
-CreateFlex(LabelResponses(op, l, responseField = "Item"))
-```
-
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants that did not experience low water levels in 2025.  ", caption.percents, "  ", caption.raked, sep="")`
-
-```{r }
-op <- foreach(i = q23Fields, .combine = "rbind") %do% {
-  data.frame(Item = i, CreateTableB_selectAll_percent(dQ23all, i, Q23_Answered, ordered = FALSE), check.names = FALSE)
-}
-CreateFlex(LabelResponses(op, l, responseField = "Item"))
-```
-
 <!---CHUNK_PAGEBREAK--->
 
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_1)) %>%
@@ -1155,7 +1261,7 @@ ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_1)) %>%
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_1"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_1"))
@@ -1163,7 +1269,7 @@ CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_1"))
 
 <!---CHUNK_PAGEBREAK--->
 
-`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_2)) %>%
@@ -1171,7 +1277,7 @@ ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_2)) %>%
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_2"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_2"))
@@ -1179,7 +1285,7 @@ CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_2"))
 
 <!---CHUNK_PAGEBREAK--->
 
-`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_3)) %>%
@@ -1187,7 +1293,7 @@ ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_3)) %>%
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_3"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_3"))
@@ -1195,7 +1301,7 @@ CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_3"))
 
 <!---CHUNK_PAGEBREAK--->
 
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_1) != optoutQ23 & !is.na(Q23_1)) %>%
@@ -1203,7 +1309,7 @@ ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_1) != optoutQ23 & !is.na(Q
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_1"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_1"))
@@ -1211,7 +1317,7 @@ CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_1"))
 
 <!---CHUNK_PAGEBREAK--->
 
-`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_2) != optoutQ23 & !is.na(Q23_2)) %>%
@@ -1219,7 +1325,7 @@ ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_2) != optoutQ23 & !is.na(Q
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_2"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_2"))
@@ -1227,7 +1333,7 @@ CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_2"))
 
 <!---CHUNK_PAGEBREAK--->
 
-`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_3) != optoutQ23 & !is.na(Q23_3)) %>%
@@ -1235,12 +1341,54 @@ ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_3) != optoutQ23 & !is.na(Q
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_3"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", labels.freq, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_3"))
 ```
 
+
+<!---CHUNK_PAGEBREAK--->
+
+### Regulations
+
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
+
+```{r Q31}
+myFieldsQ31<-d %>% dplyr::select(contains("Q31")) %>% select(-contains("Answered")) %>% names()
+CreateFlex(MarkReversedItems(SubstitueQuesForResponse(CreateTableA_means(d, myFieldsQ31), q, Q31, 2025), q, 2025))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
+
+```{r}
+CreateFlex(MarkReversedItems(SubstitueQuesForResponse(CreateTableB_means(d, myFieldsQ31), q, Q31, 2025), q, 2025))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.raked, sep="")`
+
+```{r }
+myFieldsQ31sub<-c("reg_complexity", "reg_trust", "reg_objectives")
+
+op<-foreach(i=myFieldsQ31sub, .combine="rbind") %do% {
+  CreateTableA_means(d %>% filter(get(paste(i,"_AnsweredAll", sep=""))==TRUE), i)
+}
+CreateFlex(LabelResponses(op,l))
+
+```
+
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.raked, sep="")`
+
+```{r}
+op<-foreach(i=myFieldsQ31sub, .combine="rbind") %do% {
+  CreateTableB_means(d %>% filter(get(paste(i,"_AnsweredAll", sep=""))==TRUE), i)
+}
+CreateFlex(LabelResponses(op,l))
+```
 
 <!---CHUNK_PAGEBREAK--->
 
