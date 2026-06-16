@@ -277,6 +277,22 @@ CreateFlex(CreateTableB_selectAll_percent(d, myFields, myAnsweredVar = A6_Answer
 
 <!---CHUNK_PAGEBREAK--->
 
+### Crowding
+
+`r paste(trimws(GetQuestion(q, Q11, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableA_selectOne_percent(d %>% filter(!is.na(Q11)), "Q11"))
+```
+
+`r paste(trimws(GetQuestion(q, Q11, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_selectOne_percent(d %>% filter(!is.na(Q11)), "Q11"))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
 ### Access
 
 `r paste(trimws(GetQuestion(q, A17, 2025)),"  ", caption.percents, "  The first two rows include responses from respondants that answered Yes or No to each question independant of the other question.  The last three rows only include responses from respondants that answered Yes or No to BOTH questions.", "  ", caption.raked, sep="")`
@@ -437,6 +453,23 @@ CreateFlex(SubstitueQuesForResponse(CreateTableA_means(d, "A9"),q, A9, 2025))
 CreateFlex(SubstitueQuesForResponse(CreateTableB_means(d, "A9"),q, A9, 2025))
 ```
 
+<!---CHUNK_PAGEBREAK--->
+
+### Live-imaging Sonar Use
+
+`r paste(trimws(GetQuestion(q, Q16, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableA_selectOne_percent(d %>% filter(!is.na(Q16)), "Q16"))
+```
+
+`r paste(trimws(GetQuestion(q, Q16, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+CreateFlex(CreateTableB_selectOne_percent(d %>% filter(!is.na(Q16)), "Q16"))
+```
+
+
 ### Conservation Officer
 
 `r paste(trimws(GetQuestion(q, E7, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
@@ -450,6 +483,40 @@ CreateFlex(CreateTableA_selectOne_percent(d, E7))
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, E7))
 ```
+
+
+<!---CHUNK_PAGEBREAK--->
+
+### Guided Trips
+
+`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+
+```{r }
+dQ18 <- d %>%
+  filter(Q18_Answered) %>%
+  mutate(
+    Q18a = factor(ifelse(Q18a > 0, "Hired in Nebraska",      "Unchecked"), levels = c("Unchecked", "Hired in Nebraska")),
+    Q18b = factor(ifelse(Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska")),
+    Q18c = factor(ifelse(!is.na(Q18c), "Did not hire a guide", "Unchecked"), levels = c("Unchecked", "Did not hire a guide"))
+  )
+myFields <- c("Q18a", "Q18b", "Q18c")
+CreateFlex(CreateTableA_selectAll_percent(dQ18, myFields, Q18_Answered, ordered = FALSE))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!---CHUNK_PAGEBREAK--->
 
