@@ -1,23 +1,28 @@
-﻿CreateFlex(CreateTableA_selectAll_percent(dQ18hired, myFields, Q18_any_answered, ordered = FALSE))
-```
+﻿---
+title: "2025 Licensed Angler Survey Crosstabs"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  officedown::rdocx_document:
+    toc: true
+  # word_document: default
+always_allow_html: yes
+---
 
-`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  Only respondants that hired at least one guide are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+```{r setup, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, fig.width=7.5, fig.height=6.5}
+knitr::opts_chunk$set(echo=FALSE, include=TRUE, warning=FALSE, error=FALSE, message=FALSE,  ft.align="left")
+library(tictoc)
+tic("Report Took ")
+options(stringsAsFactors = FALSE)
+#devtools::install_github("davidgohel/officer")
+#devtools::install_github("davidgohel/officedown")
+library(officedown)
+library(rmarkdown)
+library(tidyverse)
+library(knitr)
+library(flextable)
+library(stringr)
 
-```{r }
-CreateFlex(CreateTableB_selectAll_percent(dQ18hired, myFields, Q18_any_answered, ordered = FALSE))nts, "  ", caption.raked, sep="")`
-
-```{r }
-CreateFlex(CreateTableB_selectAll_percent(dQ18all, "Q18c", Q18_any_answered, ordered = FALSE)) caption.percents, "  ", caption.raked, sep="")`
-
-```{r }
-dQ18hired <- d %>%
-  filter(Q18_Answered & is.na(Q18c)) %>%
-  mutate(
-    Q18a = factor(ifelse(Q18a > 0, "Hired in Nebraska",      "Unchecked"), levels = c("Unchecked", "Hired in Nebraska")),
-    Q18b = factor(ifelse(Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska"))
-  )
-CreateFlex(CreateTableA_selectAll_percent(dQ18hired, c("Q18a", "Q18b"), Q18_Answered, ordered = FALSE))
-```vey/Analysis/CrossTabTables/")
+setwd("D:/Survey/Analysis/CrossTabTables/")
 
 source("..\\BaseFunctions_2025_UPDATED.R") #load file of common functions
 source("CrossTabTableFunctions.R") #load file of cross tab report functions
@@ -480,6 +485,7 @@ CreateFlex(CreateTableB_selectOne_percent(d, E7))
 ```
 
 
+
 <!---CHUNK_PAGEBREAK--->
 
 ### Guided Trips
@@ -488,7 +494,7 @@ CreateFlex(CreateTableB_selectOne_percent(d, E7))
 
 ```{r }
 dQ18all <- d %>%
-  filter(!is.na(Q18a) | !is.na(Q18b) | !is.na(Q18c)) %>%
+  filter(Q18_Answered) %>%
   mutate(
     Q18c = factor(
       ifelse(!is.na(Q18c), "Did not hire a guide", "Unchecked"),
@@ -510,7 +516,7 @@ CreateFlex(CreateTableB_selectAll_percent(dQ18all, "Q18c", Q18_Answered, ordered
 
 ```{r }
 dQ18hired <- d %>%
-  filter(is.na(Q18c) & (!is.na(Q18a) | !is.na(Q18b))) %>%
+  filter(Q18_Answered & is.na(Q18c)) %>%
   mutate(
     Q18a    = factor(ifelse(Q18a > 0, "Hired in Nebraska",      "Unchecked"), levels = c("Unchecked", "Hired in Nebraska")),
     Q18b    = factor(ifelse(Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska")),
@@ -525,8 +531,6 @@ CreateFlex(CreateTableA_selectAll_percent(dQ18hired, myFields, Q18_Answered, ord
 ```{r }
 CreateFlex(CreateTableB_selectAll_percent(dQ18hired, myFields, Q18_Answered, ordered = FALSE))
 ```
-<!---CHUNK_PAGEBREAK--->
-
 ### Trout Locations
 
 `r paste(trimws(GetQuestion(q, D13oga, 2025)),"  ", caption.percents, "  These values only represent the respondants that selected they fished for TROUT elsewhere in the survey.", "  ", caption.raked,sep="")`
