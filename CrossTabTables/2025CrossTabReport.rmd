@@ -499,9 +499,10 @@ dQ18hired <- d %>%
   filter(Q18_Answered & is.na(Q18c)) %>%
   mutate(
     Q18a = factor(ifelse(Q18a > 0, "Hired in Nebraska",      "Unchecked"), levels = c("Unchecked", "Hired in Nebraska")),
-    Q18b = factor(ifelse(Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska"))
+    Q18b    = factor(ifelse(Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska")),
+    Q18both = factor(ifelse(Q18a == "Hired in Nebraska" & Q18b == "Hired outside Nebraska", "Hired in both", "Unchecked"), levels = c("Unchecked", "Hired in both"))
   )
-myFields <- c("Q18a", "Q18b")
+myFields <- c("Q18a", "Q18b", "Q18both")
 CreateFlex(CreateTableA_selectAll_percent(dQ18hired, myFields, Q18_Answered, ordered = FALSE))
 ```
 
