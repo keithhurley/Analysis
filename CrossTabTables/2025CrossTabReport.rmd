@@ -1,28 +1,25 @@
-﻿---
-title: "2025 Licensed Angler Survey Crosstabs"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
-output:
-  officedown::rdocx_document:
-    toc: true
-  # word_document: default
-always_allow_html: yes
----
+﻿dQ18all <- d %>%
+  filter(Q18_Answered) %>%
+  mutate(
+    Q18c = factor(
+      ifelse(!is.na(Q18c), "Did not hire a guide", "Unchecked"),
+      levels = c("Unchecked", "Did not hire a guide")
+    )
+  )
+CreateFlex(CreateTableA_selectAll_percent(dQ18all, "Q18c", Q18_Answered, ordered = FALSE))
+```
 
-```{r setup, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, fig.width=7.5, fig.height=6.5}
-knitr::opts_chunk$set(echo=FALSE, include=TRUE, warning=FALSE, error=FALSE, message=FALSE,  ft.align="left")
-library(tictoc)
-tic("Report Took ")
-options(stringsAsFactors = FALSE)
-#devtools::install_github("davidgohel/officer")
-#devtools::install_github("davidgohel/officedown")
-library(officedown)
-library(rmarkdown)
-library(tidyverse)
-library(knitr)
-library(flextable)
-library(stringr)
+`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  Only respondants that hired at least one guide are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
 
-setwd("D:/Survey/Analysis/CrossTabTables/")
+```{r }
+dQ18hired <- d %>%
+  filter(Q18_Answered & is.na(Q18c)) %>%
+  mutate(
+    Q18a = factor(ifelse(Q18a > 0, "Hired in Nebraska",      "Unchecked"), levels = c("Unchecked", "Hired in Nebraska")),
+    Q18b = factor(ifelse(Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska"))
+  )
+CreateFlex(CreateTableA_selectAll_percent(dQ18hired, c("Q18a", "Q18b"), Q18_Answered, ordered = FALSE))
+```vey/Analysis/CrossTabTables/")
 
 source("..\\BaseFunctions_2025_UPDATED.R") #load file of common functions
 source("CrossTabTableFunctions.R") #load file of cross tab report functions
@@ -492,15 +489,20 @@ CreateFlex(CreateTableB_selectOne_percent(d, E7))
 `r paste(trimws(GetQuestion(q, Q18c, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
 
 ```{r }
-dQ18 <- d %>%
-  filter(Q18_Answered) %>%
+CreateFlex(CreateTableA_selectOne_percent(d %>% filter(Q18_Answered), "Q18c"))
+```
+
+`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  ", caption.percents, "  Only respondants that hired at least one guide are included in this calculation.", "  ", caption.raked, sep="")`
+
+```{r }
+dQ18hired <- d %>%
+  filter(Q18_Answered & is.na(Q18c)) %>%
   mutate(
     Q18a = factor(ifelse(Q18a > 0, "Hired in Nebraska",      "Unchecked"), levels = c("Unchecked", "Hired in Nebraska")),
-    Q18b = factor(ifelse(Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska")),
-    Q18c = factor(ifelse(!is.na(Q18c), "Did not hire a guide", "Unchecked"), levels = c("Unchecked", "Did not hire a guide"))
+    Q18b = factor(ifelse(Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska"))
   )
-myFields <- c("Q18a", "Q18b", "Q18c")
-CreateFlex(CreateTableA_selectAll_percent(dQ18, myFields, Q18_Answered, ordered = FALSE))
+myFields <- c("Q18a", "Q18b")
+CreateFlex(CreateTableA_selectAll_percent(dQ18hired, myFields, Q18_Answered, ordered = FALSE))
 ```
 
 
