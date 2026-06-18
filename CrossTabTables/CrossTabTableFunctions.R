@@ -110,7 +110,7 @@ LabelResponses <- function(myData, myLabels, responseField = "Response") {
 GetQuestion <- function(myQuestionFactors, myField, myYear) {
   myField <- enquo(myField)
 
-  if (rlang::quo_text(myField) %in% c("C2", "E1", "D14", "D3", "D4")) {
+  if (rlang::quo_text(myField) %in% c("C2", "E1", "D14", "D3", "D4", "Q31")) {
     switch(
       rlang::quo_text(myField),
       C2 = {
@@ -127,11 +127,16 @@ GetQuestion <- function(myQuestionFactors, myField, myYear) {
       },
       D4 = {
         op <- "Thinking about the one type of fish that you prefer to fish for, how much do you agree or disagree with the following about your fishing in Nebraska during 2025?."
+      },
+      Q31 = {
+        op <- "How much do you agree or disagree with each of the following items regarding fishing regulations?"
       }
     )
   } else {
     op <- myQuestionFactors %>%
-      filter(str_detect(.$Field, rlang::quo_text(myField)) & Year == myYear) %>%
+      filter(
+        str_detect(.data$Field, rlang::quo_text(myField)) & .data$Year == myYear
+      ) %>%
       pull(Question) %>%
       unique() %>%
       as.character()
