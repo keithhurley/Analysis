@@ -1,0 +1,236 @@
+---
+#title: "2025 Licensed Angler Survey Regulation Questions"
+#date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  officedown::rdocx_document:
+    toc: true
+  #word_document: default
+always_allow_html: yes
+---
+
+```{r setup, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, fig.width=7.5, fig.height=7}
+knitr::opts_chunk$set(echo=FALSE, include=TRUE, warning=FALSE, error=FALSE, message=FALSE,  ft.align="left")
+library(tictoc)
+tic("Report Took ")
+options(stringsAsFactors = FALSE)
+#devtools::install_github("davidgohel/officer")
+#devtools::install_github("davidgohel/officedown")
+library(officedown)
+library(rmarkdown)
+library(tidyverse)
+library(knitr)
+library(flextable)
+library(stringr)
+library(likert)
+
+setwd("D:/Survey/Analysis/CrossTabTables/")
+
+source("..\\BaseFunctions_2025_UPDATED.R") #load file of common functions
+source("CrossTabTableFunctions.R") #load file of cross tab report functions
+```
+
+
+```{r getData, echo=FALSE}
+setwd("D:/Survey/Analysis/CrossTabTables/")
+
+#load data
+load(file="../../Data/DataAggregation1/aggregateData_20260622.rData")
+d<-d %>% filter(surveyYear==2025)
+# Rebuild scale/subscale scores from raw item factors, applying reversals
+# flagged in Scales.csv (single source of truth) at report time.
+d <- add_scale_scores(d)
+#q<-base.loaddata.factorlevels()
+#save(q, file="q_20190802")
+#load(file="../../2018 Statewide Survey/Analysis/Rscripts/CrossTabTables/q_20190802")
+q<-read.csv(file="../../Data/DataAggregation1/FactorLevels_aggregated.csv") %>% filter(Year==2025)
+l=read.csv(file="../../Data/DataAggregation1/Labels.csv")
+
+```
+
+```{r createFunctions}
+CreateFlex<-function(x, mergeOnFirst=FALSE) {
+  require(officer)
+  require(flextable)
+  
+  bigborder=officer:: fp_border(color="black", width = 1.5)
+  smallborder=officer:: fp_border(color="black", width=1.0)
+  
+  myFlex<-  flextable(x) %>%
+    theme_zebra()
+  
+  if(mergeOnFirst==TRUE) {
+    #merge first column cells  
+    myFlex <-myFlex %>%
+        merge_v(j=1, part="body") 
+      #add border below merged cells in first column
+      myFlex<-myFlex %>%
+        border(border.bottom = smallborder, i=rle(cumsum(myFlex$body$spans$columns[,1] ))$values, part="body") 
+  }
+  
+  myFlex <- myFlex %>%
+    #border_outer(officer:: fp_border(color="black", width = 1.5), part="all") %>%
+    #add border above and below footer
+    border(border.bottom = bigborder, border.top = bigborder, part = "header") %>%
+    #add border at bottom of body
+    border(border.bottom = bigborder, i=nrow(myFlex$body$spans$rows), part = "body") %>%
+    padding(j=1, padding.left=3) %>%
+    flextable::align(align="left", part="all") %>%
+    fontsize(part = "header", size = 10) %>%
+    fontsize(part="body", size=8) %>%
+    bold(part="header") %>%
+    #autofit() %>%
+    width(j = 1, width = 1.2) %>%
+    set_table_properties(layout = "autofit", width = 1)
+
+      
+  myFlex
+}
+
+
+```
+
+`r officer::run_pagebreak()`
+
+This report contains the cross-tabulation results for each question in the 2025 Nebraska Licensed Angler Survey (LAS). Details on the design and administration of the LAS can be found in the companion report “Fishing Nebraska 2025-2026 Methodology Report” (BOSR 2026). Information on the responses and returns of the LAS can be found in the companion report “2026 Nebraska Licensed Angler Survey - Respondents and Responses” (Hurley 2026). When LAS returns were examined, it was determined that weighting results by age group and residency was warrented to better represent the Nebraska licensed angler population. In this report, question results that were weighted are notated in their caption.
+
+This report is organized in the order questions were asked in the LAS.  A copy of the LAS is provided in the appendies of this report.  Breakdowns of the responses to each question are provided for:  a) all respondants, b) by residency, c) by gender, and d) by age.
+
+
+`r officer::run_pagebreak()`
+
+# Regulations
+
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
+
+```{r Q31}
+myFields<-d %>% dplyr::select(contains("Q31")) %>% select(-contains("Answered")) %>% names()
+op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
+  tempD<-data.frame(Item=myFields[i], CreateTableA_selectOne_percent(d %>% filter(!is.na(get(myFields[i]))), myFields[i]), check.names = FALSE)
+  tempD<-SubstitueQuesForResponse(tempD,q, !!rlang::sym(myFields[i]), 2025, responseField="Item")
+}
+CreateFlex(MarkReversedItems(op, q, 2025, responseField="Item"), mergeOnFirst = TRUE)
+```
+
+
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
+
+```{r Q31_means}
+myFieldsQ31<-d %>% dplyr::select(contains("Q31")) %>% select(-contains("Answered")) %>% names()
+CreateFlex(MarkReversedItems(SubstitueQuesForResponse(CreateTableA_means(d, myFieldsQ31), q, Q31, 2025), q, 2025))
+```
+
+
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
+
+```{r}
+CreateFlex(MarkReversedItems(SubstitueQuesForResponse(CreateTableB_means(d, myFieldsQ31), q, Q31, 2025), q, 2025))
+```
+
+
+Subscales were constructed by averaging items within each group below.
+† denotes reverse-coded items.
+
+```{r Q31_subscales}
+subscale_items <- list(
+  "Complexity & Confusion" = c("Q31a", "Q31e", "Q31g", "Q31h"),
+  "Trust"                  = c("Q31b", "Q31c", "Q31d", "Q31j"),
+  "Objectives"             = c("Q31f", "Q31i", "Q31k", "Q31l")
+)
+
+q_current <- read.csv("../../Data/DataAggregation1/FactorLevels_aggregated.csv") %>%
+  filter(Year == 2025)
+
+reversed_fields <- q_current %>%
+  filter(Reversed %in% c(TRUE, "TRUE", "True", "true"),
+         stringr::str_detect(Field, "^Q31[a-z]$")) %>%
+  pull(Field) %>% unique()
+
+q_labels <- q_current %>%
+  filter(stringr::str_detect(Field, "^Q31[a-z]$")) %>%
+  select(Field, Question) %>%
+  distinct(Field, .keep_all = TRUE)
+
+subscale_tbl <- do.call(rbind, lapply(names(subscale_items), function(scale) {
+  do.call(rbind, lapply(subscale_items[[scale]], function(f) {
+    qtext <- q_labels$Question[q_labels$Field == f]
+    if (f %in% reversed_fields) qtext <- paste0(qtext, " †")
+    data.frame(Subscale = scale, Item = qtext, stringsAsFactors = FALSE)
+  }))
+}))
+
+CreateFlex(subscale_tbl, mergeOnFirst = TRUE)
+```
+
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", ReversedItemsNote("Regulations"), "  ", caption.raked, sep="")`
+
+```{r }
+myFieldsQ31sub<-c("reg_complexity", "reg_trust", "reg_objectives")
+
+op<-foreach(i=myFieldsQ31sub, .combine="rbind") %do% {
+  CreateTableA_means(d %>% filter(get(paste(i,"_AnsweredAll", sep=""))==TRUE), i)
+}
+CreateFlex(LabelResponses(op,l))
+
+```
+
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", ReversedItemsNote("Regulations"), "  ", caption.raked, sep="")`
+
+```{r}
+op<-foreach(i=myFieldsQ31sub, .combine="rbind") %do% {
+  CreateTableB_means(d %>% filter(get(paste(i,"_AnsweredAll", sep=""))==TRUE), i)
+}
+CreateFlex(LabelResponses(op,l))
+```
+
+
+
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", "† denotes reverse-coded item.", sep="")`
+
+```{r Q31_likert, fig.height=10.5, fig.width=7.5}
+library(likert)
+library(patchwork)
+
+likert_levels <- levels(d$Q31a)
+
+make_subscale_df <- function(fields) {
+  df <- d |>
+    dplyr::select(all_of(fields)) |>
+    dplyr::mutate(across(everything(), ~ factor(as.character(.),
+                                                levels = likert_levels,
+                                                ordered = TRUE)))
+  names(df) <- sapply(fields, function(f) {
+    txt <- q_labels$Question[q_labels$Field == f]
+    if (f %in% reversed_fields) txt <- paste0(txt, " †")
+    txt
+  })
+  df
+}
+
+subscale_plots <- lapply(names(subscale_items), function(scale) {
+  df  <- make_subscale_df(subscale_items[[scale]])
+  lo  <- likert(df)
+  plot(lo, wrap = 55) +
+    ggtitle(scale) +
+    theme(plot.title    = element_text(face = "bold", size = 11),
+          legend.position = "bottom",
+          legend.title    = element_blank())
+})
+
+wrap_plots(subscale_plots, ncol = 1) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom", legend.title = element_blank())
+```
+
+
+
+`r officer::run_pagebreak()`
+
+# References
+
+Bureau of Soci0logical Research.  2026.  Fishing Nebraska 2025-2026 Methodology Report. University of Nebraska-Lincoln.
+
+Hurley, Keith.  2026.  2026 Nebraska Licensed Angler Survey - Respondents and Responses.  Nebraska Game and Parks Commission. (Hurley 2026). 
+
+`r officer::run_pagebreak()`
+
+# Appendix A - 2026 Nebraska Licensed Angler Survey (Paper Version)

@@ -463,5 +463,96 @@ GetQuestion <- function(myQuestionFactors, myField, myYear) {
 }
 
 # ============================================================================
+# FUNCTION: add_scale_scores
+# ============================================================================
+# Build subscale score columns from RAW (unreversed) item factors, reversing
+# any item flagged Reversed == TRUE in Scales.csv before averaging. Recreates
+# each subscale existing variable name (VarName) plus a <VarName>_AnsweredAll
+# completeness flag, so the existing means/medians/CI table functions consume
+# correctly-reversed scores without further changes.
+#
+# Reversal uses each item number of response levels: for a k-level item, a
+# stored code v becomes (k + 1) - v. For factor columns k is nlevels(); for
+# numeric columns k falls back to the observed maximum.
+add_scale_scores <- function(
+  mydata,
+  scalesFile = "../../Data/DataAggregation1/Scales.csv"
+) {
+  scales <- read.csv(scalesFile, stringsAsFactors = FALSE)
+  scales$Reversed <- as.logical(scales$Reversed)
+
+  for (vn in unique(scales$VarName)) {
+    defn    <- scales[scales$VarName == vn, ]
+    fields  <- defn$Field
+    revFlds <- defn$Field[defn$Reversed]
+
+    present <- fields[fields %in% names(mydata)]
+    if (length(present) == 0) {
+      warning(sprintf("Scale %s: no item columns present; skipped.", vn))
+      next
+    }
+    if (!setequal(present, fields)) {
+      warning(sprintf(
+        "Scale %s: missing item columns: %s",
+        vn,
+        paste(setdiff(fields, present), collapse = ", ")
+      ))
+    }
+
+    num <- as.data.frame(lapply(present, function(f) {
+      x <- mydata[[f]]
+      v <- suppressWarnings(as.numeric(x))
+      if (f %in% revFlds) {
+        k <- if (is.factor(x)) nlevels(x) else max(v, na.rm = TRUE)
+        v <- (k + 1) - v
+      }
+      v
+    }))
+    names(num) <- present
+
+    answeredAll <- rowSums(is.na(num)) == 0
+    mydata[[paste0(vn, "_AnsweredAll")]] <- answeredAll
+    mydata[[vn]] <- ifelse(answeredAll, rowMeans(num, na.rm = TRUE), NA_real_)
+  }
+
+  mydata
+}
+
+# ============================================================================
+# FUNCTION: scale_reversed_items / ReversedItemsNote
+# ============================================================================
+# Return reverse-scored item codes for a scale, subscale, or variable name,
+# for use in scale-table header text. scope is matched against ScaleName,
+# SubScaleName, and VarName.
+scale_reversed_items <- function(
+  scope,
+  scalesFile = "../../Data/DataAggregation1/Scales.csv",
+  collapse = ", "
+) {
+  scales <- read.csv(scalesFile, stringsAsFactors = FALSE)
+  scales$Reversed <- as.logical(scales$Reversed)
+  hits <- scales[
+    scales$ScaleName %in% scope |
+      scales$SubScaleName %in% scope |
+      scales$VarName %in% scope,
+  ]
+  paste(unique(hits$Field[hits$Reversed]), collapse = collapse)
+}
+
+# Formatted note for table headers. Returns "" (or none) when nothing reversed.
+ReversedItemsNote <- function(
+  scope,
+  scalesFile = "../../Data/DataAggregation1/Scales.csv",
+  prefix = "Reverse-scored items: ",
+  none = ""
+) {
+  items <- scale_reversed_items(scope, scalesFile)
+  if (nchar(items) == 0) {
+    return(none)
+  }
+  paste0(prefix, items)
+}
+
+# ============================================================================
 # END OF FILE
 # ============================================================================
