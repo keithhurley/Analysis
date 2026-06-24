@@ -1,4 +1,4 @@
-﻿---
+---
 #title: "2025 Licensed Angler Survey Crosstabs"
 #date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -33,7 +33,7 @@ source("CrossTabTableFunctions.R") #load file of cross tab report functions
 setwd("D:/Survey/Analysis/CrossTabTables/")
 
 #load data
-load(file="../../Data/DataAggregation1/aggregateData_20260622.rData")
+load(file="../../Data/DataAggregation1/aggregateData_20260624.rData")
 d<-d %>% filter(surveyYear==2025)
 # Rebuild scale/subscale scores from raw item factors, applying reversals
 # flagged in Scales.csv (single source of truth) at report time.
@@ -170,13 +170,13 @@ CreateFlex(CreateTableB_selectOne_percent(d, A11))
 `r paste(trimws(GetQuestion(q, A12, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
 
 ```{r }
-CreateFlex(CreateTableA_selectOne_percent(d, A12))
+CreateFlex(CreateTableA_selectOne_percent(d %>% filter(A11=="Yes"), A12))
 ```
 
 `r paste(trimws(GetQuestion(q, A12, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
 
 ```{r }
-CreateFlex(CreateTableB_selectOne_percent(d, A12))
+CreateFlex(CreateTableB_selectOne_percent(d %>% filter(A11=="Yes"), A12))
 ```
 
 
@@ -564,88 +564,97 @@ CreateFlex(CreateTableB_selectOne_percent(d, E7))
 
 # Guided Trips
 
-`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r paste("What percent of respondants hired a fishing guide at least once - using responses to '", trimws(GetQuestion(q, Q18c, 2025)), "'  ", caption.percents, "  ", caption.raked, sep="")`
 
 ```{r }
-dQ18all <- d %>%
-  filter(Q18_Answered) %>%
+
+dHiredGuide <- d %>%
   mutate(
-    Q18c = factor(
-      ifelse(!is.na(Q18c), "Did not hire a guide", "Unchecked"),
-      levels = c("Unchecked", "Did not hire a guide")
-    )
+    hiredNE      = if_else(is.na(hiredGuide), NA, !is.na(Q18a) & Q18a > 0),
+    hiredOutside = if_else(is.na(hiredGuide), NA, !is.na(Q18b) & Q18b > 0),
+    hiredNEonly  = if_else(is.na(hiredGuide), NA, hiredNE & !hiredOutside),
+    hiredOutOnly = if_else(is.na(hiredGuide), NA, hiredOutside & !hiredNE),
+    hiredBoth    = if_else(is.na(hiredGuide), NA, hiredNE & hiredOutside),
+    hiredAny     = if_else(is.na(hiredGuide), NA, hiredNE | hiredOutside)
   )
-CreateFlex(CreateTableA_selectAll_percent(dQ18all, "Q18c", Q18_Answered, ordered = FALSE))
+
+# Keep only the TRUE row from each single-select table, then stack them
+guideRows <- bind_rows(
+  CreateTableA_selectOne_percent(dHiredGuide, hiredAny,     ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Hired a guide"),
+  CreateTableA_selectOne_percent(dHiredGuide, hiredNE,      ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Hired in Nebraska"),
+  CreateTableA_selectOne_percent(dHiredGuide, hiredNEonly,  ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Only hired in Nebraska (not outside)"),
+  CreateTableA_selectOne_percent(dHiredGuide, hiredOutside, ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Hired outside Nebraska"),
+  CreateTableA_selectOne_percent(dHiredGuide, hiredOutOnly, ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Only hired outside Nebraska (not inside)"),
+  CreateTableA_selectOne_percent(dHiredGuide, hiredBoth,    ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Hired both in and outside Nebraska")
+)
+
+CreateFlex(guideRows)
+
 ```
 
-`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
-
 ```{r }
-CreateFlex(CreateTableB_selectAll_percent(dQ18all, "Q18c", Q18_Answered, ordered = FALSE))
-```
 
+# Keep only the TRUE row from each single-select table, then stack them
+guideRows <- bind_rows(
+  CreateTableB_selectOne_percent(dHiredGuide, hiredAny,     ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Hired a guide"),
+  CreateTableB_selectOne_percent(dHiredGuide, hiredNE,      ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Hired in Nebraska"),
+  CreateTableB_selectOne_percent(dHiredGuide, hiredNEonly,  ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Only hired in Nebraska (not outside)"),
+  CreateTableB_selectOne_percent(dHiredGuide, hiredOutside, ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Hired outside Nebraska"),
+  CreateTableB_selectOne_percent(dHiredGuide, hiredOutOnly, ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Only hired outside Nebraska (not inside)"),
+  CreateTableB_selectOne_percent(dHiredGuide, hiredBoth,    ordered = FALSE) %>%
+    filter(Response == TRUE) %>% mutate(Response = "Hired both in and outside Nebraska")
+)
 
-`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  The percentages below reflect the proportion of ALL respondants to this question that hired guides in each location.  ", caption.percents, "  ", caption.raked, sep="")`
+CreateFlex(guideRows)
 
-```{r }
-dQ18all_hired <- d %>%
-  filter(Q18_Answered) %>%
-  mutate(
-    Q18a    = factor(ifelse(!is.na(Q18a) & Q18a > 0, "Hired in Nebraska",      "Unchecked"), levels = c("Unchecked", "Hired in Nebraska")),
-    Q18b    = factor(ifelse(!is.na(Q18b) & Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska")),
-    Q18both = factor(ifelse(!is.na(Q18a) & !is.na(Q18b) &
-                              Q18a == "Hired in Nebraska" & Q18b == "Hired outside Nebraska",
-                            "Hired in both", "Unchecked"), levels = c("Unchecked", "Hired in both"))
-  )
-myFields <- c("Q18a", "Q18b", "Q18both")
-CreateFlex(CreateTableA_selectAll_percent(dQ18all_hired, myFields, Q18_Answered, ordered = FALSE))
-```
-
-`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  The percentages below reflect the proportion of ALL respondants to this question that hired guides in each location.  ", caption.percents, "  ", caption.raked, sep="")`
-
-```{r }
-CreateFlex(CreateTableB_selectAll_percent(dQ18all_hired, myFields, Q18_Answered, ordered = FALSE))
-```
-
-
-`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  Only respondants that hired at least one guide are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
-
-```{r }
-dQ18hired <- d %>%
-  filter(Q18_Answered & is.na(Q18c)) %>%
-  mutate(
-    Q18a    = factor(ifelse(Q18a > 0, "Hired in Nebraska",      "Unchecked"), levels = c("Unchecked", "Hired in Nebraska")),
-    Q18b    = factor(ifelse(Q18b > 0, "Hired outside Nebraska", "Unchecked"), levels = c("Unchecked", "Hired outside Nebraska")),
-    Q18both = factor(ifelse(Q18a == "Hired in Nebraska" & Q18b == "Hired outside Nebraska", "Hired in both", "Unchecked"), levels = c("Unchecked", "Hired in both"))
-  )
-myFields <- c("Q18a", "Q18b", "Q18both")
-CreateFlex(CreateTableA_selectAll_percent(dQ18hired, myFields, Q18_Answered, ordered = FALSE))
-```
-
-`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  Only respondants that hired at least one guide are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
-
-```{r }
-CreateFlex(CreateTableB_selectAll_percent(dQ18hired, myFields, Q18_Answered, ordered = FALSE))
 ```
 
 
 `r paste(trimws(GetQuestion(q, Q18c, 2025)),"  Only respondants that hired at least one guide are included in this calculation.  ", caption.means, "  ", caption.raked, sep="")`
 
 ```{r }
-dQ18hired_raw <- d %>% filter(Q18_Answered & is.na(Q18c))
-op <- foreach(i = c("Q18a", "Q18b"), .combine = "rbind") %do% {
-  CreateTableA_means(dQ18hired_raw %>% filter(get(i) > 0), i)
+dQ18means <- d %>%
+  mutate(
+    hiredNE      = !is.na(Q18a) & Q18a > 0,
+    hiredOutside = !is.na(Q18b) & Q18b > 0,
+    Q18total     = coalesce(Q18a, 0) + coalesce(Q18b, 0)
+  )
+
+# Mean number of guides hired per respondent. Each row includes only respondents
+# who hired a guide in the scope considered, so the denominator (n) changes per row.
+dQ18hired_raw <- d %>% filter(Q18_Answered & is.na(Q18c))  # still used by the Table B chunk below
+specs <- list(
+  list(label = "Hired a guide",                            sub = quote(hiredNE | hiredOutside),  col = "Q18total"),
+  list(label = "Hired in Nebraska",                        sub = quote(hiredNE),                 col = "Q18a"),
+  list(label = "Only hired in Nebraska (not outside)",     sub = quote(hiredNE & !hiredOutside), col = "Q18a"),
+  list(label = "Hired outside Nebraska",                   sub = quote(hiredOutside),            col = "Q18b"),
+  list(label = "Only hired outside Nebraska (not inside)", sub = quote(hiredOutside & !hiredNE), col = "Q18b"),
+  list(label = "Hired both in and outside Nebraska",       sub = quote(hiredNE & hiredOutside),  col = "Q18total")
+)
+op <- foreach(s = specs, .combine = "rbind") %do% {
+  CreateTableA_means(dQ18means %>% filter(!!s$sub), s$col) %>% mutate(Response = s$label)
 }
-CreateFlex(LabelResponses(op, l))
+CreateFlex(op)
 ```
 
 `r paste(trimws(GetQuestion(q, Q18c, 2025)),"  Only respondants that hired at least one guide are included in this calculation.  ", caption.means, "  ", caption.raked, sep="")`
 
 ```{r }
-op <- foreach(i = c("Q18a", "Q18b"), .combine = "rbind") %do% {
-  CreateTableB_means(dQ18hired_raw %>% filter(get(i) > 0), i)
+op <- foreach(s = specs, .combine = dplyr::bind_rows) %do% {
+  CreateTableB_means(dQ18means %>% filter(!!s$sub), s$col) %>% mutate(Response = s$label)
 }
-CreateFlex(LabelResponses(op, l))
+CreateFlex(op)
 ```
 
 
@@ -810,7 +819,7 @@ CreateFlex(op, mergeOnFirst = TRUE)
 January
 
 ```{r}
-mydata<-d %>% filter(!is.na("C1Jan_days"))  %>% filter(C1Jan_days<22)
+mydata<-d %>% filter(!is.na(C1Jan_days))  %>% filter(C1Jan_days<22)
 CreateFlex(LabelResponses(CreateTableA_selectOne_percent(mydata, C1Jan_days),l))
 ```
 
@@ -826,7 +835,7 @@ CreateFlex(LabelResponses(CreateTableB_selectOne_percent(mydata, C1Jan_days),l))
 February
 
 ```{r}
-mydata<-d %>% filter(!is.na("C1Feb_days"))  %>% filter(C1Feb_days<22)
+mydata<-d %>% filter(!is.na(C1Feb_days))  %>% filter(C1Feb_days<22)
 CreateFlex(LabelResponses(CreateTableA_selectOne_percent(mydata, C1Feb_days),l))
 ```
 
@@ -842,7 +851,7 @@ CreateFlex(LabelResponses(CreateTableB_selectOne_percent(mydata, C1Feb_days),l))
 March
 
 ```{r}
-mydata<-d %>% filter(!is.na("C1Mar_days")) %>% filter(C1Mar_days<22)
+mydata<-d %>% filter(!is.na(C1Mar_days)) %>% filter(C1Mar_days<22)
 CreateFlex(LabelResponses(CreateTableA_selectOne_percent(mydata, C1Mar_days),l))
 ```
 
@@ -858,7 +867,7 @@ CreateFlex(LabelResponses(CreateTableB_selectOne_percent(mydata, C1Mar_days),l))
 April
 
 ```{r}
-mydata<-d %>% filter(!is.na("C1Apr_days")) %>% filter(C1Apr_days<22)
+mydata<-d %>% filter(!is.na(C1Apr_days)) %>% filter(C1Apr_days<22)
 CreateFlex(LabelResponses(CreateTableA_selectOne_percent(mydata, C1Apr_days),l))
 ```
 
@@ -874,7 +883,7 @@ CreateFlex(LabelResponses(CreateTableB_selectOne_percent(mydata, C1Apr_days),l))
 May
 
 ```{r}
-mydata<-d %>% filter(!is.na("C1May_days")) %>% filter(C1May_days<22)
+mydata<-d %>% filter(!is.na(C1May_days)) %>% filter(C1May_days<22)
 CreateFlex(LabelResponses(CreateTableA_selectOne_percent(mydata, C1May_days),l))
 ```
 
@@ -890,7 +899,7 @@ CreateFlex(LabelResponses(CreateTableB_selectOne_percent(mydata, C1May_days),l))
 June
 
 ```{r}
-mydata<-d %>% filter(!is.na("C1June_days"))  %>% filter(C1June_days<22)
+mydata<-d %>% filter(!is.na(C1June_days))  %>% filter(C1June_days<22)
 CreateFlex(LabelResponses(CreateTableA_selectOne_percent(mydata, C1June_days),l))
 ```
 
@@ -906,7 +915,7 @@ CreateFlex(LabelResponses(CreateTableB_selectOne_percent(mydata, C1June_days),l)
 July
 
 ```{r}
-mydata<-d %>% filter(!is.na("C1July_days"))  %>% filter(C1July_days<22)
+mydata<-d %>% filter(!is.na(C1July_days))  %>% filter(C1July_days<22)
 CreateFlex(LabelResponses(CreateTableA_selectOne_percent(mydata, C1July_days), l))
 
 ```
@@ -923,7 +932,7 @@ CreateFlex(LabelResponses(CreateTableB_selectOne_percent(mydata, C1July_days),l)
 August
 
 ```{r}
-mydata<-d %>% filter(!is.na("C1Aug_days"))  %>% filter(C1Aug_days<22)
+mydata<-d %>% filter(!is.na(C1Aug_days))  %>% filter(C1Aug_days<22)
 CreateFlex(LabelResponses(CreateTableA_selectOne_percent(mydata, C1Aug_days),l))
 ```
 
@@ -939,7 +948,7 @@ CreateFlex(LabelResponses(CreateTableB_selectOne_percent(mydata, C1Aug_days),l))
 September
 
 ```{r SeptDays}
-mydata<-d %>% filter(!is.na("C1Sept_days"))  %>% filter(C1Sept_days<22)
+mydata<-d %>% filter(!is.na(C1Sept_days))  %>% filter(C1Sept_days<22)
 CreateFlex(LabelResponses(CreateTableA_selectOne_percent(mydata, C1Sept_days),l))
 ```
 
@@ -955,7 +964,7 @@ CreateFlex(LabelResponses(CreateTableB_selectOne_percent(mydata, C1Sept_days),l)
 October
 
 ```{r}
-mydata<-d %>% filter(!is.na("C1Oct_days"))  %>% filter(C1Oct_days<22)
+mydata<-d %>% filter(!is.na(C1Oct_days))  %>% filter(C1Oct_days<22)
 CreateFlex(LabelResponses(CreateTableA_selectOne_percent(mydata, C1Oct_days),l))
 ```
 
@@ -970,7 +979,7 @@ CreateFlex(LabelResponses(CreateTableB_selectOne_percent(mydata, C1Oct_days),l))
 `r paste(trimws(GetQuestion(q, C1, 2025)),"  ", "This table represents all respondants to this question including those who did not fish during the given time period.  ", caption.medians, "  ", labels.freq, "  ", caption.raked, sep="")`
 
 ```{r TotalDays}
-mydata<-d %>% filter(!is.na("C1Total_days") & C1_AnsweredAll==TRUE)
+mydata<-d %>% filter(!is.na(C1Total_days) & C1_AnsweredAll==TRUE)
 myFields<-mydata %>% select(contains("_days")) %>% select(-contains("Total")) %>% names()
 op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
   CreateTableA_medians(mydata, myFields[i])
@@ -991,7 +1000,7 @@ CreateFlex(LabelResponses(op,l))
 `r paste(trimws(GetQuestion(q, C1, 2025)),"  ", "Only respondants that fished at least once during the time period were included in this breakdown.  ", caption.medians, "  ", labels.freq, "  ", caption.raked, sep="")`
 
 ```{r}
-mydata<-d %>% filter(!is.na("C1Total_days") & C1_AnsweredAll==TRUE)
+mydata<-d %>% filter(!is.na(C1Total_days) & C1_AnsweredAll==TRUE)
 myFields<-mydata %>% select(contains("_days")) %>% names()
 op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
   CreateTableA_medians(mydata %>% filter(get(myFields[i])>0), myFields[i])

@@ -1,0 +1,362 @@
+---
+title: "Cross-Tab Report: Denominator / Missing-vs-Unanswered Audit (TEMPORARY)"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Load the SAME data and helpers the cross-tab report uses. This audit does NOT
+# modify 2025CrossTabReport.rmd or any report code; it only re-reads the inputs.
+setwd("D:/Survey/Analysis/CrossTabTables/")
+source("..\\BaseFunctions_2025_UPDATED.R")
+source("CrossTabTableFunctions.R")
+load(file = "../../Data/DataAggregation1/aggregateData_20260622.rData")
+d <- d %>% filter(surveyYear == 2025)
+d <- add_scale_scores(d)
+
+N_TOTAL  <- nrow(d)                          # all 2025 respondents
+N_FISHED <- sum(d$A2 == "Yes", na.rm = TRUE) # answered "Yes" to "did you fish"
+
+kbl <- function(x, ...) {
+  x %>%
+    kable(...) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                  full_width = TRUE, font_size = 13)
+}
+```
+
+# Purpose and scope
+
+This is a **transient diagnostic**, separate from `2025CrossTabReport.rmd`. It does
+not feed the published report and changes no report code.
+
+Goal: for **every percentage table** in the cross-tab report, document the
+**denominator actually used**, the **filters** that reduced it, and whether each
+reduction reflects *legitimate skip logic / not-applicable* respondents versus
+*item non-response* that arguably belongs in the denominator. Inflated
+percentages most often come from a denominator that has been narrowed to
+"people who answered a certain way" rather than "people who could have answered."
+
+Only **overall** figures are covered here (the `myGroupVar = NA` / "Overall"
+column). Residency/gender/age breakdowns are out of scope by request.
+
+**Total 2025 respondents: `r N_TOTAL`.** "Did you fish?" = Yes for
+**`r N_FISHED`**; No for **`r sum(d$A2=="No", na.rm=TRUE)`**; missing for
+**`r sum(is.na(d$A2))`**.
+
+## How denominators are built (mechanics)
+
+* `base.summary.percent.selectOne()` internally drops rows where the item is
+  `NA` *before* computing percentages. So the denominator = (rows passed in)
+  minus (item `NA`). Any `filter()` in the chunk reduces the input first.
+* `base.summary.percent.selectAll()` first keeps only `<gate>_Answered == TRUE`
+  rows, then for each sub-item drops `NA` and divides checked counts by
+  (checked + unchecked). "Unchecked" is a stored level, not `NA`.
+* The sample size printed in parentheses for **selectAll** tables is the count
+  of *checked* responses, **not** the denominator. The true base is the gate
+  count shown below.
+
+# Key findings up front
+
+1. **Days Fished monthly tables contain a no-op filter.**
+   `filter(!is.na("C1Jan_days"))` quotes the column name as a *string*, so it
+   never removes anything. The effective `NA` drop happens only through the
+   `filter(C1<22)` cap (which currently removes 0 high values because none are
+   >= 22). Net effect: monthly day tables are computed only on respondents with
+   a non-`NA` value for that month. If a blank month means "fished 0 days,"
+   those respondents are excluded and every day-count percentage is inflated.
+   This is the table type most exposed to the concern that prompted this audit.
+
+2. **Several denominators are narrowed to "answered a certain way."**
+   `A12 Boat Out-of-State` (denom `r sum(!is.na(d$A12))`) and
+   `B1 Preferred Fish` (denom `r sum(!is.na(d$B1))`) drop a large share of
+   respondents to `NA`. Whether that is appropriate depends on whether `NA`
+   means "not applicable" (legitimate) or "left blank" (item non-response).
+
+3. **`_AnsweredAll` gates are complete-case (listwise) filters.** They require
+   *every* item in a scale to be answered and drop 13-20% of respondents. They
+   feed the subscale **means** tables (not percentages), but are included here
+   per request. Several `_AnsweredAll` flags are all-FALSE for 2025 (the items
+   do not exist), so any table filtered on them would render empty.
+
+# Percentage tables: select-one questions (overall)
+
+```{r selectOne}
+N_TOTAL <- nrow(d)
+decomp_one <- function(raw, data_chunk, item, table, chunk_filter, eligible, interp) {
+  item <- as.character(item)
+  denom <- sum(!is.na(data_chunk[[item]]))
+  tibble(
+    Table = table,
+    `Eligible base (intended)` = eligible,
+    `Explicit chunk filter` = chunk_filter,
+    `Removed by filter` = nrow(raw) - nrow(data_chunk),
+    `Removed as item NA` = nrow(data_chunk) - denom,
+    Denominator = denom,
+    `% of 2822` = round(denom / N_TOTAL * 100, 1),
+    Assessment = interp
+  )
+}
+
+res_one <- bind_rows(
+  decomp_one(d, d %>% mutate(postWeight=1), "A1", "A1 Permit Type", "none (unweighted)",
+             "All respondents",
+             "Appropriate. Near-census; 66 NA are item non-response."),
+  decomp_one(d, d, "A2", "A2 Did You Fish", "none", "All respondents",
+             "Appropriate. 38 NA = genuine non-response; small."),
+  decomp_one(d, d, "A3", "A3 Why Didn't You Fish", "none (internal NA drop)",
+             "Only non-fishers (~348)",
+             "Appropriate skip logic. Denom ~ non-fishers; fishers are correctly NA."),
+  decomp_one(d, d, "A11", "A11 Fish Out-of-State", "none", "Anglers",
+             "Likely appropriate if NA = did not fish. Verify NA aligns with non-fishers."),
+  decomp_one(d, d, "A12", "A12 Boat Out-of-State", "none", "Boat owners / boaters?",
+             "STANDOUT: denom ~1218, ~1604 dropped to NA. Confirm NA = no boat (legit) vs blank."),
+  decomp_one(d, d, "A10", "A10 Park Entry Permit", "none", "Anglers",
+             "Likely appropriate; ~233 NA. Confirm NA semantics."),
+  decomp_one(d, d, "fishedTourney", "A13 Fished Tournament (Y/N)", "none", "Anglers",
+             "Appropriate if NA = did not fish. 238 NA matches A13 non-response."),
+  decomp_one(d, d %>% filter(A13_corrected > 0), "A13_corrected",
+             "A13 # Tournaments (participants)", "A13_corrected > 0",
+             "Tournament participants only",
+             "Appropriate & documented: by design only participants (denom ~74)."),
+  decomp_one(d, d %>% filter(!is.na(Q11)), "Q11", "Q11 Crowding", "!is.na(Q11)",
+             "Anglers", "Appropriate; explicit NA filter = internal drop. 339 NA."),
+  decomp_one(d, d, "A7", "A7 Favorite Waterbody Distance", "none", "Anglers",
+             "Likely appropriate; ~352 NA item non-response."),
+  decomp_one(d, d, "A8", "A8 Most-Visited Distance", "none", "Anglers",
+             "Likely appropriate; ~333 NA."),
+  decomp_one(d, d, "A9", "A9 Satisfaction", "none", "Anglers",
+             "Likely appropriate; ~351 NA."),
+  decomp_one(d, d %>% filter(!is.na(Q16)), "Q16", "Q16 Live-imaging Sonar", "!is.na(Q16)",
+             "Anglers", "Appropriate; 341 NA."),
+  decomp_one(d, d, "E7", "E7 Conservation Officer", "none", "Anglers",
+             "Likely appropriate; ~337 NA."),
+  decomp_one(d, d, "B1", "B1 Preferred Fish", "none", "Anglers",
+             "STANDOUT: ~907 dropped to NA (32%). Confirm NA = no preference/skip vs blank."),
+  decomp_one(d, d %>% mutate(postWeight=1), "E2", "E2 Gender", "none (unweighted)",
+             "All respondents", "Appropriate; demographic shown unweighted; 166 NA."),
+  decomp_one(d, d %>% mutate(postWeight=1), "E3", "E3 Age", "none (unweighted)",
+             "All respondents", "Appropriate; demographic shown unweighted; 195 NA.")
+)
+kbl(res_one)
+```
+
+# Percentage tables: select-all questions (overall)
+
+For these the denominator is the `<gate>_Answered == TRUE` base. "Unchecked" is a
+stored level (not `NA`), so unchecked respondents *stay* in the denominator and a
+blank grid (all unchecked / all `NA`) is excluded by the gate.
+
+```{r selectAll}
+gate_true <- function(g){ v <- d[[g]]; if (is.factor(v)) v <- as.character(v); v %in% c(TRUE,"TRUE") }
+sa_row <- function(prefix_sel, gatevar, table, interp, items=NULL){
+  if (is.null(items))
+    items <- d %>% select(contains(prefix_sel)) %>% select(-contains("Answered")) %>% names()
+  base <- d[gate_true(gatevar), , drop=FALSE]
+  per <- sapply(items, function(it) sum(!is.na(base[[it]])))
+  tibble(Table=table, `Gate variable`=gatevar,
+         `Gate base (denominator)`=nrow(base),
+         `Removed by gate`=N_TOTAL-nrow(base),
+         `Per-item denom range`=paste0(min(per),"-",max(per)),
+         `% of 2822`=round(nrow(base)/N_TOTAL*100,1),
+         Assessment=interp)
+}
+b2    <- d %>% select(contains("B2")) %>% select(-contains("_")) %>% select(-contains("Answered")) %>% names()
+b2lrp <- d %>% select(contains("B2")) %>% select(contains("_lrp")) %>% select(-contains("Answered")) %>% names()
+b2rsc <- d %>% select(contains("B2")) %>% select(contains("_rsc")) %>% select(-contains("Answered")) %>% names()
+res_sa <- bind_rows(
+  sa_row("A4","A4_Answered","A4 Waterbody Types",
+         "Appropriate. Gate = checked >=1 box. One sub-item is all-NA (denom 0); inspect that item."),
+  sa_row("A5","A5_Answered","A5 Methods", "Appropriate. Gate = engaged with grid."),
+  sa_row("A6","A6_Answered","A6 Techniques", "Appropriate. Gate = engaged with grid."),
+  sa_row(NULL,"B2_Answered","B2 Fish Sought",
+         "Appropriate. Gate = sought >=1 species.", items=b2),
+  sa_row(NULL,"B2_Answered","B2 Sought - lakes/res/ponds",
+         "Denominator = ALL B2 responders, incl. those who did not fish lakes. % is share of all sought-anglers checking this species in LRP.", items=b2lrp),
+  sa_row(NULL,"B2_Answered","B2 Sought - rivers/streams/canals",
+         "Same caveat as LRP: base is all B2 responders, not just river anglers.", items=b2rsc)
+)
+kbl(res_sa)
+
+# Q18 guided trips (select-all family)
+g18 <- gate_true("Q18_Answered")
+res_q18 <- tibble(
+  Table = c("Q18c Did/Didn't hire guide (all)",
+            "Q18a/b/both Hired by location (all responders)",
+            "Q18a/b/both Hired by location (hired only)"),
+  `Eligible base` = c("Q18 responders", "Q18 responders", "Guide-hirers only"),
+  `Explicit filter` = c("Q18_Answered",
+                        "Q18_Answered",
+                        "Q18_Answered & is.na(Q18c)"),
+  Denominator = c(sum(g18), sum(g18), sum(g18 & is.na(d$Q18c))),
+  Assessment = c("Appropriate; base = engaged with Q18.",
+                 "Appropriate; % of all responders who hired (low %, expected).",
+                 "Appropriate & documented; restricts to hirers (denom ~231).")
+)
+kbl(res_q18 %>% mutate(`% of 2822` = round(Denominator/N_TOTAL*100,1)))
+```
+
+# Percentage tables: per-field loops (overall)
+
+These chunks loop over a set of item columns and build one row per item; the
+denominator differs per item. Ranges are shown.
+
+```{r perfield}
+denom_rng <- function(chunk, items){ v<-sapply(items, function(it) sum(!is.na(chunk[[it]]))); paste0(min(v),"-",max(v)) }
+
+# A17 access
+dAccess <- d %>% filter(!is.na(A17Pub_corrected) & !is.na(A17Priv_corrected)) %>%
+  filter(!(A17Pub_corrected=="No" & A17Priv_corrected=="No"))
+# D13 trout
+d13 <- d %>% select(contains("D13")) %>% select(-contains("Answered")) %>% names()
+dt  <- d %>% filter(B2rbt=="Trout")
+# D4
+d4  <- d %>% select(contains("D4")) %>% select(-contains("Answered")) %>% names()
+# B3 harvest (denom = sought that species)
+b3  <- d %>% select(contains("B3")) %>% select(-contains("Answered")) %>% select(-contains("oth")) %>% select(-contains("any")) %>% names()
+b3d <- sapply(b3, function(it) sum(!is.na(d[[it]]) & suppressWarnings(as.numeric(d[[gsub('3','2',it)]]))==2))
+# Ice
+iceBase <- d %>% filter(Q26=="Yes")
+q28 <- iceBase %>% select(contains("Q28")) %>% select(-contains("Answered")) %>% names()
+q29 <- iceBase %>% select(contains("Q29")) %>% select(-contains("Answered")) %>% names()
+# Q23 low water
+optoutQ23 <- "I did not experience low water levels in 2025"
+g23 <- gate_true("Q23_Answered")
+q23_all <- sapply(c("Q23_1","Q23_2","Q23_3"), function(it) sum(g23 & !is.na(d[[it]])))
+q23_exp <- sapply(c("Q23_1","Q23_2","Q23_3"), function(it) sum(g23 & as.character(d[[it]])!=optoutQ23 & !is.na(d[[it]])))
+
+res_pf <- tibble(
+  Table = c("A17 Access - any-access rows", "A17 Access - partition rows (just/both)",
+            "D13 Trout Locations", "D4 Preferred-Species statements",
+            "B3 Harvest by Species", "Q26 Ice Fished (Y/N)",
+            "Q28 Ice harvest share", "Q29 Ice release share",
+            "Q23 Low water (all responders)", "Q23 Low water (experienced only)"),
+  `Eligible base` = c("Answered pub & priv access", "Has >=1 access type",
+                      "Trout anglers (B2rbt=='Trout')", "Anglers", "Sought that species",
+                      "Anglers", "Ice anglers (Q26=='Yes')", "Ice anglers (Q26=='Yes')",
+                      "Q23 responders", "Experienced low water"),
+  `Filter applied` = c("!is.na(pub) & !is.na(priv)",
+                       "+ exclude both-No",
+                       "B2rbt=='Trout' & !is.na(field)", "!is.na(field)",
+                       "!is.na(field) & sought==2", "!is.na(Q26)",
+                       "Q26=='Yes' & !is.na(field)", "Q26=='Yes' & !is.na(field)",
+                       "Q23_Answered & !is.na(field)",
+                       "Q23_Answered & !=opt-out & !is.na"),
+  `Denominator (overall / range)` = c(
+    "1926", as.character(nrow(dAccess)),
+    denom_rng(dt, d13), denom_rng(d, d4),
+    paste0(min(b3d),"-",max(b3d)), as.character(sum(!is.na(d$Q26))),
+    denom_rng(iceBase, q28), denom_rng(iceBase, q29),
+    paste0(min(q23_all),"-",max(q23_all)),
+    paste0(min(q23_exp),"-",max(q23_exp))),
+  Assessment = c(
+    "Appropriate & documented. Any-access rows use full answered base (1926).",
+    "Appropriate & documented. Excludes both-No so categories sum to 100%.",
+    "Appropriate. Trout-specific question; small base (~541) -> wider CIs.",
+    "Likely appropriate; ~700 NA per item. Confirm NA = skip not blank.",
+    "Appropriate filter (can only harvest a sought species). Rare species n as low as ~41 -> very wide CIs.",
+    "Appropriate; 353 NA dropped.",
+    "Appropriate; ice anglers only (base ~402).",
+    "Appropriate; ice anglers only (base ~402).",
+    "Appropriate; both versions presented (with and without opt-out).",
+    "Appropriate & documented; opt-outs removed, 498-695 fewer than 'all'.")
+)
+kbl(res_pf)
+```
+
+# Days Fished monthly tables (overall) -- flagged
+
+```{r c1}
+months <- c("C1Jan_days","C1Feb_days","C1Mar_days","C1Apr_days","C1May_days","C1June_days",
+            "C1July_days","C1Aug_days","C1Sept_days","C1Oct_days")
+c1 <- tibble(
+  Month = months,
+  `Denominator (non-NA & <22)` = sapply(months, function(m) sum(!is.na(d[[m]]) & d[[m]]<22)),
+  `Dropped: NA for month` = sapply(months, function(m) sum(is.na(d[[m]]))),
+  `Dropped: >= 22 (cap)` = sapply(months, function(m) sum(d[[m]]>=22, na.rm=TRUE)),
+  `% of 2822` = round(sapply(months, function(m) sum(!is.na(d[[m]]) & d[[m]]<22))/N_TOTAL*100,1)
+)
+kbl(c1)
+```
+
+**Interpretation.** The chunk filter `filter(!is.na("C1Jan_days"))` is a **no-op**
+(the column name is quoted as a string, which is never `NA`). The actual `NA`
+removal is done by `filter(C1<22)` because `NA < 22` evaluates to `NA` and is
+dropped. The `< 22` cap itself currently removes **0** rows (no month has values
+>= 22). So each monthly table's denominator is simply "respondents with a
+non-`NA` value that month" (~1942-2207), versus `C1_AnsweredAll =`
+**`r sum(d$C1_AnsweredAll, na.rm=TRUE)`** who completed the days block.
+
+The pivotal question (to dig into next): **does a blank month mean "fished 0
+days" or "did not answer"?** The response label set for this question includes a
+"Did Not Fish" category, which suggests zero-days should be a *displayed
+response*, not an excluded `NA`. If zero-day months are stored as `NA`, they are
+being dropped from the denominator and every day-count percentage in the monthly
+tables is **inflated**. This is the strongest candidate for the high percentages
+that motivated this audit and is worth confirming directly against the raw
+month-day coding.
+
+# Gate-variable appendix: `_Answered` and `_AnsweredAll` as filters
+
+```{r gates}
+# "answered any" gates
+val_gates <- c("A4_Answered","A5_Answered","A6_Answered","B2_Answered")
+pres_gates <- c("Q18_Answered","Q23_Answered")
+g_any <- tibble(
+  Gate = c(val_gates, pres_gates),
+  Type = c(rep("value-sum (>0)",4), rep("presence (any non-NA)",2)),
+  `TRUE (denominator)` = sapply(c(val_gates,pres_gates), function(g) sum(gate_true(g))),
+  `% of 2822` = round(sapply(c(val_gates,pres_gates), function(g) sum(gate_true(g)))/N_TOTAL*100,1)
+)
+kbl(g_any)
+
+allgates <- grep("_AnsweredAll$", names(d), value=TRUE)
+g_all <- tibble(
+  Gate = allgates,
+  `TRUE (complete-case denom)` = sapply(allgates, function(g) sum(gate_true(g))),
+  `% of 2822` = round(sapply(allgates, function(g) sum(gate_true(g)))/N_TOTAL*100,1)
+) %>% arrange(`TRUE (complete-case denom)`)
+kbl(g_all)
+```
+
+**`_Answered` (any) gates** define the denominator for the select-all percentage
+tables. Two definitions coexist: A4/A5/A6/B2/F1 use a *value-sum* rule
+(`rowSums(values) > 0` -> checked at least one box), while Q18/Q23 use a
+*presence* rule (any item non-`NA`). Both are reasonable here because unchecked
+boxes are stored as a level (so "checked nothing" reads as not-answered). The
+inconsistency is worth noting only because a respondent who genuinely selected
+*no* option is indistinguishable from one who skipped the grid.
+
+**`_AnsweredAll` (complete-case) gates** are used to filter the subscale
+**means/medians** tables (e.g. `motivation_*`, `attitude_*`, `reg_*`,
+`Q31_AnsweredAll`, `C1_AnsweredAll`). They require *every* item answered and so
+drop the most respondents (13-20%). This is the most aggressive denominator
+reduction in the report. For a scale **mean** that needs all items, listwise
+deletion is defensible, but it can bias estimates if non-response is related to
+the trait; an available-case (row-mean over answered items) alternative would
+retain more respondents. Note also the all-FALSE flags for 2025
+(`D3_AnsweredAll`, `programs_*`, `D1_AnsweredAll`, `barriers_*`): any table
+filtered on these would be **empty**.
+
+# Standouts to investigate next
+
+| Priority | Table | Why it stands out |
+|---|---|---|
+| High | C1 Days Fished (monthly) | No-op string filter; blank-month may = 0 days but is dropped, inflating day-count %. |
+| High | A12 Boat Out-of-State | ~57% of respondents dropped to NA; confirm NA = "no boat" vs blank. |
+| Medium | B1 Preferred Fish | ~32% dropped to NA; confirm skip vs item non-response. |
+| Medium | Subscale means via `_AnsweredAll` | Listwise deletion drops 13-20%; consider available-case. |
+| Low | A4 Waterbody Types | One sub-item has denominator 0 (all NA); identify that column. |
+| Low | B3 Harvest (rare species) | Some species denom ~41; percentages are very unstable. |
+```
+

@@ -34,7 +34,7 @@ source("CrossTabTableFunctions.R") #load file of cross tab report functions
 setwd("D:/Survey/Analysis/CrossTabTables/")
 
 #load data
-load(file="../../Data/DataAggregation1/aggregateData_20260622.rData")
+load(file="../../Data/DataAggregation1/aggregateData_20260624.rData")
 d<-d %>% filter(surveyYear==2025)
 # Rebuild scale/subscale scores from raw item factors, applying reversals
 # flagged in Scales.csv (single source of truth) at report time.
