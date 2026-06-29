@@ -3,18 +3,23 @@
 #date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   officedown::rdocx_document:
+    #reference_docx: double_spaced_template.docx
     toc: true
   #word_document: default
 always_allow_html: yes
 ---
 
 ```{r setup, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, fig.width=7.5, fig.height=7}
+
 knitr::opts_chunk$set(echo=FALSE, include=TRUE, warning=FALSE, error=FALSE, message=FALSE,  ft.align="left")
 library(tictoc)
 tic("Report Took ")
 options(stringsAsFactors = FALSE)
+
 #devtools::install_github("davidgohel/officer")
+
 #devtools::install_github("davidgohel/officedown")
+
 library(officedown)
 library(rmarkdown)
 library(tidyverse)
@@ -27,52 +32,62 @@ setwd("D:/Survey/Analysis/CrossTabTables/")
 
 source("..\\BaseFunctions_2025_UPDATED.R") #load file of common functions
 source("CrossTabTableFunctions.R") #load file of cross tab report functions
+
 ```
 
-
 ```{r getData, echo=FALSE}
+
 setwd("D:/Survey/Analysis/CrossTabTables/")
 
 #load data
+
 load(file="../../Data/DataAggregation1/aggregateData_20260624.rData")
 d<-d %>% filter(surveyYear==2025)
+
 # Rebuild scale/subscale scores from raw item factors, applying reversals
+
 # flagged in Scales.csv (single source of truth) at report time.
+
 d <- add_scale_scores(d)
+
 #q<-base.loaddata.factorlevels()
+
 #save(q, file="q_20190802")
+
 #load(file="../../2018 Statewide Survey/Analysis/Rscripts/CrossTabTables/q_20190802")
+
 q<-read.csv(file="../../Data/DataAggregation1/FactorLevels_aggregated.csv") %>% filter(Year==2025)
 l=read.csv(file="../../Data/DataAggregation1/Labels.csv")
 
 ```
 
 ```{r createFunctions}
+
 CreateFlex<-function(x, mergeOnFirst=FALSE, firstColLabel=FALSE) {
   require(officer)
   require(flextable)
-  
+
   bigborder=officer:: fp_border(color="black", width = 1.5)
   smallborder=officer:: fp_border(color="black", width=1.0)
   # width for the leading column: narrow when it holds a short item label
   w1 <- if (firstColLabel) 0.4 else 1.2
-  
+
   myFlex<-  flextable(x) %>%
     theme_zebra()
-  
+
   if(mergeOnFirst==TRUE) {
-    #merge first column cells  
+    #merge first column cells
     myFlex <-myFlex %>%
-        merge_v(j=1, part="body") 
+        merge_v(j=1, part="body")
       #when a short label leads, also merge the adjacent wording column
       if (firstColLabel) {
         myFlex <- myFlex %>% merge_v(j=2, part="body")
       }
       #add border below merged cells in first column
       myFlex<-myFlex %>%
-        border(border.bottom = smallborder, i=rle(cumsum(myFlex$body$spans$columns[,1] ))$values, part="body") 
+        border(border.bottom = smallborder, i=rle(cumsum(myFlex$body$spans$columns[,1] ))$values, part="body")
   }
-  
+
   myFlex <- myFlex %>%
     #border_outer(officer:: fp_border(color="black", width = 1.5), part="all") %>%
     #add border above and below footer
@@ -93,28 +108,27 @@ CreateFlex<-function(x, mergeOnFirst=FALSE, firstColLabel=FALSE) {
     myFlex <- myFlex %>% width(j = 2, width = 1.2)
   }
 
-      
   myFlex
 }
-
 
 ```
 
 `r officer::run_pagebreak()`
+
 # Introduction
 
-The use of harvest regulations is one of the most-commonly used management tools in the management of sport fisheries.  Harvest regulations can be applied to fisheries over a region-wide or state-wide scale, or they can be applied to specific waterbodies or fisheries in a site-specific manner.  While site-specific regulations are often more effective at addressing local concerns, region-wide and state-wide regulations can provide consistency and broader management benefits.  Fisheries managers, adminstrators, and the general public often disagree on the best mix of wide-scale and site-specific regulations due to percieved complexity, compliance, enforcement, and other social issues.  The 2025 Statwide License Angler Survey (LAS) included a series of questions that were designed to assess angler attitudes toward the use of harvest regulations, particularly among different spatial scales (see Appendix A for the full list of questions).
+The use of harvest regulations is one of the most-commonly used tools in the management of sport fisheries.  Harvest regulations can be applied to fisheries over a region-wide or state-wide scale, or they can be applied to specific waterbodies or fisheries in a site-specific manner.  While site-specific regulations are often more effective at addressing local concerns, region-wide and state-wide regulations can provide consistency and broader management benefits.  Fisheries managers, adminstrators, and the general public often disagree on the best mix of wide-scale and site-specific regulations due to percieved complexity, compliance, enforcement, and other social issues.  The 2025 Statwide License Angler Survey (LAS) included a series of questions that were designed to assess angler attitudes toward the use of harvest regulations, particularly among different spatial scales (see Appendix A for the full list of questions).
 
 These questions were designed to cover a range of opinions and attitudes towards regulations.  As the questions are new and under their first iteration of use, no a priori scale structure was imposed on the questions.  The following report describes the development of a scale structure for the regulation questions, the reliability of the resulting scales, and the relationship of the scale results to other survey parameters.
 
 `r officer::run_pagebreak()`
+
 # Methods
 
-Logistic implementation of the 2025 LAS is described in Bosr (2026).  Analysis of survey returns, response bias, and weight stratigies is found in Hurley (2026).  The twelve regulation items (Items A–L) were administered as a single block of 5-point statements with responses of: 1 = Strongly disagree, 2 = Slightly disagree, 3 = Neither agree nor disagree, 4 = Slightly agree, and 5 = Strongly agree (Appendix ???). The questions were written as balanced between three scale constructs including multi-directionality.  However, this analysis treats the list of items without an a priori scale structure.  Any reversal of answer directionality is determined by survey responses and scale development analysis.
-
-## Scale development
+Logistic implementation of the 2025 LAS is described in Bosr (2026).  Analysis of survey returns, response bias, and weighting stratigies are found in Hurley (2026).  The twelve regulation items (Items A–L) were administered as a single block of 5-point statements with responses of: 1 = Strongly disagree, 2 = Slightly disagree, 3 = Neither agree nor disagree, 4 = Slightly agree, and 5 = Strongly agree (Appendix A). The questions were written as balanced between three scale constructs including multi-directionality.  However, this analysis treats the list of items without an a priori scale structure.  Any reversal of answer directionality was determined by survey responses and the scale development analysis.
 
 ```{r regdev_setup, include=FALSE}
+
 library(psych)
 library(lavaan)
 library(nnet)
@@ -125,6 +139,7 @@ library(survey)
 reg_items <- paste0("Q31", letters[1:12])
 
 # Numeric 1-5 item matrix and complete-case subset
+
 reg_num <- as.data.frame(lapply(d[reg_items], as.integer))
 names(reg_num) <- reg_items
 cc        <- stats::complete.cases(reg_num)
@@ -134,30 +149,37 @@ n_cc      <- nrow(reg_cc)
 pct_cc    <- round(100 * n_cc / n_total, 1)
 
 # Item wording lookup
+
 item_text <- q %>%
   dplyr::filter(grepl("^Q31[a-z]$", Field)) %>%
   dplyr::distinct(Field, Question)
 lab <- function(f) item_text$Question[match(f, item_text$Field)]
 
 # Scale definitions (empirical)
+
 comp_i <- c("Q31e", "Q31g", "Q31h")
 site_i <- c("Q31j", "Q31k", "Q31l")
 unif_i <- c("Q31a", "Q31b", "Q31d", "Q31f", "Q31i")
 
 # ---- Factorability & polychoric correlations ----
+
 Rpoly <- polychoric(reg_cc)$rho
 kmo   <- KMO(Rpoly)
 bart  <- cortest.bartlett(Rpoly, n = n_cc)
 
 # ---- Parallel analysis (number retained) ----
+
 set.seed(4127)
 pa <- fa.parallel(Rpoly, n.obs = n_cc, fa = "fa", fm = "ml", plot = FALSE)
 n_fact <- pa$nfact
 
 # ---- 3-factor EFA ----
+
 fa3 <- fa(Rpoly, nfactors = 3, fm = "ml", rotate = "oblimin", n.obs = n_cc)
 L   <- unclass(fa3$loadings)
+
 # Map statistical factors to substantive scales by representative items
+
 f_comp <- which.max(abs(L["Q31h", ]))
 f_site <- which.max(abs(L["Q31k", ]))
 f_unif <- which.max(abs(L["Q31d", ]))
@@ -165,6 +187,7 @@ fa_fit_tli   <- round(fa3$TLI, 3)
 fa_fit_rmsea <- round(fa3$RMSEA[1], 3)
 
 # ---- Reliability per scale ----
+
 rel_one <- function(items) {
   a  <- psych::alpha(reg_cc[, items], warnings = FALSE)
   om <- tryCatch(suppressWarnings(
@@ -178,6 +201,7 @@ rel_site <- rel_one(site_i)
 rel_unif <- rel_one(unif_i)
 
 # ---- CFA: 1-factor (bipolar) vs 2-factor (correlated) on 8 policy items ----
+
 pol_i <- c(unif_i, site_i)
 pol   <- reg_cc[, pol_i]
 pol[] <- lapply(pol, ordered)
@@ -193,6 +217,7 @@ lrt <- lavTestLRT(fit1, fit2, method = "satorra.2000")
 latcor <- lavInspect(fit2, "cor.lv")["uniform", "site"]
 
 # ---- Composite (bipolar) scale & scores ----
+
 comprehension <- rowMeans(reg_cc[, comp_i])
 site_score    <- rowMeans(reg_cc[, site_i])
 uniform_score <- rowMeans(reg_cc[, unif_i])
@@ -201,6 +226,7 @@ alpha_orient  <- psych::alpha(cbind(6 - reg_cc[, unif_i], reg_cc[, site_i]),
                               warnings = FALSE)$total$raw_alpha
 
 # ---- Analysis frame with demographics / covariates / weights ----
+
 af <- data.frame(
   comprehension, site_score, uniform_score, orientation,
   Resi    = d$Resi[cc],
@@ -230,6 +256,7 @@ af$fishpref <- relevel(factor(af$fishpref),
                        ref = "I do not prefer any particular type of fish")
 
 # ---- Demographic association tests (Wants both vs rest) ----
+
 cram_v <- function(tb) {
   x <- suppressWarnings(chisq.test(tb))
   v <- sqrt(as.numeric(x$statistic) / (sum(tb) * (min(dim(tb)) - 1)))
@@ -244,6 +271,7 @@ age_rrb <- (2 * as.numeric(age_w$statistic) / (n1 * n0)) - 1   # rank-biserial
 age_med <- tapply(af$Age, af$wants_both, median, na.rm = TRUE)
 
 # ---- Multinomial: quadrant ~ comprehension (+ covariates) ----
+
 af$quadrant <- relevel(af$quadrant, ref = "Wants both")
 m_base <- multinom(quadrant ~ comprehension, data = af, trace = FALSE)
 m_full <- multinom(quadrant ~ comprehension + avidity_log + fishpref,
@@ -260,6 +288,7 @@ or_tab$CI95 <- apply(round(t(ci_base), 2), 1,
                      function(z) sprintf("[%.2f, %.2f]", z[1], z[2]))
 
 # ---- Weighted quadrant prevalence (design-based) ----
+
 af$quadrant <- factor(af$quadrant,
   levels = c("Site-specific only","Wants both","Statewide only","Neither"))
 des <- svydesign(ids = ~1, weights = ~postWeight,
@@ -272,12 +301,11 @@ wtab <- data.frame(
   `Weighted %`   = round(100 * as.numeric(coef(wp)), 1),
   `95% CI`       = sprintf("[%.1f, %.1f]", 100*wci[,1], 100*wci[,2]),
   check.names = FALSE, row.names = NULL)
+
 ```
 
-Analyses used `r format(n_cc, big.mark=",")` of `r format(n_total, big.mark=",")`
-2025 LAS respondents (`r pct_cc`%) who answered all twelve items. Per-item nonresponse was modest and uniform (11–13%), consistent with incidental item skipping rather than structured
-non-response. Because the items are ordinal, all correlational and
-factor-analytic steps used polychoric correlations. Item and scale structure was explored unweighted, on the rationale that measurement structure is a property of the instrument rather than of the survey response composition.  Appriopiate per-respondant survey weighting is used only for the population-level estimates and comparisons (post-stratified on age group and residency).
+Analyses used `r format(n_cc, big.mark=",")` of `r format(n_total, big.mark=",")` 2025 LAS respondents (`r pct_cc`%) who answered all twelve items. Per-item nonresponse was modest and uniform (11–13%), consistent with incidental item skipping rather than structured
+non-response. All correlational and factor-analytic steps used polychoric correlations due to the ordinal nature of the items. Item and scale structure was explored unweighted on the rationale that measurement structure is a property of the instrument rather than of the survey response composition.  Appriopiate per-respondant survey weighting suggested by Hurley (2026) was used only for the population-level estimates and comparisons (post-stratified on age group and residency).
 
 # Results
 
@@ -285,25 +313,50 @@ factor-analytic steps used polychoric correlations. Item and scale structure was
 
 Before extraction, the correlation matrix was checked for factorability. The
 Kaiser–Meyer–Olkin measure of sampling adequacy was
-**`r round(kmo$MSA, 2)`**, with all per-item values ≥
-`r round(min(kmo$MSAi), 2)`. By Kaiser's conventional benchmarks (< 0.50
-unacceptable, 0.70–0.80 middling, 0.80–0.90 *meritorious*, > 0.90 marvelous),
-the battery is comfortably in the meritorious range. Bartlett's test of
-sphericity rejected the identity-matrix null
+`r round(kmo$MSA, 2)`, with all per-item values ≥
+`r round(min(kmo$MSAi), 2)`. By Kaiser's (1974) conventional benchmarks (< 0.50
+unacceptable, 0.70–0.79 middling, 0.80–0.89 *meritorious*, ≥ 0.90 marvelous),
+the items are comfortably in the meritorious range. Bartlett's test of
+sphericity rejected the hypothesis that the items represent an identity-matrix
 (χ²(`r bart$df`) = `r format(round(bart$chisq), big.mark=",")`,
-*p* < .001), confirming sufficient common variance to factor.
+*p* < .001).  These results confirm that sufficient common variance exists to factor.
 
-Horn's parallel analysis—which retains factors whose eigenvalues exceed those
-from random data of equivalent dimensions—indicated **`r n_fact` factors**.
-The polychoric inter-item correlations (Figure 1) show the same three blocks
-visually, and, notably, the policy items split by direction: the
-statewide/simplification items correlate positively among themselves and
+Horn's parallel analysis (which retains factors whose eigenvalues exceed those
+from random data of equivalent dimensions) indicated `r n_fact` factors in the items (Figure 1).
+The polychoric inter-item correlations (Figure 2) show the same three blocks
+visually and that the two policy blocks split by direction: the
+simplification items correlate positively among themselves and
 negatively with the site-specific items.
 
-```{r regdev_heatmap, fig.cap="Figure 1. Polychoric inter-item correlations among the twelve regulation items.", fig.width=7.5, fig.height=6.5}
+```{r regdev_scree, fig.cap="Figure 1. Horn's parallel analysis scree plot. Actual factor eigenvalues (solid line) exceed mean eigenvalues from 100 random datasets of equivalent dimensions (dashed line) for the first three factors, supporting retention of a 3-factor solution.", fig.width=6, fig.height=4}
+
+data.frame(
+  Factor    = 1:6,
+  Actual    = pa$fa.values[1:6],
+  Simulated = pa$fa.sim[1:6]
+) |>
+  tidyr::pivot_longer(-Factor, names_to = "Source", values_to = "Eigenvalue") |>
+  ggplot(aes(Factor, Eigenvalue, color = Source, linetype = Source)) +
+  geom_hline(yintercept = 0, color = "grey80") +
+  geom_vline(xintercept = 3.5, linetype = "dashed", color = "grey60") +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2.5) +
+  scale_color_manual(values = c(Actual = "#1b4f8a", Simulated = "#c0392b")) +
+  scale_linetype_manual(values = c(Actual = "solid", Simulated = "dashed")) +
+  scale_x_continuous(breaks = 1:6) +
+  labs(x = "Factor", y = "Eigenvalue", color = NULL, linetype = NULL) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+
+```
+
+```{r regdev_heatmap, fig.cap="Figure 2. Polychoric inter-item correlations among the twelve regulation items.", fig.width=7.5, fig.height=6.5}
+
 as.data.frame(Rpoly) |>
   tibble::rownames_to_column("item1") |>
+  dplyr::mutate(item1 = toupper(sub("^Q31", "", item1))) |>
   tidyr::pivot_longer(-item1, names_to = "item2", values_to = "r") |>
+  dplyr::mutate(item2 = toupper(sub("^Q31", "", item2))) |>
   ggplot(aes(item1, item2, fill = r)) +
   geom_tile() +
   geom_text(aes(label = sprintf("%.2f", r)), size = 2.5) +
@@ -312,82 +365,80 @@ as.data.frame(Rpoly) |>
   labs(x = NULL, y = NULL, fill = "r") +
   theme_minimal(base_size = 11) +
   theme(panel.grid = element_blank())
+
 ```
 
-A three-factor model was estimated by maximum likelihood with oblique (oblimin)
-rotation, allowing the factors to correlate. The rotated pattern (Table 1) is
-simple and interpretable: eleven of twelve items load saliently
-(|loading| ≥ .40) on exactly one factor, with no consequential cross-loadings.
-The factors correspond to **regulation comprehension/confidence**
-(Items E, G, H), **site-specific support** (Items J, K, L), and
-**statewide/simplification preference** (Items A, B, D, F, I).
+A three-factor model was also estimated by maximum likelihood with oblique rotation. The rotated pattern (Table 1) is simple and interpretable.  Eleven of twelve items load saliently
+(|loading| ≥ .40) on exactly one factor with no consequential cross-loadings.  The factors correspond to regulation comprehension and confidence (*comprehension*; Items E, G, H), site-specific support (*site-specific*; Items J, K, L), and simplification preference (*simplification*; Items A, B, D, F, I).
 
 ```{r regdev_loadings}
+
 fac_idx  <- c(f_comp, f_site, f_unif)
 ord_items <- c(comp_i, site_i, unif_i)
 load_tbl <- data.frame(
-  Item = lab(ord_items),
+  Item = toupper(sub("^Q31", "", ord_items)),
+  Statement = lab(ord_items),
   Comprehension = round(L[ord_items, f_comp], 2),
   `Site-specific` = round(L[ord_items, f_site], 2),
-  `Statewide` = round(L[ord_items, f_unif], 2),
+  `Simplification` = round(L[ord_items, f_unif], 2),
   h2 = round(fa3$communality[ord_items], 2),
   check.names = FALSE)
-for (j in 2:4) load_tbl[abs(load_tbl[[j]]) < .30, j] <- NA
-CreateFlex(load_tbl)
+for (j in 3:5) load_tbl[abs(load_tbl[[j]]) < .30, j] <- NA
+CreateFlex(load_tbl, firstColLabel = TRUE)|>
+  compose(part = "header", j = "h2",
+          value = as_paragraph(as_chunk("h"), as_sup("2")))
+
 ```
 
-*Table 1. Oblimin-rotated maximum-likelihood factor loadings (loadings < .30
-suppressed); h² = communality. ML extraction on the polychoric matrix.*
+*Table 1. Oblimin-rotated factor loadings from maximum-likelihood extraction on the polychoric correlation matrix (loadings < .30 suppressed; Item C excluded — see text); h² = communality. TLI = `r fa_fit_tli`, RMSEA = `r fa_fit_rmsea`.*
 
-One item—**Item C** ("Anglers are willing to follow complex regulations to
-produce high-quality fisheries")—failed to cohere with any factor (no loading
-≥ .30; its largest polychoric correlation with any other item was 0.39). It
-appears to tap a distinct notion of compliance willingness that the remaining
-items do not, and retaining it would degrade rather than define a scale.
-**Item C was therefore excluded from all scale scores** and is reported only at
-the item level (above). The three-factor model accounted for
-`r round(sum(fa3$Vaccounted["Proportion Var", ]) * 100)`% of the common
-variance; overall approximate fit was acceptable for an exploratory solution
-(TLI = `r fa_fit_tli`, RMSEA = `r fa_fit_rmsea`), with the residual misfit
-attributable largely to the orphan item and a minor secondary loading on Item A.
+Item C - "Anglers are willing to follow complex regulations to
+produce high-quality fisheries" — failed to relate with any factor (no loading
+≥ .30; largest polychoric correlation = 0.39). It instead appears to tap the idea of complience that the remaining items do not.  Retaining it would degrade rather than improve any of the other scales.  Item C was excluded from all scale scores and is reported only at
+the item level.
+
+The three-factor model accounted for `r round(sum(fa3$Vaccounted["Proportion Var", ]) * 100)`% of the variance of the items.  Overall approximate fit was acceptable for an exploratory solution (TLI = `r fa_fit_tli`, RMSEA = `r fa_fit_rmsea`), with the residual misfit attributable largely to the orphan item and a minor secondary loading on Item A.
 
 ## Reliability
 
 Internal consistency was estimated with Cronbach's α and McDonald's ω
-(Table 2). Conventionally, α ≥ .70 is considered acceptable and ≥ .80 good; ω
+(Table 2). Conventionally, α ≥ .70 is considered acceptable and ≥ .80 good (Nunnally & Bernstein, 1994); ω
 is reported alongside because it does not assume tau-equivalence and is the
-preferred coefficient for congeneric items. All three scales meet or approach
-the "good" threshold, and no item-deletion would materially raise any
+preferred coefficient for congeneric items (McDonald, 1999; McNeish, 2018). All three scales meet or approach
+the "good" threshold, and no item deletion would materially raise any
 coefficient, so all items were retained.
 
 ```{r regdev_reliability}
+
 rel_tbl <- data.frame(
-  Scale = c("Comprehension / confidence", "Site-specific support",
-            "Statewide / simplification preference"),
+  Scale = c("Comprehension", "Site-specific",
+            "Simplification"),
   Items = c(length(comp_i), length(site_i), length(unif_i)),
   `Cronbach alpha` = round(c(rel_comp$alpha, rel_site$alpha, rel_unif$alpha), 3),
   `McDonald omega`  = round(c(rel_comp$omega, rel_site$omega, rel_unif$omega), 3),
-  `Item-total r (range)` = c(
-    sprintf("%.2f-%.2f", min(rel_comp$item), max(rel_comp$item)),
-    sprintf("%.2f-%.2f", min(rel_site$item), max(rel_site$item)),
-    sprintf("%.2f-%.2f", min(rel_unif$item), max(rel_unif$item))),
   check.names = FALSE)
 CreateFlex(rel_tbl)
+
 ```
 
 *Table 2. Internal-consistency reliability for the three derived scales.*
 
 ## Two correlated scales versus a single bipolar composite
 
-Because the statewide and site-specific items are negatively related, a natural
-question is whether the eight policy items measure **one** bipolar dimension
-(statewide regulation at one pole, site-specificity at the other) or **two** distinct but
-correlated dimensions. This was tested directly with confirmatory factor
+Because the simplified and site-specific items are negatively related, a natural
+question is whether the eight policy items measure one bipolar dimension
+(simplification at one pole, site-specificity at the other) or two distinct but
+correlated dimensions. The three-factor EFA structure established in the
+previous section is suggested by this analysis; the confirmatory analysis here addresses a
+narrower question specifically about the two policy-orientation factors —
+whether the simplification and site-specific items, which load on separate EFA
+factors, nonetheless reduce to a single, more-easily understood bipolar dimension.  This was tested with confirmatory factor
 analysis on the eight policy items, using the WLSMV estimator appropriate for
 ordinal indicators, comparing a one-factor model against a two-factor
 correlated model (Table 3).
 
 ```{r regdev_cfa}
+
 cfa_tbl <- data.frame(
   Model = c("1-factor (bipolar)", "2-factor (correlated)"),
   CFI   = round(c(fm1["cfi.scaled"], fm2["cfi.scaled"]), 3),
@@ -396,111 +447,101 @@ cfa_tbl <- data.frame(
   SRMR  = round(c(fm1["srmr"], fm2["srmr"]), 3),
   row.names = NULL)
 CreateFlex(cfa_tbl)
+
 ```
 
 *Table 3. CFA fit for competing structures of the eight policy items
 (WLSMV, robust/scaled indices).*
 
 Against standard cutoffs (good fit: CFI/TLI ≥ .95, RMSEA ≤ .06, SRMR ≤ .08;
-acceptable: CFI/TLI ≥ .90, RMSEA ≤ .08), the one-factor model fits poorly
+acceptable: CFI/TLI ≥ .90, RMSEA ≤ .08; Hu & Bentler, 1999), the one-factor model fits poorly
 (CFI = `r round(fm1["cfi.scaled"],2)`, RMSEA = `r round(fm1["rmsea.scaled"],2)`),
 whereas the two-factor model is far better
 (CFI = `r round(fm2["cfi.scaled"],2)`, RMSEA = `r round(fm2["rmsea.scaled"],2)`).
 A robust scaled chi-square difference test strongly favors two factors
 (Δχ²(`r lrt[2,"Df diff"]`) = `r format(round(lrt[2,"Chisq diff"]), big.mark=",")`,
-*p* < .001). The disattenuated latent correlation between the two policy factors
-is `r round(latcor, 2)`—substantial, but well short of the −1 a true single
-bipolar axis would require (the two poles share only about
+*p* < .001). The two-factor model estimates the latent correlation between the two policy
+factors at `r round(latcor, 2)`—substantial, but well short of the −1 that a
+true single bipolar axis would require (the two poles share only about
 `r round(latcor^2 * 100)`% of their variance).
 
-Because the indicators are ordinal and estimation used the mean- and
-variance-adjusted WLSMV estimator, this difference test follows the Satorra
-(2000) procedure—the appropriate robust correction for categorical-data
-estimators; the more familiar Satorra–Bentler (2010) correction applies only to
-continuous robust maximum likelihood (MLM/MLR) and is not valid here.
-
-The practical consequence is visible when respondents are scored both ways
-(Figure 2). Under the two-scale framing (left), the data do not collapse onto
-the anti-diagonal that a pure bipolar dimension implies; a large group scores
-high on **both** scales. The single reversed composite (right), though
-internally consistent (α = `r round(alpha_orient, 2)`), averages these
+The practical difference between a two-scale and single-scale approach to the support of the different regulation complexity levels is visible when respondents are scored both ways (Figure 3). Under the two-scale framing the data do not collapse onto the diagonal that a pure bipolar dimension implies; a large group scores high on both scales. The single reversed composite, though internally consistent (α = `r round(alpha_orient, 2)`), averages these
 respondents toward the middle and conceals that pattern.
 
-```{r regdev_framing, fig.cap="Figure 2. Two-scale framing (left) versus single reversed composite (right). Red line marks where a strictly bipolar dimension would place respondents.", fig.width=7.5, fig.height=4}
+```{r regdev_framing, fig.cap="Figure 3. Two-scale framing (left) versus single reversed composite (right). Red line marks where a strictly bipolar dimension would place respondents.", fig.width=7.5, fig.height=4}
+
 pA <- ggplot(af, aes(uniform_score, site_score)) +
   geom_jitter(width = .12, height = .12, alpha = .12, size = .8) +
   geom_hline(yintercept = 3, linetype = 2, colour = "grey40") +
   geom_vline(xintercept = 3, linetype = 2, colour = "grey40") +
   geom_abline(slope = -1, intercept = 6, colour = "#b2182b") +
   labs(title = "Two-scale framing",
-       x = "Statewide preference (mean)", y = "Site-specific support (mean)") +
+       x = "Simplification mean", y = "Site-specific mean") +
   theme_minimal(base_size = 10)
 pB <- ggplot(af, aes(orientation)) +
   geom_histogram(binwidth = .25, fill = "grey50", colour = "white") +
   geom_vline(xintercept = 3, linetype = 2, colour = "grey40") +
   labs(title = "Single composite framing",
-       subtitle = "Higher = pro site-specific",
-       x = "Site-specific orientation (8-item mean)", y = "Anglers") +
+       subtitle = "Higher value = site-specific support",
+       x = "Site-specific mean", y = "Number respondents") +
   theme_minimal(base_size = 10)
 pA + pB
+
 ```
 
-**Recommendation.** The evidence supports retaining **two correlated policy
-scales** rather than a single composite. Beyond the statistical case, the
-two-scale representation preserves the most managerially interesting group—the
-anglers who simultaneously value local tailoring and worry about complexity—who
-are otherwise erased. The composite remains available (encoded as
-`reg_orientation`) for occasions that call for a single summary number, with the
-caveat that it compresses a genuinely two-dimensional attitude.
+The evidence supports retaining two policy scales (site-specific and simplification) rather than a single composite. Beyond the statistical case, the two-scale representation preserves the most interesting group, the anglers who simultaneously value local tailoring and worry about complexity, who are otherwise erased. The composite scale can remain available for occasions that call for a single summary number, with the caveat that it compresses a genuinely  two-dimensional attitude.
 
 # Discussion
 
-## Self-rated comprehension and the policy quadrants
+## Interaction of comprehension and policy scales
 
 To connect the comprehension scale to the policy debate, respondents were
-cross-classified at the scale midpoints (3.0) into four quadrants: *Site-specific
-only*, *Statewide only*, *Wants both* (high on both), and *Neither* (low on both).
+split at the scale midpoints (3.0) into four quadrants: Site-specific
+only, Simplification only, Wants both (high on both), and Neither (low on both).
 A multinomial logistic regression predicting quadrant membership from
-comprehension (Table 4, Figure 3) shows a strong, monotonic gradient
+comprehension (Table 4, Figure 4) shows a strong, monotonic gradient
 (likelihood-ratio χ²(`r an_base["comprehension","Df"]`) =
 `r round(an_base["comprehension","LR Chisq"], 1)`, *p* < .001).
 
 ```{r regdev_multinom}
-CreateFlex(or_tab[, c("Contrast","OR_unadjusted","CI95")])
+
+or_tab |>
+  dplyr::mutate(`Odds Ratio` = paste0(OR_unadjusted, " ", CI95)) |>
+  dplyr::select(Contrast, `Odds Ratio`) |>
+  CreateFlex()
+
 ```
 
 *Table 4. Odds ratios for a one-point increase in comprehension, relative to the
 "Wants both" reference group.*
 
-```{r regdev_box, fig.cap="Figure 3. Regulation comprehension by policy quadrant (red point = mean).", fig.width=7, fig.height=4.5}
+```{r regdev_box, fig.cap="Figure 4. Mean comprehension by policy quadrant.  Error bars represent 95% confidence interval.", fig.width=7, fig.height=4.5}
+
 af |>
   dplyr::mutate(quad = factor(quadrant,
     levels = c("Statewide only","Neither","Wants both","Site-specific only"))) |>
   ggplot(aes(quad, comprehension)) +
-  geom_boxplot(outlier.alpha = .15, width = .5) +
-  stat_summary(fun = mean, geom = "point", colour = "#b2182b", size = 2) +
-  labs(x = NULL, y = "Comprehension / confidence (mean of Items E, G, H)") +
+  stat_summary(fun.data = mean_cl_normal, geom = "errorbar", width = 0.15) +
+  stat_summary(fun = mean, geom = "point", size = 2.5) +
+  labs(x = NULL, y = "Comprehension scale mean") +
   theme_minimal(base_size = 11)
+
 ```
 
 Each one-point rise in comprehension nearly doubles the odds of being
-*Site-specific only* rather than *Wants both*
-(OR = `r or_tab$OR_unadjusted[or_tab$Contrast=="Site-specific only vs Wants both"]`)
-and sharply lowers the odds of being *Statewide only*
+"Site-specific only" rather than "Wants both" (OR = `r or_tab$OR_unadjusted[or_tab$Contrast=="Site-specific only vs Wants both"]`)
+and sharply lowers the odds of being "Statewide only"
 (OR = `r or_tab$OR_unadjusted[or_tab$Contrast=="Statewide only vs Wants both"]`).
-**For managers and administrators, this is the actionable finding:** support for
-the more complex, locally tailored regulatory approach rises with anglers'
+For fishery managers, the actionable finding is that support for
+more complex, locally tailored regulations rises with anglers'
 confidence that they understand the rules. Investments that make regulations
-easier to find, read, and apply are therefore not merely a customer-service
-nicety—they plausibly expand the constituency comfortable with the
-site-specific management that biologists often need. The relationship is
-cross-sectional and should not be read causally, but its size and consistency
-make comprehension a natural lever to monitor and test.
+easier to find, read, and apply are therefore not merely a customer-service function but may plausibly expand the constituency comfortable with the
+site-specific management that biologists often need.
 
 ## Fishing avidity and species preference
 
-A reasonable concern is that the comprehension–policy link is a by-product of
-how much or what people fish. Adding fishing avidity (log of total days fished
+A reasonable consideration is that the comprehension–policy link is a by-product of
+how much or for what people fish. Adding fishing avidity (log of total days fished
 in 2025) and target-species preference to the model leaves the comprehension
 effect essentially unchanged (Table 5): the adjusted odds ratios match the
 unadjusted ones to two decimals, and comprehension remains the dominant term
@@ -508,24 +549,71 @@ unadjusted ones to two decimals, and comprehension remains the dominant term
 `r round(an_full["comprehension","LR Chisq"], 1)`, *p* < .001).
 
 ```{r regdev_adjust}
-CreateFlex(or_tab[, c("Contrast","OR_unadjusted","OR_adjusted")])
+
+or_tab |>
+  dplyr::select(Contrast, `Odds ratio - original` = OR_unadjusted, `Odds ration - adjusted` = OR_adjusted) |>
+  CreateFlex()
+
 ```
 
 *Table 5. Comprehension odds ratios before and after adjusting for avidity and
 species preference.*
 
 The two covariates behave differently from one another. Fishing avidity is
-**not** associated with policy quadrant
-(LR χ²(`r an_full["avidity_log","Df"]`) =
+not associated with policy quadrant in the multinomial model (LR χ²(`r an_full["avidity_log","Df"]`) =
 `r round(an_full["avidity_log","LR Chisq"], 1)`,
 *p* = `r round(an_full["avidity_log","Pr(>Chisq)"], 2)`): how often an angler
-fishes does not predict where they stand. Species preference **is** associated
+fishes does not predict where they stand.  However Species preference is associated
 (LR χ²(`r an_full["fishpref","Df"]`) =
 `r round(an_full["fishpref","LR Chisq"], 1)`, *p* < .001), though the practical
-differences are modest; most groups fall within a few points of one another.
-The clearest departure is among **trout anglers**, who lean toward statewide regulation
-more than other groups—a pattern worth noting for managers given the
+differences are modest; most groups fall within a few points of one another (Figure 5).
+The clearest departure is among trout anglers, who lean toward simplified regulations
+more than other groups (Figure 5).  This pattern is worth noting for managers given the
 site-specific nature of much of Nebraska's trout management.
+
+```{r regdev_specpref, fig.cap="Figure 5. Policy quadrant membership by target species preference (anglers with missing or unspecified species preference excluded), sorted by proportion in the Statewide-only quadrant. Trout anglers (outlined) show the strongest lean toward simplifed regulations.", fig.width=7, fig.height=4.5}
+
+plot_df <- af |>
+  dplyr::filter(!fishpref %in% c("Missing", "Other species")) |>
+  dplyr::mutate(
+    fishpref = dplyr::if_else(
+      fishpref == "I do not prefer any particular type of fish",
+      "No preference", fishpref),
+    quadrant = factor(quadrant,
+      levels = c("Statewide only","Neither","Wants both","Site-specific only"))
+  ) |>
+  dplyr::count(fishpref, quadrant) |>
+  dplyr::group_by(fishpref) |>
+  dplyr::mutate(pct = n / sum(n)) |>
+  dplyr::ungroup()
+
+sp_order <- plot_df |>
+  dplyr::filter(quadrant == "Statewide only") |>
+  dplyr::arrange(pct) |>
+  dplyr::pull(fishpref)
+
+plot_df |>
+  dplyr::mutate(
+    fishpref = factor(fishpref, levels = sp_order),
+    is_trout = fishpref == "Trout"
+  ) |>
+  ggplot(aes(pct, fishpref, fill = quadrant, color = is_trout, linewidth = is_trout)) +
+  geom_col(width = 0.7) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1), expand = c(0, 0)) +
+  scale_fill_manual(values = c(
+    "Statewide only"     = "#d6604d",
+    "Neither"            = "#f4a582",
+    "Wants both"         = "#92c5de",
+    "Site-specific only" = "#2166ac"),
+    name = NULL) +
+  scale_color_manual(values = c("TRUE" = "black", "FALSE" = NA), guide = "none") +
+  scale_linewidth_manual(values = c("TRUE" = 0.8, "FALSE" = 0), guide = "none") +
+  labs(x = "Proportion of anglers", y = NULL) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom",
+        panel.grid.major.y = element_blank())
+
+```
 
 Demographically, the "wants both" segment is unremarkable. It does not differ
 from other anglers in residency
@@ -535,46 +623,44 @@ from other anglers in residency
 *p* = `r round(gen_t$p, 2)`; *V* = `r round(gen_t$v, 3)`), and is only
 trivially older (median `r age_med["Wants both"]` vs `r age_med["Other"]` years;
 Wilcoxon *p* = `r round(age_w$p.value, 3)`, rank-biserial *r* =
-`r round(age_rrb, 2)`). The ambivalence is broad-based rather than confined to
-any subgroup, which argues against treating it as a niche position.
+`r round(age_rrb, 2)`).
+Because the "wants both" segment is demographically unremarkable, the appetite for both flexibility and simplicity should be understood as a mainstream attitude rather than a position of any demographic subgroup.  Coupled with the comprehension scale relationships, support of this group for site-specific regulations also appears to be mallable with education and enforcement actions.
 
 ## Standalone Item C
 
 Item C ("Anglers are willing to follow complex regulations to produce
 high-quality fisheries") was excluded from the scales because it failed to load
-cleanly on any factor. Its behavior is nonetheless informative, and because it
-speaks to a stated *behavioral* willingness rather than a policy preference, it
-is worth examining as an external correlate of the derived scales.
+cleanly on any factor. While it doesn't factor into the three scales presented, its responses are still worth examining outside of scale developement because it speaks to a stated behavioral willingness rather than a policy preference.
 
 ```{r regdev_q31c}
+
 af$Q31c <- reg_cc$Q31c
 q31c_tab <- af |>
   dplyr::group_by(quadrant) |>
   dplyr::summarise(n = dplyr::n(),
                    Mean = round(mean(Q31c), 2),
-                   SD = round(sd(Q31c), 2), .groups = "drop") |>
+                   me = qt(0.975, dplyr::n() - 1) * sd(Q31c) / sqrt(dplyr::n()),
+                   `95% CI` = sprintf("%.2f \u00b1 %.2f", Mean, round(me, 2)),
+                   .groups = "drop") |>
+  dplyr::select(-me) |>
   dplyr::arrange(dplyr::desc(Mean))
 kw <- kruskal.test(Q31c ~ quadrant, data = af)
 sp <- sapply(af[c("comprehension","site_score","uniform_score","orientation")],
              function(x) round(cor(af$Q31c, x, method = "spearman"), 2))
 CreateFlex(as.data.frame(q31c_tab))
+
 ```
 
-*Table 7. Mean agreement with Item C by policy quadrant (1 = strongly disagree,
-5 = strongly agree).*
+*Table 7. Mean agreement with Item C by policy quadrant.*
 
 Agreement with Item C is unevenly distributed across the quadrants
 (Kruskal-Wallis χ²(`r kw$parameter`) = `r round(kw$statistic, 1)`, *p* < .001;
-Figure 5). It is highest among the *Site-specific only* group
-(`r q31c_tab$Mean[q31c_tab$quadrant=="Site-specific only"]`) and lowest among
-the *Statewide only* group
+Figure 7). It is highest among the Site-specific only group (`r q31c_tab$Mean[q31c_tab$quadrant=="Site-specific only"]`) and lowest among the Statewide only group
 (`r q31c_tab$Mean[q31c_tab$quadrant=="Statewide only"]`). Consistent with this,
-Item C correlates positively with both the comprehension scale
-(Spearman ρ = `r sp["comprehension"]`) and the site-specific support scale
-(ρ = `r sp["site_score"]`), and weakly negatively with statewide preference
-(ρ = `r sp["uniform_score"]`).
+Item C correlates positively with both the comprehension scale (Spearman ρ = `r sp["comprehension"]`) and the site-specific scale (ρ = `r sp["site_score"]`), and weakly negatively with simplification (ρ = `r sp["uniform_score"]`).
 
-```{r regdev_q31c_fig, fig.cap="Figure 5. Mean agreement with Item C by policy quadrant (bars are 95% confidence intervals).", fig.width=7, fig.height=4}
+```{r regdev_q31c_fig, fig.cap="Figure 7. Mean agreement with Item C by policy quadrant.  Error bars represent 95% confidence intervals.", fig.width=7, fig.height=4}
+
 af |>
   dplyr::mutate(quad = factor(quadrant,
     levels = c("Statewide only","Neither","Wants both","Site-specific only"))) |>
@@ -584,41 +670,54 @@ af |>
   ggplot(aes(quad, m)) +
   geom_point(size = 2) +
   geom_errorbar(aes(ymin = m - 1.96*se, ymax = m + 1.96*se), width = .15) +
-  labs(x = NULL, y = "Mean agreement with Item C (1-5)") +
+  labs(x = NULL, y = "Item C mean") +
   theme_minimal(base_size = 11)
+
 ```
 
 This dual association explains why Item C resisted assignment to a single factor:
 it draws simultaneously on feeling competent with the rules and on valuing
 locally tailored management, the two constructs that the exploratory analysis
-kept distinct. Substantively, Item C functions less like a scale indicator than
-like a downstream attitude the scales help account for. **For managers, the
-implication is direct and encouraging:** the anglers most willing to comply with
-complex, site-specific rules in pursuit of better fishing are precisely those
+kept distinct. Item C functions less like a scale indicator than
+like a downstream attitude the scales help account for. For fishery managers, the
+implication is direct and encouraging. The anglers most willing to comply with
+complex, site-specific rules in pursuit of better fishing are those
 who understand the regulations and already endorse tailored management. This
 reinforces the earlier conclusion that improving regulatory comprehension is a
 plausible route not only to broader acceptance of site-specific regulation but
-to greater willingness to follow it. As with the other correlational results,
-the cross-sectional design precludes causal claims.
+to greater willingness to follow it. However, this is a single item and repeated measures on future application of this instrument may be needed to confirm this construct.
 
 ## Population sizes of the quadrants
 
 Finally, the quadrants were projected to the licensed-angler population using
-the survey raking weights (post-stratified on age group and residency). A
+the survey respondant weights (post-stratified on age group and residency; Hurley 2026). A
 design-based estimator (Taylor-linearized standard errors) yields the weighted
-prevalences and 95% confidence intervals in Table 6 and Figure 4. Weighting
+prevalences and 95% confidence intervals in Table 6 and Figure 6. Weighting
 shifts the estimates only slightly relative to the raw sample, indicating that
-attitude composition is not strongly confounded with the age/residency margins
-used in raking.
+attitude composition is not strongly confounded with the age or residency margins
+used in weighting.
 
 ```{r regdev_weighted}
-CreateFlex(wtab)
+
+wtab |>
+  dplyr::mutate(
+    p_uw = `Unweighted %` / 100,
+    n_tot = sum(table(af$quadrant)),
+    `Unweighted %` = sprintf("%.1f \u00b1 %.1f", `Unweighted %`,
+                              round(1.96 * sqrt(p_uw * (1 - p_uw) / n_tot) * 100, 1)),
+    `Weighted %`   = sprintf("%.1f \u00b1 %.1f", `Weighted %`,
+                              round((100*wci[,2] - 100*wci[,1]) / 2, 1))
+  ) |>
+  dplyr::select(Quadrant, `Unweighted %`, `Weighted %`) |>
+  CreateFlex()
+
 ```
 
 *Table 6. Unweighted and weighted (raked) quadrant prevalence with design-based
 95% confidence intervals.*
 
-```{r regdev_wbar, fig.cap="Figure 4. Weighted population prevalence of the four policy quadrants (design-based 95% CIs).", fig.width=7, fig.height=4}
+```{r regdev_wbar, fig.cap="Figure 6. Weighted population prevalence of the four policy quadrants (design-based 95% CIs).", fig.width=7, fig.height=4}
+
 data.frame(Quadrant = factor(levels(af$quadrant), levels = levels(af$quadrant)),
            est = 100*as.numeric(coef(wp)),
            lo  = 100*wci[,1], hi = 100*wci[,2]) |>
@@ -627,51 +726,46 @@ data.frame(Quadrant = factor(levels(af$quadrant), levels = levels(af$quadrant)),
   geom_errorbar(aes(ymin = lo, ymax = hi), width = .2) +
   labs(x = NULL, y = "Weighted % of anglers") +
   theme_minimal(base_size = 11)
+
 ```
 
-Roughly **`r round(wtab$"Weighted %"[wtab$Quadrant=="Site-specific only"])`%**
+Roughly `r round(wtab$"Weighted %"[wtab$Quadrant=="Site-specific only"])`%
 of Nebraska anglers endorse site-specific regulation without favoring
 statewide regulation, while a comparable
-**`r round(wtab$"Weighted %"[wtab$Quadrant=="Wants both"])`%** want both
+`r round(wtab$"Weighted %"[wtab$Quadrant=="Wants both"])`% want both
 simplicity and local tailoring. Only about
-**`r round(wtab$"Weighted %"[wtab$Quadrant=="Statewide only"])`%** prefer
-statewide regulation alone. For decision-makers, the headline is that outright opposition
-to site-specific regulation is a minority position, but a plurality of anglers
-hold the more nuanced "both" view—suggesting that communication emphasizing
-*why* particular waters carry particular rules, paired with genuine effort to
-keep the overall system legible, is likely to resonate more broadly than either
-pure simplification or unexplained complexity.
+`r round(wtab$"Weighted %"[wtab$Quadrant=="Statewide only"])`% prefer
+statewide regulations alone. For decision-makers, the message is that outright opposition
+to site-specific regulation is a minority position, but another group of anglers
+hold the more nuanced "both" view which suggests that communication emphasizing
+why particular waters carry particular regulations, paired with genuine effort to
+keep the overall system comprehendible, and adaquate education and enforcement actions are likely to resonate more broadly than either pure simplification or unexplained complexity.
 
 ## Limitations
 
-Several limitations qualify these results. First, the data are
-**cross-sectional**: comprehension, policy preference, and their correlates were
-measured at a single point, so the associations reported here—most importantly
-the comprehension–policy gradient—describe co-occurrence rather than cause.
-Higher comprehension may foster openness to complexity, anglers predisposed
-toward site-specific management may simply invest more in learning the rules, or
-both may share a common driver such as engagement or experience; this design
-cannot adjudicate among them. Second, target-species preference (B1) was
-**missing for roughly 31% of the analytic sample**. Missing cases were retained
-as their own category to preserve power and avoid list-wise loss, but if that
-missingness is related to species choice the fish-preference estimates could be
-biased; the central comprehension finding does not depend on B1 and is
-unaffected. Third, the analysis rests on a **single survey year (2025)**, so the
-scale structure and prevalence estimates should be treated as provisional;
-confirmatory cross-validation in a future administration would be needed to
-establish measurement invariance over time and confirm the three-factor
-solution is stable rather than sample-specific. Finally, scale scores were
-formed as unit-weighted item means, a deliberate and transparent simplification
-rather than latent-variable scores; modest departures from equal item weighting
-would not materially change the substantive conclusions.
+Some limitations could apply to these results. The scales derived in this study including comprehension, site-specific preference, simplification preference, and their combinations were measured in a single cross-sectional effort.  It is possible that the associations found can be purely correlative here and should taken as informative but not as causational.  Higher comprehension may foster openness to complexity, or anglers predisposed
+toward site-specific management may simply invest more in learning the rules, or both may be true.  Anglers may share a common driver such as engagement or experience or education and this analysis cannot differentiate among them.
+These results also rely on stated versus realized preferences.  Any given respondant may score highly on site-specific or simplified scales, yet when faced with a concrete regulation implimentation may exhibit a different realized response driven by situation specfic parameters.  Results presented reflect population analysis of generalized, stated opinions and preferences
+The analysis also rests on a single survey year (2025) and angler population sampling so the scale structure and prevalence estimates should be treated as provisional or potentially transitional,  Confirmatory cross-validation in a future survey efforts would be needed to establish measurement over time and confirm the three-factor solution is stable rather than sample-specific.
 
 # Implications
 
-#Appendices
+## Fisheries regulations
+
+From a broad persepective, 2025 LAS respondants expressed more support for site-specific approaches over simplified, regional approaches to regulating fisheries.  However, the smaller, no inconsequential amount of respondents that did favor simplified regulations indicates that that discontent may be expressed regardless of approach used.  The tipping point for policy application appears to lie with a sizable portion of respondants who are willing to support either approach.  The critical consideration to move respondants towards site-specific regulations appears to be the ability to comprehend both the regulations themselves and the logic behind them as well as trust in the managers that set the recommendations.  With proper educational and outreach efforts, this large, middle-group of respondants will likely lend the support needed for any regulation change or implementation.
+
+## Scale development.
+
+The simplification preference scale warrants attention in future survey iterations: all five of its items are negatively worded (reversed), meaning angler agreement consistently signals preference for simpler, statewide rules. While the scale performs reliably (ω = `r rel_tbl[rel_tbl$Scale == "Simplification preference", "McDonald omega"]`), all-same-direction item blocks are susceptible to acquiescence bias — a tendency to agree with statements regardless of content. Future development should introduce positively worded counterparts to create a more balanced item pool.  Additionally, additional questions to complement Item C could help create a useful fourth scale looking at perception of angler behaviors.
+
+While they score well on factor loading and consistance, the comprehension and site-specific scales are also relatively narrow at three items. Broadening it with additional items tapping angler confidence with specific regulatory formats and additional site-specific examples may improve not on cosmetic balance but also content coverage providing a more stable platform for longitudinal monitoring.
+
+# Appendex A
 
 `r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
 
 ```{r Q31_percentA}
+
 myFields<-d %>% dplyr::select(contains("Q31")) %>% select(-contains("Answered")) %>% names()
 op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
   tempD<-data.frame(Item=myFields[i], CreateTableA_selectOne_percent(d %>% filter(!is.na(get(myFields[i]))), myFields[i]), check.names = FALSE)
@@ -681,11 +775,13 @@ op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
 op<-MarkReversedItems(op, q, 2025, responseField="Item")
 op<-op %>% dplyr::rename(Statement = Item, Item = ItemLetter) %>% dplyr::relocate(Item, Statement)
 CreateFlex(op, mergeOnFirst = TRUE, firstColLabel = TRUE)
+
 ```
 
 `r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
 
 ```{r Q31_percentB}
+
 myFields<-d %>% dplyr::select(contains("Q31")) %>% select(-contains("Answered")) %>% names()
 op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
   tempD<-data.frame(Item=myFields[i], CreateTableB_selectOne_percent(d %>% filter(!is.na(get(myFields[i]))), myFields[i]), check.names = FALSE)
@@ -695,11 +791,13 @@ op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
 op<-MarkReversedItems(op, q, 2025, responseField="Item")
 op<-op %>% dplyr::rename(Statement = Item, Item = ItemLetter) %>% dplyr::relocate(Item, Statement)
 CreateFlex(op, mergeOnFirst = TRUE, firstColLabel = TRUE)
+
 ```
 
 `r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
 
 ```{r Q31_means}
+
 myFieldsQ31<-d %>% dplyr::select(contains("Q31")) %>% select(-contains("Answered")) %>% names()
 tblA<-CreateTableA_means(d, myFieldsQ31)
 tblA$Item<-toupper(sub("^Q31", "", as.character(tblA$Response)))
@@ -707,16 +805,28 @@ tblA<-SubstitueQuesForResponse(tblA, q, Q31, 2025)
 tblA<-MarkReversedItems(tblA, q, 2025)
 tblA<-tblA %>% dplyr::rename(Statement = Response) %>% dplyr::relocate(Item, Statement)
 CreateFlex(tblA, firstColLabel = TRUE)
-```
 
+```
 
 `r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
 
 ```{r}
+
 tblB<-CreateTableB_means(d, myFieldsQ31)
 tblB$Item<-toupper(sub("^Q31", "", as.character(tblB$Response)))
 tblB<-SubstitueQuesForResponse(tblB, q, Q31, 2025)
 tblB<-MarkReversedItems(tblB, q, 2025)
 tblB<-tblB %>% dplyr::rename(Statement = Response) %>% dplyr::relocate(Item, Statement)
 CreateFlex(tblB, firstColLabel = TRUE)
+
 ```
+
+# References
+
+Bureau of Soci0logical Research. 2026. Fishing Nebraska 2025-2026 Methodology Report. University of Nebraska-Lincoln.
+Hu, L. T., & Bentler, P. M. (1999). Cutoff criteria for fit indexes in covariance structure analysis: Conventional criteria versus new alternatives. Structural Equation Modeling, 6(1), 1–55.
+Hurley, Keith. 2026. 2026 Nebraska Licensed Angler Survey - Respondents and Responses. Nebraska Game and Parks Commission. (Hurley 2026).
+Kaiser, H. F. (1974). An index of factorial simplicity. Psychometrika, 39(1), 31–36.
+McDonald, R. P. (1999). Test theory: A unified treatment. Lawrence Erlbaum Associates.
+McNeish, D. (2018). Thanks coefficient alpha, we'll take it from here. Psychological Methods, 23(3), 412–433.
+Nunnally, J. C., & Bernstein, I. H. (1994). Psychometric theory (3rd ed.). McGraw-Hill.
