@@ -1,0 +1,1239 @@
+2018 Nebraska Licensed Angler Survey
+                   Trends
+
+              March 26, 2020
+
+Director:                                   Jim Douglas
+Fisheries Administrator:               Dean Rosenthal
+Fisheries Research Administrator:  Dr. Richard Holland
+Fish and Wildlife Specialist:
+                                           Keith Hurley
+Table of Contents
+
+      Did You Fish................................................................................................................................................... 5
+      Why Didn't You Fish ................................................................................................................................... 6
+      Waterbody Types ........................................................................................................................................ 7
+      Methods........................................................................................................................................................... 8
+      Techniques ..................................................................................................................................................... 9
+      Favorite Waterbody Distance .............................................................................................................. 10
+      Most-Visited Waterbody Distance ..................................................................................................... 10
+      Satisfaction.................................................................................................................................................. 11
+      Park Entry Permit..................................................................................................................................... 13
+      Conservation Officer................................................................................................................................ 14
+      Preferred Fish ............................................................................................................................................ 15
+      Fish Sought.................................................................................................................................................. 18
+      Harvest By Species ................................................................................................................................... 21
+      Days Fished ................................................................................................................................................. 26
+      Angler Motivations................................................................................................................................... 39
+      Angler Attitudes ........................................................................................................................................ 46
+      Information Sources ................................................................................................................................ 52
+                                                                                                                                4
+
+This report contains trend comparisons for questions in the 2018 Nebraska Licensed
+Angler Survey (LAS) that were also included in the 2002 and 2012 Nebraska Licensed
+Angler Surveys. Details on the design and administration of the LAS (conducted by the
+University of Nebraska ­ Lincoln Bureau of Sociological Research (BOSR)) can be found in
+the companion report titled "Fishing Nebraska Report" prepared by BOSR. Information on
+the responses and returns of the LAS can be found in the companion report titled "2018
+Licensed Angler Survey: Methods and Responses." Information on the methods, responses,
+and results of the 2002 and 2012 surveys can be found in previous NGPC reports.
+
+A copy of the LAS is provided in the appendices of this report. Tabular, and in many cases
+graphical, results are given for each question of the LAS that was included in the two
+previous surveys. Available responses were generally consistent across surveys with a few
+exceptions (Waterbody Types, Methods, Why Didn't Fish, and Information Sources). No
+other discussion or further analysis are provided in this report. Interpretations and
+conclusions regarding the trends are left to the reader.
+                                                                                         5
+
+Did You Fish
+
+Did you fish in Nebraska during 2018? Values represent percentage of respondents +- 95%
+confidence intervals with sample size given in parenthesis.
+
+Response  Value CI       2002    Value CI       2012   Value CI       2018
+                             N                      N                     N
+No            16.9 1.97              12.2 0.71             17.6 1.37
+                            234                 1,002                    526
+                                                                                                             6
+
+Why Didn't You Fish
+
+If NO, why didn't you fish in Nebraska during 2018? Values represent percentage of
+respondents +- 95% confidence intervals with sample size given in parenthesis.
+
+Response                              Value CI       2002     Value CI       2012    Value CI       2018
+                                                         N                       N                      N
+Lack of time                              58.7 6.46               52.5 3.14              56.2 4.22
+Dissatisfied with past fishing trips       8.1 3.58     131        7.9 1.70     509       5.8 1.98     300
+No one to fish with                        3.1 2.29      18        5.2 1.39      77       4.0 1.66      31
+Lack of access to fishing areas            4.0 2.58        7       3.8 1.21      50       3.8 1.62      22
+Too expensive                              6.7 3.29        9       2.3 0.94      37       6.9 2.16      21
+Physically unable to fish                  2.7 2.12      15        3.7 1.19      22       4.3 1.72      37
+No longer enjoy fishing                    1.3 1.51        6       2.8 1.04      36       1.2 0.91      23
+Other                                                      3       7.3 1.64      27                       7
+Waters too crowded                        15.2 4.72      34                      71      14.9 3.03      80
+Complicated regulations                                           13.5 2.15               1.1 0.89        6
+                                                                   1.0 0.64     131       1.9 1.17      11
+                                                                                 10
+                                                                                               7
+
+Waterbody Types
+
+What types of water bodies did you fish in Nebraska during 2018? (select all that apply)
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+                                                            2002                2012                 2018
+                                                      CI N                                     CI N
+Response                                   Value                  Value     CI  N       Value
+                                                     1.67 105
+City park ponds                                 9.2                   16.4  0.85 1,183
+Lakes and Reservoirs
+Missouri River                             16.6 2.16 190          17.1 0.87 1,233       85.0 1.42 2,079
+Open fields and waters lakes/ponds                                20.0 0.92 1,444       15.3 1.43 374
+Open fields and waters rivers/streams
+Other public lakes, reservoirs, and ponds  80.4 2.30 919           7.2 0.60 517         21.7 1.63 531
+Other streams, rivers, and canals          24.0 2.48 274          73.8 1.01 5,325       10.2 1.20 250
+Platte River                               10.1 1.74 115          16.8 0.86 1,213       51.8 1.98 1,268
+Ponds and sandpits
+Private ponds and sandpits                 41.0 2.85 469           9.8 0.69 705         11.7 1.27 286
+Public sandpits                            11.4 1.84 130
+Sandhill lakes                             17.5 2.20 200          37.4 1.12 2,698
+                                                                   8.9 0.66 643
+
+                                                                  11.8 0.74 853
+                                                                                          8
+
+Methods
+
+Which methods of fishing did you use during 2018? Values represent percentage of
+respondents +- 95% confidence intervals with sample size given in parenthesis.
+
+Response            Value CI       2002    Value CI       2012    Value CI        2018
+                                       N                      N                       N
+Bank/wading             75.1 2.48              76.0 0.98              81.1 1.54
+Float tube               3.3 1.03     875       3.5 0.42  5,507        1.7 0.50   2,005
+Ice fishing                            39                    251                      42
+Kayak/Canoe             17.7 2.19              14.6 0.81              20.5 1.59
+Motorized boat                        206                 1,057       15.0 1.41      508
+Non-motorized boat                             62.5 1.11              56.1 1.96      371
+Other               67.0 2.70      781         12.5 0.76  4,527                   1,386
+Wading                                                       907       4.7 0.83      116
+                    12.6 1.91      147          1.4 0.27     102       1.8 0.52
+                                               14.3 0.81              14.0 1.37       44
+                    2.8 0.95       33                     1,035                      347
+                                                                                             9
+
+Techniques
+
+What techniques did you use during 2018? Values represent percentage of respondents +-
+95% confidence intervals with sample size given in parenthesis.
+
+Response              Value CI       2002     Value CI       2012    Value CI       2018
+                                         N                       N                      N
+Archery                    3.3 1.02                4.9 0.50               6.1 0.94
+Fly-fishing                8.7 1.61       38       9.9 0.69     352       8.1 1.08     152
+Other                      0.9 0.55     101        0.9 0.22     716       0.9 0.36     202
+Other                      1.1 0.60                1.6 0.29               1.2 0.42
+Rod & reel                98.9 0.60       11      98.4 0.29      64      98.8 0.42      22
+Set lines/limb lines       8.5 1.60       13       6.7 0.58     117       6.4 0.97      29
+Snagging                   1.8 0.76   1,154        2.6 0.37  7,122        2.3 0.59  2,445
+Surface spear              1.6 0.73       99       0.6 0.18     488       0.3 0.23     160
+Underwater spear           1.0 0.58       21       0.4 0.14     188       0.4 0.25      57
+                                          19
+                                          12                     43                       9
+                                                                 28                     10
+                                                                                              10
+
+Favorite Waterbody Distance
+
+About how far is the one-way distance from your residence to your favorite Nebraska
+water body? Values represent lower 95% median confidence limit, median response, and
+upper 95% median confidence limit with sample size given in parenthesis Answers
+included: 10 or less miles, 11 to 20 miles, 21 to 40 miles, 41 to 60 miles, 61 to 100 miles,
+101 to 250 miles, 251 to 500 miles, and Over 500 miles.
+
+       2002                  2012                  2018
+
+Value  CI N           Value  CI N           Value  CI N
+
+50.5 50.5/375.5 1137  50.5 50.5/375.5 7181  30.5 30.5/375.5 2518
+
+Most-Visited Waterbody Distance
+
+About how far is the one-way distance from your residence to your most visited Nebraska
+water body? Values represent percentage of respondents +- 95% confidence intervals with
+sample size given in parenthesis. Answers included: 10 or less miles, 11 to 20 miles, 21 to
+40 miles, 41 to 60 miles, 61 to 100 miles, 101 to 250 miles, 251 to 500 miles, and Over 500
+miles.
+
+       2002                  2012                  2018
+
+Value  CI N           Value  CI N           Value  CI N
+
+30.5 30.5/175.5 1161  30.5 30.5/175.5 7236  30.5 30.5/175.5 2551
+                                                                                            11
+
+Satisfaction
+
+How satisfied were you with your fishing experiences in Nebraska during 2018? Values
+represent percentage of respondents +- 95% confidence intervals with sample size given in
+parenthesis. Answers included (from 1 to 5): Very Satisfied, Somewhat Satisfied, Neutral,
+Somewhat Dissatisfied, and Very Dissatisfied.
+
+Response               Value CI       2002    Value CI       2012    Value CI       2018
+                                          N                      N                      N
+Very satisfied             16.4 2.13              25.0 1.00              25.3 1.72
+Somewhat satisfied         39.8 2.82     190      42.2 1.14  1,810       37.8 1.92     622
+Neutral                    18.6 2.24     461      17.6 0.88  3,054       21.6 1.63     929
+Somewhat dissatisfied      18.4 2.23     215      11.4 0.73  1,275       11.1 1.24     531
+Very dissatisfied                        213                                           274
+                            6.7 1.44               3.8 0.44     829       4.2 0.79     104
+                                          78                    276
+                                                                             12
+
+Response  Value CI       2002   Value CI       2012   Value CI       2018
+                             N                     N                     N
+A9             2.6 0.07              2.3 0.02              2.3 0.04
+                         1,157                 7,244                  2,459
+                                                                                      13
+
+Park Entry Permit
+
+Did you fish at a water body that required a Nebraska Park Entry Permit during 2018?
+Values represent mean response +- 95% confidence intervals with sample size given in
+parenthesis.
+
+Response  Value CI       2002    Value CI       2012   Value CI       2018
+                             N                      N                     N
+Yes           73.1 2.56              72.4 1.03             68.6 1.75
+No            26.9 2.56     845      27.6 1.03  5,194      31.4 1.75   1,847
+                            311                 1,980                    845
+                                                                                     14
+
+Conservation Officer
+
+Were you checked by a Nebraska conservation officer wearing a sidearm while fishing
+during 2018? Values represent percentage of respondents +- 95% confidence intervals
+with sample size given in parenthesis.
+
+Response  Value CI       2002    Value CI       2012   Value CI       2018
+                             N                      N                     N
+Yes           19.1 2.12              14.7 0.78             15.9 1.44
+No            80.9 2.12     251      85.3 0.78  1,180      84.1 1.44     398
+                         1,066                  6,838                  2,099
+                                                                                                   15
+
+Preferred Fish
+
+Which type of fish do you prefer to fish for in Nebraska? Values represent percentage of
+respondents +- 95% confidence intervals with sample size given in parenthesis.
+
+Response                   Value CI       2002     Value CI       2012     Value CI       2018
+                                              N                       N                       N
+Striped bass                    0.3 0.37                0.1 0.09                0.4 0.28
+Wiper                           1.3 0.74        3       1.3 0.27        9       1.0 0.45        7
+White bass                      3.7 1.23      12        2.5 0.38      84        2.5 0.72       18
+Largemouth bass                18.7 2.53      34       18.5 0.94     161       21.1 1.89       45
+Smallmouth bass                 1.2 0.71     171        1.1 0.26  1,208         1.2 0.50     379
+Bluegill / Sunfish              2.6 1.04      11        2.2 0.36      75        3.2 0.81       22
+Crappie                         6.8 1.63      24        9.0 0.69     144       10.0 1.39       58
+Yellow perch                    1.4 0.77      62        1.2 0.27     586        1.4 0.55     180
+Walleye / Sauger               30.9 2.99      13       30.4 1.11      80       22.3 1.93       26
+Northern pike                   2.7 1.06     282        2.5 0.38  1,991         2.1 0.66     401
+Muskellunge / Tiger musky                     25        0.3 0.14     162        0.6 0.35       37
+Channel catfish                                        10.6 0.74      21        9.8 1.38       11
+Blue catfish               12.9 2.17      118           0.7 0.21     691        0.8 0.40     176
+Flathead catfish                                        2.3 0.36      48        1.7 0.59       14
+Bullhead                   0.3 0.37       3             0.3 0.13     149        0.2 0.23       30
+Drum                                                    0.2 0.11      20
+Sturgeon                   1.8 0.85       16            0.0 0.03      14                        5
+Carp                                                    0.3 0.13
+Trout                      0.2 0.30       2             5.1 0.53        1
+Paddlefish                                              0.7 0.21      20
+I fished for anything      0.1 0.21       1            10.5 0.74     331
+Other                                                   0.1 0.07      49
+Asian Carp                                              0.1 0.09     686   0.1 0.14       2
+
+                           0.5 0.48       5                             5  0.2 0.21       4
+                                                                        9
+                           4.0 1.28       37                               3.6 0.86       65
+
+                           0.4 0.43       4                                0.7 0.37       12
+
+                           10.0 1.94      91                               16.8 1.73      302
+
+                                                                           0.2 0.23       5
+
+                                                                           0.2 0.21       4
+16
+                                                                                          17
+
+Which type of fish do you prefer to fish for in Nebraska? Values represent rank order of
+responses.
+
+Response                   2002 2012 2018
+
+Walleye / Sauger           1 (30.9%) 1 (30.4%) 1 (22.3%)
+Largemouth bass
+Channel catfish            2 (18.7%) 2 (18.5%) 2 (21.1%)
+I fished for anything
+Crappie                    3 (12.9%) 3 (10.6%) 5 (9.8%)
+Trout
+White bass                 4 (10%) 4 (10.5%) 3 (16.8%)
+Northern pike
+Bluegill / Sunfish         5 (6.8%)  5 (9%) 4 (10%)
+Flathead catfish
+Yellow perch               6 (4%) 6 (5.1%) 6 (3.6%)
+Wiper
+Smallmouth bass            7 (3.7%) 8 (2.5%) 8 (2.5%)
+Carp
+Paddlefish                 8 (2.7%) 7 (2.5%) 9 (2.1%)
+Striped bass
+Blue catfish               9 (2.6%) 10 (2.2%) 7 (3.2%)
+Bullhead
+Drum                       10 (1.8%) 9 (2.3%) 10 (1.7%)
+Muskellunge / Tiger musky
+Sturgeon                   11 (1.4%) 12 (1.2%) 11 (1.4%)
+Other
+Asian Carp                 12 (1.3%) 11 (1.3%) 13 (1%)
+
+                           13 (1.2%) 13 (1.1%) 12 (1.2%)
+
+                           14 (0.5%) 18 (0.3%) 20 (0.2%)
+
+                           15 (0.4%) 14 (0.7%) 15 (0.7%)
+
+                           16 (0.3%) 20 (0.1%) 17 (0.4%)
+
+                           17 (0.3%) 15 (0.7%) 14 (0.8%)
+
+                           18 (0.2%) 17 (0.3%) 18 (0.2%)
+
+                           19 (0.1%) 19 (0.2%)
+
+                                     16 (0.3%) 16 (0.6%)
+
+                                     23 (0%) 22 (0.1%)
+
+                                     22 (0.1%) 19 (0.2%)
+
+                                     21 (0.1%) 21 (0.2%)
+                                                                                                    18
+
+Fish Sought
+
+Which types of fish did you try to catch in Nebraska waters during 2018? Values represent
+percentage of respondents +- 95% confidence intervals with sample size given in
+parenthesis.
+
+                                      2002                 2012                            2018
+                                                               N                               N
+Response                   Value  CI  N     Value CI               Value CI
+                                                              110                               95
+Asian Carp                 9.7 1.71   112        1.5 0.28     963       3.9 0.77              635
+Blue catfish                                    13.3 0.78  3,251       26.2 1.75            1,443
+Bluegill / Sunfish         34.2 2.74  394       44.9 1.15     542      59.5 1.95              380
+Bullhead                                                      630      15.6 1.45              349
+Carp                       4.9 1.25   57         7.5 0.61  3,255       14.4 1.40            1,282
+Channel catfish                                  8.7 0.65  4,005       52.8 1.99            1,534
+Crappie                    9.0 1.65   104       45.0 1.15     436      63.2 1.92              264
+Drum                                            55.3 1.15  1,266       10.8 1.24              695
+Flathead catfish           39.6 2.82  456        6.0 0.55     626      28.6 1.80            1,046
+I fished for anything                           17.5 0.88  3,758       43.1 1.97            1,534
+Largemouth bass            46.4 2.88  535        8.6 0.65     226      63.2 1.92              213
+Muskellunge / Tiger musky                       51.9 1.15  1,384                              637
+Northern pike              3.5 1.06   40         3.1 0.40  1,157        8.8 1.13
+Other                                           19.1 0.91     195      26.3 1.75                85
+Paddlefish                 14.1 2.01  162       16.0 0.84  1,340                                67
+Smallmouth bass                                  2.7 0.37     561       3.5 0.73              792
+Striped bass               18.9 2.26  218       18.5 0.89               2.7 0.65              422
+Sturgeon                                         7.8 0.62      79      32.7 1.87                62
+Trout                      45.8 2.88  528        1.1 0.24  1,399       17.4 1.51              563
+Walleye / Sauger                                19.3 0.91  3,627        2.5 0.63            1,226
+White bass                 4.4 1.19   51        50.1 1.15  1,880       23.2 1.68              741
+Wiper                                           26.0 1.01  1,203       50.5 1.99              501
+Yellow perch               15.6 2.10  180       16.6 0.86  1,173       30.5 1.83              531
+                                                16.2 0.85              20.6 1.61
+                           1.7 0.75   20                               21.9 1.65
+
+                           3.6 1.07   41
+
+                           16.1 2.12  186
+
+                           8.8 1.63   101
+
+                           1.6 0.72   18
+
+                           13.5 1.97  155
+
+                           45.1 2.87  519
+
+                           23.4 2.44  269
+
+                           16.2 2.13  187
+
+                           14.4 2.03  166
+19
+                                                                                           20
+
+Which types of fish did you try to catch in Nebraska waters during 2018? Values represent
+rank order of responses.
+
+Response                   2002       2012  2018
+
+Crappie                    1 (46.4%) 1 (55.3%) 2 (63.2%)
+Largemouth bass
+Walleye / Sauger           2 (45.8%) 2 (51.9%) 1 (63.2%)
+Channel catfish
+Bluegill / Sunfish         3 (45.1%) 3 (50.1%) 5 (50.5%)
+White bass
+I fished for anything      4 (39.6%)  4 (45%) 4 (52.8%)
+Wiper
+Smallmouth bass            5 (34.2%) 5 (44.9%) 3 (59.5%)
+Northern pike
+Yellow perch               6 (23.4%)  6 (26%) 8 (30.5%)
+Flathead catfish
+Trout                      7 (18.9%) 16 (8.6%) 6 (43.1%)
+Blue catfish
+Carp                       8 (16.2%) 11 (16.6%) 14 (20.6%)
+Striped bass
+Bullhead                   9 (16.1%) 9 (18.5%) 7 (32.7%)
+Muskellunge / Tiger musky
+Paddlefish                 10 (15.6%) 8 (19.1%) 10 (26.3%)
+Drum
+Other                      11 (14.4%) 12 (16.2%) 13 (21.9%)
+Sturgeon
+Asian Carp                 12 (14.1%) 10 (17.5%) 9 (28.6%)
+
+                           13 (13.5%) 7 (19.3%) 12 (23.2%)
+
+                           14 (9.7%) 14 (13.3%) 11 (26.2%)
+
+                           15 (9%) 15 (8.7%) 17 (14.4%)
+
+                           16 (8.8%) 17 (7.8%) 15 (17.4%)
+
+                           17 (4.9%) 18 (7.5%) 16 (15.6%)
+
+                           18 (4.4%) 20 (3.1%) 19 (8.8%)
+
+                           19 (3.6%) 21 (2.7%) 22 (2.7%)
+
+                           20 (3.5%)  19 (6%) 18 (10.8%)
+
+                           21 (1.7%) 13 (16%) 21 (3.5%)
+
+                           22 (1.6%) 23 (1.1%) 23 (2.5%)
+
+                                      22 (1.5%) 20 (3.9%)
+                                                                                              21
+
+Harvest By Species
+
+Thinking about the types of fish you tried to catch this year, how many LEGAL-sized fish did
+you keep? Values represent percentage of respondents +- 95% confidence intervals with
+sample size given in parenthesis.
+
+                                             2002             2012                            2018
+
+Species           Response         Value CI N      Value CI N       Value CI N
+
+Striped bass             Kept All  6.7 5.65  5     7.2 2.48   30    6.8 2.57                  25
+Wiper                Kept Many
+White bass                         8.0 6.14  6     7.7 2.55   32    2.9 1.70                  11
+Largemouth bass        Kept Half
+Smallmouth bass     Kept A Few     5.3 5.09  4     6.7 2.40   28    6.9 2.59                  26
+Bluegill/Sunfish     Kept None
+                                   26.7 10.01 20   22.1 3.98  92    18.5 3.97                 68
+                         Kept All  53.3 11.29 40
+                     Kept Many                     56.4 4.76 235    65.0 4.88 239
+
+                       Kept Half   9.9 4.62 16     10.0 1.90  96    6.5 2.25                  30
+                    Kept A Few
+                     Kept None     8.7 4.35 14     5.5 1.45   53    3.9 1.77                  18
+
+                         Kept All  8.1 4.21 13     7.3 1.65   70    6.7 2.29                  31
+                     Kept Many
+                                   33.5 7.29 54    27.7 2.83 266    21.1 3.73                 97
+                       Kept Half   39.8 7.56 64    49.4 3.16 474
+                    Kept A Few                                      61.8 4.44 284
+                     Kept None
+                                   11.7 4.08 28    9.6 1.41 162     8.7 2.08                  62
+                         Kept All
+                     Kept Many     18.8 4.96 45    17.1 1.80 288    8.8 2.09                  63
+
+                       Kept Half   14.2 4.43 34    15.8 1.74 265    13.0 2.48                 93
+                    Kept A Few
+                     Kept None     30.1 5.82 72    31.4 2.22 527    27.4 3.29 194
+                                   25.1 5.50 60    26.1 2.10 438    42.1 3.64 298
+                         Kept All
+                     Kept Many     5.1 1.99 24     2.2 0.50   71    3.4 0.96                  48
+
+                       Kept Half   5.7 2.10 27     2.2 0.50   71    2.2 0.77                  31
+                    Kept A Few
+                     Kept None     4.2 1.82 20     3.3 0.62 108     3.9 1.03                  55
+
+                         Kept All  22.5 3.77 106   18.2 1.33 591    15.6 1.92 217
+                     Kept Many     62.4 4.37 294   74.1 1.51 2,403  74.8 2.29 1,034
+
+                                   9.7 4.68 15     4.1 1.16   46    3.5 1.39                  25
+
+                                   4.5 3.29  7     2.5 0.91   28    2.2 1.10                  16
+
+                                   5.8 3.70  9     4.0 1.15   45    3.6 1.40                  25
+
+                                   21.4 6.48 33    17.8 2.24 200    18.1 2.88 124
+                                   58.4 7.78 90    71.6 2.64 804    72.5 3.34 497
+
+                                   7.6 2.72 28     5.3 0.80 161     6.5 1.35                  83
+
+                                   15.5 3.71 57    11.2 1.12 339    9.1 1.58 117
+                                                                                         22
+
+                                                       2002            2012              2018
+
+Species                   Response         Value CI N        Value CI N       Value CI N
+
+Crappie                        Kept Half   12.8 3.42 47      11.4 1.13 347    10.8 1.70 139
+Yellow perch                Kept A Few
+Walleye/Sauger               Kept None     28.9 4.64 106     28.5 1.60 867    25.0 2.37 320
+Northern pike
+Muskellunge/Tiger muskie         Kept All  35.1 4.88 129     43.6 1.76 1,326  48.6 2.74 622
+Channel catfish              Kept Many
+                                           9.7 2.69 45       8.3 0.90 297     8.4 1.45 118
+                               Kept Half
+                            Kept A Few     18.3 3.51 85      13.6 1.12 488    11.2 1.65 158
+                             Kept None
+                                           16.6 3.38 77      13.0 1.10 466    12.6 1.73 177
+                                 Kept All
+                             Kept Many     29.0 4.13 135     31.9 1.52 1,145  26.3 2.31 370
+
+                               Kept Half   26.5 4.01 123     33.3 1.54 1,196  41.5 2.58 582
+                            Kept A Few
+                             Kept None     15.9 6.24 21      9.8 1.82 101     8.4 2.46   42
+
+                                 Kept All  14.4 5.99 19      15.3 2.20 157    9.0 2.54   45
+                             Kept Many
+                                           15.9 6.24 21      12.1 2.00 125    10.2 2.69  51
+                               Kept Half
+                            Kept A Few     34.8 8.13 46      35.0 2.91 360    26.9 3.93 132
+                             Kept None
+                                           18.9 6.68 25      27.8 2.74 286    45.4 4.41 223
+                                 Kept All
+                             Kept Many     16.0 3.42 71      14.5 1.27 427    13.5 1.97 157
+
+                               Kept Half   11.3 2.95 50      12.4 1.19 366    7.3 1.50   85
+                            Kept A Few
+                             Kept None     12.6 3.09 56      12.4 1.19 364    10.5 1.76 122
+
+                                 Kept All  37.2 4.50 165     36.4 1.74 1,070  27.7 2.57 321
+                             Kept Many
+                                           22.8 3.91 101     24.3 1.55 716    41.0 2.83 477
+                               Kept Half
+                            Kept A Few     9.3 4.63 14       6.2 1.41  70     5.2 1.84   29
+                             Kept None
+                                           4.6 3.35    7     5.9 1.37  66     2.0 1.18   12
+                                 Kept All
+                             Kept Many     7.3 4.15 11       6.2 1.41  70     5.9 1.96   33
+
+                               Kept Half   31.8 7.43 48      26.6 2.58 299    15.6 3.02  87
+
+                                           47.0 7.96 71      55.1 2.91 620    71.3 3.77 396
+
+                                           2.6 5.09    1                      3.0 2.53       6
+
+                                           5.3 7.10    2     1.4 1.95  2
+
+                                           2.6 5.09    1     2.1 2.38  3      0.7 1.20       2
+
+                                           15.8 11.59  6     4.3 3.33  6      4.7 3.12       9
+
+                                           73.7 14.00 28     92.2 4.43 130    91.6 4.09 162
+
+                                           14.6 3.45 59      12.2 1.17 367    9.5 1.69 110
+
+                                           17.9 3.74 72      14.1 1.24 422    9.3 1.67 108
+
+                                           15.1 3.50 61      10.9 1.11 326    9.7 1.71 113
+                                                                                 23
+
+                                               2002             2012             2018
+
+Species           Response         Value CI N        Value CI N       Value CI N
+
+Blue catfish        Kept A Few     28.8 4.42 116     32.1 1.67 962    29.1 2.62 336
+Flathead catfish     Kept None
+Bullhead                           23.6 4.14 95      30.7 1.65 922    42.4 2.85 491
+Drum                     Kept All
+Sturgeon             Kept Many     14.6 7.34 13      14.0 2.50 104    9.3 2.44   52
+Common Carp
+                       Kept Half   11.2 6.56 10      8.9 2.05   66    3.5 1.55   20
+                    Kept A Few
+                     Kept None     4.5 4.30    4     5.5 1.64   41    5.0 1.83   28
+
+                         Kept All  27.0 9.22 24      20.2 2.89 150    23.3 3.54 128
+                     Kept Many
+                                   42.7 10.28 38     51.3 3.60 381    58.8 4.12 323
+                       Kept Half
+                    Kept A Few     18.9 6.68 25      12.6 2.02 130    8.5 2.26   50
+                     Kept None
+                                   12.9 5.71 17      9.8 1.81 101     5.4 1.83   32
+                         Kept All
+                     Kept Many     8.3 4.71 11       7.1 1.56   73    5.3 1.82   32
+
+                       Kept Half   21.2 6.97 28      23.8 2.60 246    20.3 3.26 119
+                    Kept A Few
+                     Kept None     38.6 8.31 51      46.8 3.04 484    60.4 3.96 354
+
+                         Kept All  22.4 11.68 11     12.4 2.92  61    9.0 3.15   29
+                     Kept Many
+                                   4.1 5.54    2     5.9 2.09   29    5.0 2.39   16
+                       Kept Half
+                    Kept A Few     4.1 5.54    2     7.8 2.37   38    3.9 2.13   13
+                     Kept None
+                                   28.6 12.65 14     21.0 3.61 103    17.3 4.16  55
+                         Kept All
+                     Kept Many     40.8 13.76 20     52.9 4.42 259    64.9 5.26 206
+
+                       Kept Half   14.3 11.59  5     11.3 3.11  45    8.4 3.53   20
+                    Kept A Few
+                     Kept None     11.4 10.54  4     10.3 2.99  41    6.7 3.20   16
+
+                         Kept All  5.7 7.69    2     8.5 2.75   34    6.6 3.16   16
+                     Kept Many
+                                   22.9 13.91  8     21.4 4.03  85    26.6 5.64  63
+                       Kept Half
+                    Kept A Few     45.7 16.50 16     48.5 4.91 193    51.7 6.38 123
+
+                                   23.5 20.16  4     1.4 2.78   1     5.1 5.95       3
+
+                                   11.8 15.32  2
+
+                                   5.9 11.19   1                      1.3 3.09       1
+
+                                   11.8 15.32  2     12.9 7.84  9     8.8 7.61       5
+
+                                   47.1 23.73  8     85.7 8.20  60    84.7 9.68  45
+
+                                   18.2 8.06 16      19.9 3.28 113    10.1 3.51  29
+
+                                   8.0 5.65    7     5.8 1.92   33    2.1 1.68       7
+
+                                   9.1 6.01    8     2.6 1.32   15    4.3 2.35   13
+
+                                   18.2 8.06 16      15.3 2.96  87    17.4 4.42  50
+                                                                                   24
+
+                                                2002             2012              2018
+                             Value CI N
+Species     Response                                  Value CI N       Value CI N
+                                 46.6 10.42 41
+Asian Carp     Kept None                              56.4 4.07 321    66.2 5.51 188
+Trout              Kept All
+Paddlefish                                            34.3 9.21  35    12.3 8.10       8
+               Kept Many
+                 Kept Half                            2.0 2.69   2     3.1 4.27        2
+
+              Kept A Few                              2.0 2.69   2
+               Kept None
+                                                      10.8 6.02  11    17.2 9.31   11
+                   Kept All
+               Kept Many                              51.0 9.70  52    67.5 11.57  43
+
+                 Kept Half   37.3 8.19 50             24.3 2.37 306    22.6 3.59 118
+              Kept A Few
+               Kept None     6.0 4.01    8            9.9 1.65 125     7.5 2.26    39
+
+                   Kept All  9.0 4.83 12              7.6 1.47   96    6.5 2.12    35
+               Kept Many
+                             29.1 7.69 39             27.8 2.47 350    25.0 3.72 131
+                 Kept Half
+              Kept A Few     18.7 6.60 25             30.3 2.54 382    38.4 4.18 200
+               Kept None
+                             21.4 15.20  6            30.1 7.52  43    12.1 8.95       7
+
+                             3.6 6.87    1            1.4 1.92   2     1.2 2.95        1
+
+                             10.7 11.46  3            2.8 2.70   4     3.2 4.84        2
+
+                             7.1 9.54    2            24.5 7.05  35    21.6 11.29  12
+
+                             57.1 18.33 16            41.3 8.07  59    62.0 13.32  32
+                                                                                              25
+
+Thinking about the types of fish you tried to catch this year, how many LEGAL-sized fish did
+you keep? Values represent mean response +- 95% confidence intervals with sample size
+given in parenthesis. Answers included (from 1 to 5): Kept All, Kept Many, Kept Half, Kept A
+Few, Kept None.
+
+                                     2002                 2012                    2018
+                                                              N                       N
+Response                  Value  CI  N     Value CI                Value CI
+                                                             102                      63
+Asian Carp                3.7 0.31   89         3.4 0.36     742        4.2 0.34     548
+Blue catfish                                    3.9 0.11   3,040        4.2 0.11  1,278
+Bluegill/Sunfish          3.7 0.13   367        3.9 0.04     490        4.0 0.07     317
+Bullhead                                        4.0 0.12   2,999        4.2 0.14  1,156
+Channel catfish           3.6 0.45   49         3.6 0.05     569        3.9 0.08     283
+Common Carp                                     3.8 0.13   3,592        4.3 0.15  1,402
+Crappie                   3.3 0.14   403        3.7 0.04     398        3.8 0.07     236
+Drum                                            3.9 0.14   1,034        4.1 0.16     585
+Flathead catfish          3.7 0.33   88         3.8 0.09   3,244        4.2 0.10  1,382
+Largemouth bass                                 4.6 0.03     141        4.6 0.05     176
+Muskellunge/Tiger muskie  3.4 0.12   465        4.9 0.08   1,125        4.8 0.11     555
+Northern pike                                   4.2 0.07     143        4.5 0.09
+Paddlefish                3.7 0.50   35         3.5 0.28   1,123        4.2 0.37      51
+Smallmouth bass                                 4.5 0.06     417        4.5 0.07     685
+Striped bass              3.5 0.27   132        4.1 0.12                4.3 0.12     367
+Sturgeon                                        4.8 0.13       70       4.7 0.25
+Trout                     4.3 0.10   471        3.3 0.09   1,259        3.5 0.14      53
+Walleye/Sauger                                  3.4 0.05   2,943        3.8 0.08     521
+White bass                4.5 0.31   38         3.5 0.06   1,680        3.9 0.10  1,160
+Wiper                                           4.0 0.08                4.3 0.11     707
+Yellow perch              4.0 0.20   151        3.6 0.08     959        3.9 0.11     459
+                                                           1,029                     489
+                          3.8 0.62   28
+
+                          4.1 0.21   154
+
+                          4.1 0.28   75
+
+                          3.5 0.83   17
+
+                          2.9 0.27   134
+
+                          3.4 0.13   443
+
+                          3.4 0.17   239
+
+                          3.8 0.20   161
+
+                          3.3 0.23   132
+                                                                                         26
+
+Days Fished
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018.
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+January
+
+Response  Value CI       2002     Value CI       2012     Value CI       2018
+                             N                       N                       N
+0.000         73.2 3.11               82.1 0.92               75.0 1.87
+1.000          2.8 1.16     571        3.3 0.43  5,474         3.0 0.73   1,552
+2.000          7.2 1.81      22        4.5 0.50     217        4.4 0.89       62
+3.000          4.9 1.51      56        3.0 0.41     297        3.8 0.83       92
+4.000          2.9 1.19      38        1.8 0.32     199        2.6 0.69       80
+5.000          2.1 0.99      23        1.6 0.30     123        3.3 0.77       55
+7.000          5.0 1.53      16        2.1 0.34     108        3.3 0.77       68
+10.000         1.4 0.83      39        0.9 0.22     140        2.4 0.66       69
+13.000         0.3 0.35      11        0.4 0.16      58        1.2 0.46       50
+16.000                         2       0.2 0.09      28        0.6 0.34       25
+19.000         0.3 0.35                0.0 0.04      10        0.1 0.15       13
+21.000                         2       0.1 0.08        2       0.2 0.18        3
+                                                       8                       4
+                                                                                         27
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018.
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+February
+
+Response  Value CI       2002     Value CI       2012     Value CI       2018
+                             N                       N                       N
+0.000         74.2 3.09               83.7 0.89               77.2 1.82
+1.000          3.9 1.37     570        2.7 0.39  5,566         2.9 0.73   1,586
+2.000          6.6 1.76      30        4.4 0.49     181        4.5 0.89       60
+3.000          3.8 1.35      51        2.5 0.37     291        3.0 0.74       92
+4.000          3.6 1.33      29        2.0 0.34     165        2.7 0.70       62
+5.000          1.8 0.95      28        1.3 0.27     135        2.6 0.69       56
+7.000          4.2 1.41      14        1.9 0.33      87        3.2 0.76       54
+10.000         1.0 0.72      32        0.8 0.22     126        2.3 0.65       66
+13.000         0.4 0.44        8       0.3 0.12      56        0.9 0.42       49
+16.000                         3       0.2 0.10      18        0.4 0.28       20
+19.000         0.4 0.44                0.0 0.05      11        0.1 0.15        9
+21.000                         3       0.1 0.09        3       0.2 0.17        3
+                                                       9                       4
+                                                                                         28
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018.
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+March
+
+Response  Value CI       2002     Value CI       2012     Value CI       2018
+                             N                       N                       N
+0.000         62.5 3.43               67.6 1.12               66.4 2.04
+1.000          5.0 1.54     479        4.3 0.49  4,527         4.1 0.86   1,364
+2.000          9.3 2.05      38        7.7 0.64     291        6.5 1.07       85
+3.000          4.6 1.48      71        5.4 0.54     515        5.5 0.98
+4.000          5.1 1.55      35        4.0 0.47     363        4.3 0.87     134
+5.000          3.4 1.28      39        3.3 0.43     269        4.1 0.86     113
+7.000          6.4 1.73      26        4.4 0.49     222        4.6 0.90
+10.000         1.3 0.80      49        1.8 0.32     298        2.0 0.60       88
+13.000         1.4 0.84      10        0.7 0.20     121        1.3 0.49       84
+16.000         0.7 0.57      11        0.4 0.15      49        0.8 0.39       94
+19.000         0.4 0.44        5       0.1 0.07      25        0.3 0.23       41
+21.000         0.1 0.26        3       0.2 0.11        6       0.2 0.21       27
+                               1                     15                       17
+
+                                                                               6
+                                                                               5
+                                                                                         29
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018.
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+April
+
+Response  Value CI       2002     Value CI       2012    Value CI       2018
+                             N                       N                      N
+0.000         32.5 3.18               38.1 1.15              38.4 2.05
+1.000          7.4 1.78     272        7.1 0.61  2,603        6.9 1.07     830
+2.000                        62                     484                    149
+3.000         11.8 2.19      99       11.9 0.77     813      10.5 1.29     226
+4.000          9.4 1.98      79        9.4 0.69     640       8.3 1.16     179
+5.000                        87        7.7 0.63     529       8.2 1.15     176
+7.000         10.4 2.07      52        7.3 0.62     501       6.9 1.07     150
+10.000         6.2 1.64      87        9.3 0.69     633       9.4 1.23     204
+13.000                       43        4.4 0.49     300       4.7 0.89     101
+16.000        10.4 2.07      25        2.5 0.37     170       3.1 0.73
+19.000         5.1 1.50      15        1.2 0.26      81       2.1 0.60       66
+21.000         3.0 1.15      10        0.5 0.17      35       0.5 0.29       45
+               1.8 0.90        5       0.7 0.20      47       1.2 0.47       11
+               1.2 0.74                                                      27
+               0.6 0.52
+                                                                                         30
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018.
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+May
+
+Response  Value CI       2002    Value CI       2012    Value CI       2018
+                             N                      N                      N
+0.000         10.2 1.89              17.1 0.88              18.1 1.57
+1.000          8.5 1.74     100       7.6 0.62  1,189        6.5 1.01     418
+2.000                        83                    532                    151
+3.000         13.8 2.16              12.9 0.79     900      11.1 1.28     258
+4.000         12.2 2.05     136      11.3 0.74     786      10.9 1.27     252
+5.000         11.2 1.97     120                    686                    215
+7.000                       110       9.8 0.70     659       9.3 1.18     202
+10.000         8.4 1.73               9.5 0.69               8.7 1.15     328
+13.000        16.1 2.30      82      14.9 0.84  1,042       14.2 1.42     196
+16.000                      158       7.3 0.61     506       8.5 1.14     141
+19.000         9.3 1.81               4.7 0.50     330       6.1 0.98
+21.000         4.6 1.31      91       2.7 0.38     185       2.7 0.66       63
+               2.6 1.00      45       1.0 0.24      71       2.2 0.60       52
+               1.9 0.86      26       1.2 0.26      85       1.6 0.51       37
+               1.2 0.69      19
+                             12
+                                                                                         31
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018.
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+June
+
+Response  Value CI       2002    Value CI       2012    Value CI       2018
+                             N                      N                      N
+0.000          9.3 1.77              13.6 0.80              13.3 1.37
+1.000          7.4 1.60      95       7.5 0.61     958       7.0 1.03     314
+2.000         11.7 1.97      76                    526       9.7 1.19     167
+3.000         10.1 1.85     120      12.8 0.78     897                    229
+4.000         11.6 1.96     104      10.4 0.71     732      11.1 1.26     262
+5.000          9.0 1.75     119      10.3 0.71     728       9.3 1.17     220
+7.000         16.8 2.29      92                    634       9.8 1.20     231
+10.000         9.9 1.83     172       9.0 0.67  1,119                     337
+13.000         6.7 1.53     102      15.9 0.85     616      14.2 1.41     253
+16.000         3.8 1.17      69                    398      10.7 1.25     163
+19.000         1.9 0.82      39       8.8 0.66     192
+21.000         1.9 0.82      19       5.7 0.54     116       6.9 1.02       79
+                             19       2.7 0.38     119       3.3 0.72       54
+                                      1.6 0.30               2.3 0.60       61
+                                      1.7 0.30               2.6 0.64
+                                                                                         32
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018.
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+July
+
+Response  Value CI       2002    Value CI       2012    Value CI       2018
+                             N                      N                      N
+0.000         11.4 1.97              22.0 0.97              17.0 1.53
+1.000         10.2 1.88     114       8.8 0.67  1,535        7.1 1.05     393
+2.000         10.7 1.92     102                    618                    164
+3.000         10.3 1.89     107      11.8 0.76     826      10.3 1.24     239
+4.000         11.0 1.94     103       9.5 0.69     662       9.6 1.20     223
+5.000                       110       9.2 0.68     641       9.8 1.21     226
+7.000          9.9 1.85               8.7 0.66     610                    235
+10.000        16.1 2.28      99                    910      10.2 1.23     317
+13.000                      161      13.0 0.79     493      13.7 1.40     214
+16.000         8.6 1.74               7.1 0.60     324                    135
+19.000         5.1 1.36      86       4.6 0.49     149       9.3 1.18
+21.000         3.7 1.17      51       2.1 0.34      97       5.8 0.96       72
+               1.3 0.70      37       1.4 0.27     123       3.1 0.71       41
+               1.6 0.78      13       1.8 0.31               1.8 0.54       52
+                             16                              2.3 0.61
+                                                                                         33
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018.
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+August
+
+Response  Value CI       2002     Value CI       2012    Value CI       2018
+                             N                       N                      N
+0.000         19.4 2.53               31.2 1.09              24.6 1.77
+1.000          9.9 1.92     181        9.2 0.68  2,156        8.3 1.14     559
+2.000                        93                     633       9.5 1.21     189
+3.000         11.3 2.03               11.4 0.75     787       9.5 1.21     217
+4.000         10.3 1.95     106        8.6 0.66     591       9.0 1.18     217
+5.000                        96        8.2 0.65     566       9.4 1.20     205
+7.000          9.1 1.84      85        7.3 0.61     501                    213
+10.000         9.2 1.85      86                     737      11.5 1.31     262
+13.000        14.8 2.27               10.7 0.73     388       7.2 1.07     165
+16.000         6.8 1.62     138        5.6 0.54     246       5.2 0.91     118
+19.000         4.2 1.28      64        3.6 0.44     130       2.5 0.64
+21.000         2.8 1.05      39        1.9 0.32      71       1.4 0.48       58
+               0.7 0.55      26        1.0 0.24     102       1.8 0.55       33
+               1.5 0.78        7       1.5 0.28                              42
+                             14
+                                                                                         34
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018.
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+September
+
+Response  Value CI       2002     Value CI       2012    Value CI       2018
+                             N                       N                      N
+0.000         35.4 3.19               45.1 1.18              41.4 2.06
+1.000         10.2 2.02     305        8.0 0.65  3,073        6.8 1.05     909
+2.000         11.4 2.12      88                     549       9.5 1.23     150
+3.000                        98       10.7 0.73     727       7.7 1.12     210
+4.000          6.8 1.69      59        7.6 0.63     516       7.1 1.08     170
+5.000          7.5 1.76      65        6.5 0.58     440       6.4 1.02     157
+7.000          8.1 1.82      70        5.9 0.56     399       8.2 1.15     141
+10.000        10.1 2.01      87        7.4 0.62     508       5.0 0.91     181
+13.000         4.3 1.35      37        4.0 0.47     273       4.0 0.82     109
+16.000         3.2 1.18      28        2.4 0.36     161       1.9 0.57
+19.000         1.3 0.75      11        1.1 0.25      74       1.0 0.42       89
+21.000         0.5 0.45        4       0.6 0.18      40       0.9 0.39       42
+               1.2 0.71      10        0.9 0.22      60                      22
+                                                                             20
+                                                                                         35
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018.
+Values represent percentage of respondents +- 95% confidence intervals with sample size
+given in parenthesis.
+
+October
+
+Response  Value CI       2002     Value CI       2012    Value CI       2018
+                             N                       N                      N
+0.000         58.0 3.44               62.7 1.16              61.2 2.07
+1.000          7.6 1.85     458        7.0 0.61  4,215        5.7 0.99   1,298
+2.000          8.4 1.93      60        7.5 0.63     468       5.7 0.98     121
+3.000          7.1 1.79      66        5.1 0.53     504       4.8 0.91     121
+4.000          6.0 1.65      56        4.3 0.48     344       4.8 0.91     101
+5.000          3.4 1.27      47        3.9 0.46     288       4.9 0.92     103
+7.000          4.9 1.51      27        4.9 0.52     264       5.4 0.96     105
+10.000         1.6 0.89      39        1.9 0.33     328       3.2 0.75     115
+13.000         1.5 0.85      13        1.2 0.26     129       2.0 0.60       68
+16.000         0.4 0.43      12        0.7 0.20      82       1.6 0.54       43
+19.000         0.6 0.55        3       0.3 0.14      47       0.4 0.25       35
+21.000         0.4 0.43        5       0.4 0.16      22       0.3 0.24        8
+                               3                     30                       7
+                                                                                             36
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018. This
+table represents all respondants to this question including those who did not fish during
+the given time period. Values represent lower 95% median confidence limit, median
+response, and upper 95% median confidence limit with sample size given in parenthesis
+Answers included: Did Not Fish, 1, 2, 3, 4, 5, 6-8, 9-11, 12-14, 15-17, 18-20, and Over 20.
+
+                  2002                                  2012                     2018
+                                     Value CI N               Value CI N
+Response   Value  CI N
+                                             0 0/5 6664               0 0/7 2068
+January    0      0/7 780                    0 0/4 6648               0 0/7 2054
+February                                     0 0/7 6701               0 0/7 2052
+March      0      0/7 768                    2 2/10 6836              2 2/13 2159
+April                                        4 4/13 6971              4 4/16 2308
+May        0      0/7 767                    4 4/16 7035              4 4/16 2362
+June                                         3 3/16 6988              4 4/16 2306
+July       2      2/13 836                   2 2/13 6908              3 3/16 2272
+August                                       1 1/10 6820              2 2/13 2194
+September  4      4/16 982                   0 0/7 6721               0 0/10 2119
+October
+           4      4/16 1026
+
+           4      4/16 999
+
+           3 3/13.7499999999999 935
+
+           2      2/13 862
+
+           0      0/7 789
+                                                                                        37
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018. Only
+respondants that fished at least once during the time period were included in this
+breakdown. Values represent lower 95% median confidence limit, median response, and
+upper 95% median confidence limit with sample size given in parenthesis Answers
+included: Did Not Fish, 1, 2, 3, 4, 5, 6-8, 9-11, 12-14, 15-17, 18-20, and Over 20.
+
+                                      2002                      2012         2018
+                 Value CI N                 Value CI N
+Response                                                              Value  CI N
+                         3 3/10 209                 3 3/10 1190
+January                  3 3/10 198                 3 3/10 1082       4      4/13 481
+February                 3 3/13 288                 3 3/10 2174
+March                    4 4/16 564                 4 4/13 4233       4      4/13 440
+April                    4 4/16 882                 4 4/16 5782
+May                      5 5/16 931                 5 5/16 6077       4      4/13 672
+June                     5 5/16 885                 4 4/16 5453
+July                     4 4/16 754                 4 4/16 4752       4      4/16 1330
+August                   4 4/13 557                 4 4/13 3747
+September                3 3/13 331                 3 3/13 2506       5      5/16 1879
+October                18 18/86 1146              19 19/85 7200
+Total (Jan-Oct)                                                       5      5/19 2036
+
+                                                                      5      5/16 1882
+
+                                                                      5      5/16 1697
+
+                                                                      4      4/16 1306
+
+                                                                      4      4/16 848
+
+                                                                      23 23/101 2367
+                                                                                                                              38
+
+For each month, indicate about how many DAYS you fished in Nebraska during 2018. Only
+respondants that fished at least once during the time period were included in this
+breakdown. Values represent lower 95% median confidence limit, median response, and
+upper 95% median confidence limit with sample size given in parenthesis Answers
+included: Did Not Fish, 1, 2, 3, 4, 5, 6-8, 9-11, 12-14, 15-17, 18-20, and Over 20.
+                                                                                         39
+
+Angler Motivations
+
+Indicate the importance for each item as a reason why you fish. Values represent mean
+response +- 95% confidence intervals with sample size given in parenthesis. Answers
+included (from 1 to 5): Not At All Important, Slightly Important, Moderately Important,
+Very Important, Extremely Important.
+
+                                              2002             2012             2018
+
+Response
+
+                                    Value CI  N Value CI       N Value CI       N
+
+For family recreation               3.6 0.07 1,113   3.6 0.03 8,075   3.8 0.04 2,775
+
+For physical exercise               2.1 0.07 1,086   2.3 0.03 8,031   2.4 0.05 2,742
+
+For relaxation                      4.0 0.06  1,124  4.0 0.02  8,112  4.0 0.03  2,788
+For the challenge or sport          3.2 0.07  1,107  3.3 0.03  8,054  3.4 0.05  2,755
+
+For the experience of the catch     3.6 0.06 1,108   3.7 0.02 8,076   3.9 0.04 2,780
+
+For the fun of catching fish        4.1 0.05  1,140  4.1 0.02  8,121  4.2 0.03  2,813
+To be close to the water            2.9 0.07  1,098  3.1 0.03  8,058  3.3 0.05  2,759
+To be outdoors                      4.0 0.05  1,138  4.2 0.02  8,132  4.3 0.03  2,820
+To be with friends                  3.3 0.07  1,104  3.4 0.03  8,101  3.6 0.04  2,768
+To catch a trophy fish              2.3 0.08  1,082  2.2 0.03  8,015  2.2 0.05  2,748
+
+To compete for prizes or money      1.2 0.04  1,076  1.2 0.01  8,011  1.2 0.02  2,753
+                                    3.0 0.07  1,084  3.2 0.03  8,030  3.4 0.04  2,758
+To experience adventure and
+excitement                          3.7 0.06 1,104   3.8 0.02 8,073   4.1 0.03 2,776
+To experience natural
+surroundings                        2.6 0.07  1,080  2.7 0.03  8,038  3.1 0.04  2,760
+To experience new and different     3.1 0.08  1,098  3.1 0.03  8,059  3.2 0.05  2,772
+things
+
+To get away from other people
+
+To get away from the daily routine  3.8 0.06 1,110   3.8 0.02 8,108   3.8 0.04 2,780
+
+To obtain fish for eating           2.6 0.07 1,119   2.6 0.03 8,108   2.6 0.05 2,763
+40
+41
+42
+43
+                                                                                                44
+
+Indicate the importance for each item as a reason why you fish. Values represent mean
+response +- 95% confidence intervals with sample size given in parenthesis. Answers
+included (from 1 to 5): Not At All Important, Slightly Important, Moderately Important,
+Very Important, Extremely Important.
+
+Response                              2002                   2012                        2018
+                                          N                      N                           N
+                            Value CI          Value CI               Value CI
+                                       1,049                  7,940                      2,656
+Fishery resource            2.7 0.04   1,058       2.8 0.01   7,978       2.8 0.02       2,694
+Natural environment         3.3 0.05   1,053       3.4 0.02   7,955       3.7 0.03       2,653
+                                       1,063       3.2 0.02   7,987       3.3 0.03       2,689
+Physical and psychological  3.1 0.05               3.5 0.02               3.6 0.03
+Social                      3.5 0.05
+                                                                                                45
+
+Indicate the importance for each item as a reason why you fish. Values represent mean
+response +- 95% confidence intervals with sample size given in parenthesis. Answers
+included (from 1 to 5): Not At All Important, Slightly Important, Moderately Important,
+Very Important, Extremely Important.
+
+Response               Value CI       2002   Value CI       2012   Value CI              2018
+                                          N                     N                            N
+Catch Motivations           2.9 0.04              2.9 0.01              3.0 0.02
+Non-catch Motivations       3.3 0.04  1,032       3.4 0.02  7,908       3.5 0.03         2,599
+                                      1,027                 7,893                        2,580
+
+Indicate the importance for each item as a reason why you fish. Values represent mean
+response +- 95% confidence intervals with sample size given in parenthesis. Answers
+included (from 1 to 5): Not At All Important, Slightly Important, Moderately Important,
+Very Important, Extremely Important.
+                                                                                                                46
+
+Angler Attitudes
+
+Indicate how much you agree with each of the following statements about fishing. Values
+represent mean response +- 95% confidence intervals with sample size given in
+parenthesis. Answers included (from 1 to 5): Strongly Disagree, Disagree, Neutral, Agree,
+Strongly Agree.
+
+Response                                              Value           2002  Value       2012  Value       2018
+                                                                 CI N              CI N              CI N
+A fishing trip can be successful even if no fish           2.3
+are caught.                                                2.7  0.06 1,357  2.3 0.02 8,153    2.2 0.04 2,790
+A full stringer is the best indicator of a good            3.1  0.05 1,346
+fishing trip.                                              2.9  0.06 1,347  2.6 0.02 8,136    2.7 0.04 2,765
+A successful fishing trip is one in which many             2.6  0.06 1,338
+fish are caught                                                 0.06 1,333  3.1 0.02 8,137    3.2 0.04 2,762
+I'm happiest with a fishing trip if I catch at least
+the limit                                                                   2.8 0.02 8,119    3.0 0.04 2,743
+
+I'm just as happy if I don't keep the fish I catch                          2.3 0.02 8,108    2.3 0.04 2,766
+                                                                            2.3 0.02 8,112    2.2 0.04 2,720
+I'm just as happy if I release all the fish I catch   2.6 0.06 1,346
+                                                      3.4 0.05 1,339        3.4 0.02 8,108    3.3 0.04 2,760
+I am the happiest with a fishing trip if I catch a    3.2 0.06 1,347
+challenging game fish                                 3.3 0.07 1,351        3.2 0.02 8,109    3.1 0.04 2,750
+I like to fish where I know I have a chance to
+catch a trophy fish                                                         3.2 0.03 8,131    3.0 0.05 2,747
+                                                                            1.9 0.02 8,131    1.9 0.04 2,754
+I usually eat the fish I catch
+
+I want to keep all the fish I catch                   2.0 0.05 1,342        3.1 0.02 8,115    3.1 0.04 2,758
+                                                      3.1 0.06 1,349
+I would rather catch one or two big fish than ten     2.8 0.07 1,335        2.8 0.03 8,002    2.8 0.05 2,754
+smaller fish                                          3.2 0.06 1,347
+If I thought I wouldn't catch any fish, I would not   3.2 0.06 1,347        3.2 0.02 8,121    3.3 0.04 2,766
+go fishing                                            3.2 0.06 1,347
+The bigger the fish I catch, the better the fishing   3.2 0.06 1,354        3.3 0.02 8,121    3.5 0.04 2,750
+trip
+                                                                            3.1 0.02 8,128    3.1 0.04 2,765
+The more fish I catch, the happier I am
+                                                                            3.2 0.02 8,117    3.2 0.04 2,764
+When I go fishing, I'm just as happy if I don't
+catch a fish
+When I go fishing, I am not satisfied unless I
+catch at least something
+47
+48
+49
+50
+                                                                                           51
+
+Indicate how much you agree with each of the following statements about fishing. Values
+represent mean response +- 95% confidence intervals with sample size given in
+parenthesis. Answers included (from 1 to 5): Strongly Disagree, Disagree, Neutral, Agree,
+Strongly Agree.
+
+Response         Value CI       2002   Value CI       2012   Value CI       2018
+                                    N                     N                     N
+Catch Something       2.9 0.05              2.8 0.02              2.8 0.03
+Harvest               2.6 0.05  1,317       2.4 0.02  7,921       2.4 0.03  2,716
+Numbers               3.0 0.04  1,305       3.0 0.02  7,998       3.1 0.03  2,649
+Size                  3.2 0.04  1,316       3.2 0.02  8,043       3.2 0.03  2,689
+                                1,315                 8,009                 2,705
+
+## run report: 76.32 sec elapsed
+                                                                                                   52
+
+Information Sources
+
+How do you get information on fishing in Nebraska? Values represent percentage of
+respondents +- 95% confidence intervals with sample size given in parenthesis.
+
+                                                           2002             2012            2018
+                                       Value CI N
+Response                                                         Value CI   N     Value CI N
+                                           47.7 2.67 643
+Bait and tackle shops                                            52.3 1.88 1,424  31.0 1.71 875
+Barbs and Backlashes Blog
+Fishing organizations                                            2.8 0.62   75    3.2 0.65  91
+Fishing regulations guide
+Friends and family                     3.9 1.04  53              3.8 0.72   104   3.1 0.64  88
+Game and Parks events
+Game and Parks social media            47.1 2.66 636             52.2 1.88 1,420  41.8 1.82 1,181
+Nebraska Game and Parks Internet site
+Nebraska State Fair                    65.7 2.53 886             64.8 1.80 1,762  60.3 1.80 1,703
+NEBRASKALAND magazine
+Other                                                            4.2 0.76   115   3.5 0.68  99
+Other events
+Other fishing / outdoor magazines                                4.5 0.78   123   16.3 1.36 460
+Other Internet fishing sites
+Other news programs (TV or radio)      26.8 2.36 361             43.7 1.86 1,189  47.7 1.84 1,348
+Other newspapers
+Outdoor Nebraska radio program         3.7 1.01  50              3.9 0.73   106   3.7 0.70 105
+State parks / facilities
+                                       24.2 2.28 326             21.6 1.55  587   20.5 1.49 579
+
+                                       6.0 1.27  81              7.2 0.97   197   5.4 0.83 153
+
+                                                                 4.5 0.78   123   3.2 0.65  90
+
+                                       14.8 1.89 199             16.4 1.39  445   11.6 1.18 328
+
+                                       5.7 1.24  77              10.9 1.17  296   15.6 1.34 441
+
+                                       11.0 1.67 149             13.9 1.30  379   6.0 0.88 171
+
+                                       14.6 1.88 197             32.1 1.75  874   13.3 1.25 375
+
+                                       5.6 1.23  76              8.3 1.03   225   5.4 0.84 154
+
+                                       21.0 2.17 283             25.8 1.64  702   21.8 1.52 616
+                                                                                                           53
+
+  Appendix A
+
+2018 Licensed Angler Survey
+      (Hard Copy Format)
+54
+55
+56
+57
+58
+59
+60
+61
+
