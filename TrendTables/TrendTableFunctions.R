@@ -55,6 +55,49 @@ SubstitueQuesForResponse <- function(
   return(op)
 }
 
+OrderLegendByFinalX <- function(
+  myData,
+  responseField = "Response",
+  valueField = "Value",
+  xField = "Year"
+) {
+  xVals <- myData[[xField]]
+
+  # "Final" x position: last factor level if x is a factor (e.g. an
+  # ordered age group), otherwise the maximum value (e.g. latest year).
+  finalX <- if (is.factor(xVals)) {
+    levels(xVals)[nlevels(xVals)]
+  } else {
+    max(xVals, na.rm = TRUE)
+  }
+
+  # Order legend to match the top-to-bottom stacking of lines at the
+  # final (right-most) x position, i.e. highest value first.
+  levelOrder <- myData %>%
+    filter(.data[[xField]] == finalX) %>%
+    arrange(desc(.data[[valueField]])) %>%
+    pull(.data[[responseField]]) %>%
+    as.character()
+
+  myData %>%
+    mutate(
+      !!rlang::sym(responseField) := factor(
+        as.character(.data[[responseField]]),
+        levels = levelOrder
+      )
+    )
+}
+
+# Backwards-compatible alias for the Year-axis use case.
+OrderLegendByFinalYear <- function(
+  myData,
+  responseField = "Response",
+  valueField = "Value",
+  yearField = "Year"
+) {
+  OrderLegendByFinalX(myData, responseField, valueField, yearField)
+}
+
 LabelResponses <- function(myData, myLabels, responseField = "Response") {
   op <- myData %>%
     mutate(Response2 = as.character(get(responseField))) %>%
@@ -390,8 +433,14 @@ CreateFt <- function(
     fontsize(part = "header", size = 10) %>%
     fontsize(part = "body", size = 8) %>%
     bold(part = "header") %>%
-    autofit() #%>%
-  #width(j = 1, width = 1.2)
+    # lightweight vertical divider between the year column-groups
+    vline(
+      j = c("2002_Number", "2012_Number", "2018_Number"),
+      border = officer::fp_border(color = "gray60", width = 0.75),
+      part = "all"
+    ) %>%
+    autofit() %>%
+    set_table_properties(layout = "autofit", width = 1)
 
   if (formatStyle == "perc") {
     myFlex <- myFlex %>%
@@ -454,8 +503,8 @@ CreateFtRanks <- function(x) {
     fontsize(part = "header", size = 10) %>%
     fontsize(part = "body", size = 8) %>%
     bold(part = "header") %>%
-    autofit() #%>%
-  #width(j = 1, width = 1.2)
+    autofit() %>%
+    set_table_properties(layout = "autofit", width = 1)
 
   return(myFlex)
 }

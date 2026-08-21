@@ -3,12 +3,14 @@ title: "2025 Licensed Angler Survey Trends"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   # word_document: default
-  officedown::rdocx_document
+  officedown::rdocx_document:
+    toc: true
+    toc_depth: 2
 always_allow_html: yes
 ---
 
-```{r setup, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, fig.width=7.5, fig.height=6.5}
-knitr::opts_chunk$set(echo=FALSE, include=TRUE, warning=FALSE, error=FALSE, message=FALSE,  ft.align="left", fig.width = 7.4)
+```{r setup, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, fig.width=6.5, fig.height=6.5}
+knitr::opts_chunk$set(echo=FALSE, include=TRUE, warning=FALSE, error=FALSE, message=FALSE,  ft.align="left", fig.width = 6.5)
 options(stringsAsFactors = FALSE)
 #devtools::install_github("davidgohel/officer")
 #devtools::install_github("davidgohel/officedown")
@@ -19,10 +21,8 @@ library(knitr)
 library(flextable)
 library(stringr)
 library(foreach)
-library(tictoc)
 library(tidyverse)
-
-tic("run report")
+library(patchwork)
 
 source("..\\BaseFunctions_2025_UPDATED.R") #load file of common functions
 source("TrendTableFunctions.R") #load file of cross tab report functions
@@ -46,68 +46,85 @@ l <- read.csv(file="../../Data/DataAggregation1/Labels.csv")
 s <- read.csv(file="../../Data/DataAggregation1/Scales.csv")
 ```
 
-# Executive Summary: What Has Changed Over Time
+`r officer::run_pagebreak()`
 
-*Major trends from four statewide angler surveys — 2002, 2012, 2018, and 2025.*
+# Summary
 
-Nebraska has surveyed licensed anglers four times over roughly two decades. This
-report tracks the questions asked in a comparable way across those surveys so we
-can see how angler behavior, preferences, and attitudes have shifted. The notes
-below translate the major trends into plain language and flag what they may mean
-for management. A few percentage-point movements between any two surveys are
-normal; the patterns highlighted here hold up across multiple surveys or show a
-clear direction of travel.
+Nebraska has surveyed licensed anglers four times over two decades. This report tracks the questions asked across those surveys so we can see how angler behavior, preferences, and attitudes have or have not shifted.  A few percentage-point movements between any two surveys are normal.  Major shifts or changes in ranking across surveys may indicate societal changes or shifts important for consideration in fisheries management.
 
-## More license holders are actually fishing
+The share of license holders who did **not** fish in Nebraska fell from about 17% (2002) to under 10% (2025).  Including this questions is more for context than indicative of angler behavior.  During the 2002 and 2012 survey distribution, recepients were chosen from the previous years' licensed angler list due to the capabilities of the permit system in place.  Answers of no during those years are a mix of anglers who were licensed but chose not to fish and truely lapsed anglers (did not by a license in the survey year).  Beginning in the 2018 survey, the year covered by the survey was presented to current license holders.  However, a decrease in fishing participation among licensed anglers was seen indicating more people bought licenses that they did not use.  In the 2025 survey we also have a confounding effect of multi-year permits which presents anglers that are licensed due to a purchase during a previous year that may or may not fish.  Those that did not are not truly "lapsed" from an license standpoint but do represent decreased participation.  Among those who fished during each survey, the typical angler reported about 18–19 days on the water per year, stable across all four surveys (with a temporary rise to ~23 days in 2018).
 
-The share of license holders who did **not** fish in Nebraska fell from about 17%
-(2002) to under 10% (2025) — a larger fraction of the people buying licenses are
-using them. Among those who fished, the typical angler reported about 18–19 days
-on the water per year, stable across all four surveys (with a temporary rise to
-~23 days in 2018).
-
-```{r chart_participation, fig.width=6.5, fig.height=3}
-base.summary.percent.selectOne(d, A2) %>%
+```{r chart_participation, fig.width=6.5, fig.height=3.2}
+p_fished <- base.summary.percent.selectOne(d, A2) %>%
   filter(Response == "No") %>%
   mutate(Fished = 100 - Value) %>%
   ggplot(aes(Year, Fished)) +
-  geom_line() + geom_point(size = 2) +
+  geom_line(linewidth = 1.5) + geom_point(size = 4) +
   scale_x_continuous(breaks = c(2002, 2012, 2018, 2025)) +
   ylim(80, 95) +
-  labs(title = "Share of license holders who fished in Nebraska",
-       x = NULL, y = "Percent who fished") +
+  labs(title = "Percent who fished", x = NULL, y = "Percent") +
   theme_minimal()
+
+# Median total days per year (anglers who fished) with a bootstrap 95% CI of the
+# weighted median.
+set.seed(4127)
+boot_median_ci <- function(df, B = 2000) {
+  wm <- as.numeric(weighted.quantile(df$days, df$w, probs = 0.5))
+  bs <- replicate(B, {
+    idx <- sample.int(nrow(df), replace = TRUE)
+    as.numeric(weighted.quantile(df$days[idx], df$w[idx], probs = 0.5))
+  })
+  tibble(Value = wm, lo = quantile(bs, 0.025), hi = quantile(bs, 0.975))
+}
+
+p_days <- d %>%
+  filter(C1_AnsweredAll == TRUE & C1Total_days > 0) %>%
+  transmute(Year = surveyYear, days = C1Total_days, w = postWeight) %>%
+  group_by(Year) %>%
+  group_modify(~ boot_median_ci(.x)) %>%
+  ungroup() %>%
+  ggplot(aes(factor(Year), Value)) +
+  geom_col() +
+  geom_errorbar(aes(ymin = lo, ymax = hi), width = 0.4) +
+  labs(title = "Median days fished per year",
+       x = NULL, y = "Median days (anglers who fished)") +
+  theme_minimal()
+
+p_fished | p_days
 ```
 
-## How and where people fish is shifting
-
-Bank and wading fishing remains the backbone of Nebraska angling (roughly
-three-quarters of anglers), with little change. Use of a motorized boat, however,
-has declined steadily — from about 67% (2002) to 52% (2025) — while kayaks and
-canoes have emerged as a distinct and growing mode (~15–17% in the two most recent
-surveys). Most anglers fish close to home: the typical most-visited water is about
-30 miles away one-way.
+Bank fishing and wading remain the backbone of Nebraska angling (roughly three-quarters of anglers) with little change. Use of a motorized boat, however, has declined steadily — from about 67% (2002) to 52% (2025) — while kayaks and canoes have emerged as a distinct and growing mode (~15–17% in the two most recent surveys). 
 
 ```{r chart_methods, fig.width=6.5, fig.height=3}
 mf5 <- d %>% dplyr::select(contains("A5")) %>% dplyr::select(-contains("Answered")) %>% names()
 base.summary.percent.selectAll(d, mf5, A5_Answered) %>%
   filter(Response %in% c("Bank/wading", "Motorized boat", "Kayak/Canoe")) %>%
   ggplot(aes(Year, Value, color = Response)) +
-  geom_line() + geom_point(size = 2) +
-  scale_color_viridis_d(begin = 0.2, end = 0.8) +
+  geom_line(linewidth = 1.5) + geom_point(size = 4) +
+  scale_color_viridis_d(end = 0.9) +
   scale_x_continuous(breaks = c(2002, 2012, 2018, 2025)) +
-  labs(title = "How anglers fish", x = NULL, y = "Percent of anglers", color = NULL) +
+  labs(title = "Fishing method", x = NULL, y = "Percent of anglers", color = NULL) +
   theme_minimal()
 ```
 
-## What anglers want to catch is broadening
+Most anglers fish close to home with their most-visited waterbody about 30 miles or less from home. While the last two surveys have shown a slight increase in the percentage of anglers fishing closer to home, the 2025 respondants showed similar travel distances to the 2002 survey with a slightly larger percentage of anglers traveling 100 or more miles to their most-visited waters.  This could also indicate some anglers fished fewer but farther trips at the expense of more numerous local trips.
 
-Walleye remains the single most-preferred species, but its share has slipped from
-about 31% (2002) to 24% (2025). Largemouth bass holds a steady second, while
-channel catfish preference has declined. The largest mover is the rise of anglers
-who do **not** prefer any particular species — up from about 10% to 18% — now one
-of the most common responses. Demand is becoming less concentrated on a few
-flagship species.
+```{r chart_distance, fig.width=6.5, fig.height=3.2}
+dist_levels <- c("10 or fewer miles", "11 to 20 miles", "21 to 40 miles",
+                  "41 to 60 miles", "61 to 100 miles", "101 to 250 miles",
+                  "251 to 500 miles", "Over 500 miles")
+
+base.summary.percent.selectOne(d, A8) %>%
+  mutate(Response = factor(as.character(Response), levels = dist_levels)) %>%
+  ggplot(aes(factor(Year), Value, fill = Response)) +
+  geom_col(position = position_stack(reverse = TRUE)) +
+  scale_fill_viridis_d(end = 0.95, direction = -1) +
+  labs(title = "Distance traveled to most-visited waterbody",
+       x = NULL, y = "Percent of anglers", fill = NULL) +
+  theme_minimal()
+```
+
+Walleye remains the single most-preferred species but its share has slipped from about 31% (2002) to 24% (2025). Largemouth bass remains second while channel catfish preference has declined. The largest change is the rise of anglers who do not prefer any particular species, up from 10% to 18%, and is now one of the most common responses. Angler preference is becoming less concentrated on a few flagship species.
 
 ```{r chart_species, fig.width=6.5, fig.height=3}
 base.summary.percent.selectOne(d, B1) %>%
@@ -116,70 +133,139 @@ base.summary.percent.selectOne(d, B1) %>%
                          "I do not prefer any particular type of fish")) %>%
   mutate(Response = ifelse(Response == "I do not prefer any particular type of fish",
                            "No particular species", Response)) %>%
+  OrderLegendByFinalYear() %>%
   ggplot(aes(Year, Value, color = Response)) +
-  geom_line() + geom_point(size = 2) +
-  scale_color_viridis_d(begin = 0.2, end = 0.8) +
+  geom_line(linewidth = 1.5) + geom_point(size = 4) +
+  scale_color_viridis_d(end = 0.9) +
   scale_x_continuous(breaks = c(2002, 2012, 2018, 2025)) +
   labs(title = "Most-preferred fish", x = NULL, y = "Percent naming as favorite", color = NULL) +
   theme_minimal()
 ```
 
-## Anglers are satisfied, and have been for years
+Satisfaction improved between 2002 and 2012 and has held since. The share who are "very satisfied" has climbed every survey (16% to 28%) while dissatisfaction has fallen from about a quarter of anglers to roughly 15%.
 
-Satisfaction improved notably between 2002 and 2012 and has held since. The share
-who are "very satisfied" has climbed every survey (16% to 28%), while expressed
-dissatisfaction has fallen from about a quarter of anglers to roughly 15%.
-
-```{r chart_satisfaction, fig.width=6.5, fig.height=3}
-base.summary.percent.selectOne(d, A9) %>%
+```{r chart_satisfaction, fig.width=6.5, fig.height=3.5}
+sat_levels <- c("Very satisfied", "Somewhat satisfied", "Neutral",
+                "Somewhat dissatisfied", "Very dissatisfied")
+sat <- base.summary.percent.selectOne(d, A9) %>%
+  mutate(Response = factor(as.character(Response), levels = sat_levels))
+sat_line <- sat %>%
   filter(Response %in% c("Very satisfied", "Somewhat satisfied")) %>%
-  group_by(Year) %>%
-  summarise(pct = sum(Value), .groups = "drop") %>%
-  ggplot(aes(Year, pct)) +
-  geom_line() + geom_point(size = 2) +
-  scale_x_continuous(breaks = c(2002, 2012, 2018, 2025)) +
-  ylim(50, 75) +
-  labs(title = "Anglers satisfied with their Nebraska fishing (very + somewhat)",
-       x = NULL, y = "Percent satisfied") +
+  group_by(Year) %>% summarise(pct = sum(Value), .groups = "drop")
+
+ggplot() +
+  geom_col(data = sat, aes(factor(Year), Value, fill = Response),
+           position = position_stack(reverse = TRUE)) +
+  geom_line(data = sat_line, aes(factor(Year), pct, group = 1,
+                                 color = "Satisfied (very + somewhat)"), linewidth = 1.5) +
+  geom_point(data = sat_line, aes(factor(Year), pct,
+                                  color = "Satisfied (very + somewhat)"), size = 4) +
+  scale_fill_viridis_d(end = 0.9) +
+  scale_color_manual(values = c("Satisfied (very + somewhat)" = "black"), name = NULL) +
+  guides(fill = guide_legend(reverse = TRUE)) +
+  labs(title = "Angler satisfaction with Nebraska fishing",
+       x = NULL, y = "Percent of anglers", fill = NULL) +
   theme_minimal()
 ```
 
-## A gradual shift away from keeping fish
-
-Anglers' orientation toward catching something, toward catching numbers of fish,
-and toward catching bigger fish has been largely stable (interest in larger fish
-remains strongest and has ticked up slightly). The clearest movement is a modest,
-steady decline in how harvest-oriented anglers are — consistent with a long-running,
-gradual move toward a catch-and-release ethic.
+When examining the components to Nebraska anglers' attitudes of a successful trip, rank order of the four attitudes has not changed over the four surveys.  Anglers' orientation towards size of fish and catching something have remained relatively constant.  The importance of numbers of fish caught has increased in the last two surveys yet remains lower than the importance of size of fish. The clearest movement is a modest, steady decline in harvest-oriented attitudes of Nebraska anglers.
 
 ```{r chart_attitudes, fig.width=6.5, fig.height=3}
 foreach(i = c("attitude_catch","attitude_numbers","attitude_size","attitude_harvest"),
         .combine = "rbind") %do%
   base.summary.means(d %>% filter(get(paste0(i, "_AnsweredAll")) == TRUE), !!rlang::sym(i)) %>%
   LabelResponses(l) %>%
+  OrderLegendByFinalYear() %>%
   ggplot(aes(Year, Value, color = Response)) +
-  geom_line() + geom_point(size = 2) +
-  scale_color_viridis_d(begin = 0.1, end = 0.85) +
+  geom_line(linewidth = 1.5) + geom_point(size = 4) +
+  scale_color_viridis_d(end = 0.9) +
   scale_x_continuous(breaks = c(2002, 2012, 2018, 2025)) +
-  labs(title = "Catch and harvest orientation (1 = low to 5 = high)",
+  labs(title = "Angler attitudes",
        x = NULL, y = "Mean rating", color = NULL) +
   theme_minimal()
 ```
 
-## Bottom line
+Younger anglers place more importance on the size and number of fish caught, while older anglers place relatively more importance on harvest; orientation toward simply catching something is fairly stable across age groups. Age groups are only available for the 2025 survey.
+
+```{r chart_attitudes_age, fig.width=6.5, fig.height=3.5}
+foreach(i = c("attitude_catch","attitude_numbers","attitude_size","attitude_harvest"),
+        .combine = "rbind") %do%
+  base.summary.means(
+    d %>% filter(surveyYear == 2025, get(paste0(i, "_AnsweredAll")) == TRUE, !is.na(E3)),
+    !!rlang::sym(i),
+    E3
+  ) %>%
+  LabelResponses(l) %>%
+  OrderLegendByFinalX(xField = "Group") %>%
+  ggplot(aes(Group, Value, color = Response, group = Response)) +
+  geom_errorbar(aes(ymin = Value - CI, ymax = Value + CI), width = 0.2, linewidth = 0.6) +
+  geom_line(linewidth = 1.5) + geom_point(size = 4) +
+  scale_color_viridis_d(end = 0.9) +
+  labs(title = "Angler attitudes by age group (2025)",
+       x = NULL, y = "Mean rating", color = NULL) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+```
+
+The declining harvest orientation is reflected in what anglers actually do with their catch. When anglers who sought a species were asked how much of their catch they kept, harvest has declined steadily for almost every species across the four surveys. Anglers of traditional harvest species such as crappie, channel catfish, bluegill, and walleye have shifted from keeping roughly half of their catch toward keeping only a few with trout anglers showing the largest decline.  Harvest among the release-oriented largemouth bass anglers continues to fall. Voluntary release is rising broadly outside of the traditional trophy fisheries, which affects assumptions about exploitation rates and how harvest-oriented regulations will function.
+
+```{r chart_harvest_species, fig.width=6.5, fig.height=3.5}
+harvestFields <- d %>% dplyr::select(contains("B3")) %>%
+  dplyr::select(-contains("Answered")) %>%
+  dplyr::select(-contains("oth")) %>% dplyr::select(-contains("any")) %>% names()
+
+harvest_b3 <- foreach(i = harvestFields, .combine = "rbind") %do% {
+  base.summary.means(
+    d %>% filter(!is.na(get(i))) %>% filter(as.numeric(get(gsub("3", "2", i))) == 2),
+    !!rlang::sym(i))
+} %>% LabelResponses(l)
+
+harvest_b3 %>%
+  filter(Response %in% c("Walleye/Sauger", "Crappie", "Channel catfish",
+                         "Bluegill/Sunfish", "Trout", "Largemouth bass")) %>%
+  # Invert (6 - response) so declining lines = declining harvest, matching the
+  # attitude chart above.
+  mutate(Value = 6 - Value) %>%
+  ggplot(aes(Year, Value, color = Response)) +
+  geom_errorbar(aes(ymin = Value - CI, ymax = Value + CI), width = 1.2, linewidth = 0.6) +
+  geom_line(linewidth = 1.5) + geom_point(size = 4) +
+  scale_color_viridis_d(end = 0.9) +
+  scale_x_continuous(breaks = c(2002, 2012, 2018, 2025)) +
+  scale_y_continuous(limits = c(1, 5), breaks = 1:5, labels = c("Kept None", "Kept Few", "Kept Half", "Kept Many", "Kept all")) +
+  labs(title = "Harvest rates by species",
+       x = NULL, y = "Mean harvest",
+       caption = "",
+       color = NULL) +
+  theme_minimal()
+```
+
+When asked about four different motivations for fishing, anglers rate social motivations and natural environment motivations as most important. During the 2018 survey natural environment motivations overtook social motivations for the top ranking and the that rank order remained during the 2025 survey.  Motivations tied strictly to the fishery resource itself (the importance of the catch and keeping fish) rank last among motivational factors and fall significantly lower on the scale.  For a large share of anglers, the quality of the overall outdoor experience and social motivations are as important as the catch. All scale scores were higher for all scales than in previous survey and likely represents a survey artifect and attention should remain on rank order and relative differences within years and not examined for relative differences in scale scores between years.
+
+```{r chart_motivations, fig.width=6.5, fig.height=3}
+foreach(i = c("motivation_pp","motivation_natural","motivation_social","motivation_resource"),
+        .combine = "rbind") %do%
+  base.summary.means(d %>% filter(get(paste0(i, "_AnsweredAll")) == TRUE), !!rlang::sym(i)) %>%
+  LabelResponses(l) %>%
+  OrderLegendByFinalYear() %>%
+  ggplot(aes(Year, Value, color = Response)) +
+  geom_line(linewidth = 1.5) + geom_point(size = 4) +
+  scale_color_viridis_d(end = 0.9) +
+  scale_x_continuous(breaks = c(2002, 2012, 2018, 2025)) +
+  labs(title = "Angler motivations",
+       x = NULL, y = "Mean importance", color = NULL) +
+  theme_minimal()
+```
 
 Over the past two decades, Nebraska's licensed anglers have become more active,
 consistently satisfied, less reliant on motorized boats, broader in the species
-they pursue, and somewhat less focused on harvest. The throughline for management
-is that anglers increasingly value access and a quality overall experience across
-a diversity of waters, alongside the traditional draw of premier species.
-Continued attention to shore and small-craft access, dependable fishing close to
-home, and the broader setting will serve the largest and fastest-growing segments
-of the angling public.
+they pursue, and less focused on harvest. The implications for management
+is that anglers value access and a quality overall experience across diverse species and settings.  Management should continue to provide access to a diversity of waters and opportunites alongside the traditional draw of premier species.  Continued attention to shore and small-craft access, dependable fishing close to home, and the broader experience will serve the largest segments of the angling public.
 
-The detailed question-by-question tables and figures follow.
+`r officer::run_pagebreak()`
 
-<!---CHUNK_PAGEBREAK--->
+# Longitudinal Results
+
+## Fished in Nebraska
 
 `r paste(trimws(GetQuestion(q, A2, 2025)),"  ", caption.percents, sep="")`
 
@@ -197,7 +283,9 @@ CreatePercPlot(base.summary.percent.selectOne(d, A2), freeScale = FALSE)
 
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Reasons for Not Fishing
 
 `r paste(trimws(GetQuestion(q, A3, 2025)),"  ", caption.percents, sep="")`
 
@@ -214,7 +302,9 @@ CreateFt(
 CreatePercPlot(base.summary.percent.selectOne(d, A3))
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Waterbody Types
 
 `r paste(trimws(GetQuestion(q, A4, 2025)),"  ", caption.percents, sep="")`
 
@@ -229,7 +319,9 @@ CreateFt(ArrangeTable(
 CreatePercPlot(base.summary.percent.selectAll(d , myFields, myAnsweredVar = A4_Answered))
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Fishing Methods
 
 `r paste(trimws(GetQuestion(q, A5, 2025)),"  ", caption.percents, sep="")`
 
@@ -244,7 +336,9 @@ CreateFt(ArrangeTable(
 CreatePercPlot(base.summary.percent.selectAll(d, myFields, myAnsweredVar = A5_Answered))
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Fishing Techniques
 
 `r paste(trimws(GetQuestion(q, A6, 2025)),"  ", caption.percents, sep="")`
 
@@ -259,7 +353,9 @@ CreateFt(ArrangeTable(
 CreatePercPlot(base.summary.percent.selectAll(d, myFields, myAnsweredVar = A6_Answered))
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Distance to Waterbody
 
 `r paste(trimws(GetQuestion(q, A7, 2025)),"  ", caption.medians, "  ", labels.distance, sep="")`
 
@@ -277,7 +373,9 @@ CreateFt(ArrangeTableMedians(
   roundDigits = 1) %>% select(-Response))
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Satisfaction
 
 `r paste(trimws(GetQuestion(q, A9, 2025)),"  ", caption.percents, "  ", labels.satisfaction, sep="")`
 
@@ -291,13 +389,17 @@ CreateFt(ArrangeTable(
 CreatePercPlot(base.summary.percent.selectOne(d, A9), freeScale = FALSE)
 ```
 
+`r paste(trimws(GetQuestion(q, A9, 2025)),"  ", caption.means, "  ", labels.satisfaction, sep="")`
+
 ```{r A9_satisfactionMean}
 CreateFt(ArrangeTable(
   base.summary.means(d, A9),
-  roundDigits = 1))
+  roundDigits = 1) %>% select(-Response))
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## State Park Entry Permits
 
 `r paste(trimws(GetQuestion(q, A10, 2025)),"  ", caption.means, sep="")`
 
@@ -311,7 +413,9 @@ CreateFt(ArrangeTable(
 CreatePercPlot(base.summary.percent.selectOne(d, A10), freeScale = FALSE)
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Conservation Officer Contact
 
 `r paste(trimws(GetQuestion(q, E7, 2025)),"  ", caption.percents, sep="")`
 
@@ -325,7 +429,9 @@ CreateFt(ArrangeTable(
 CreatePercPlot(base.summary.percent.selectOne(d, E7), freeScale = FALSE)
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Most-Preferred Species
 
 `r paste(trimws(GetQuestion(q, B1, 2025)),"  ", caption.percents, sep="")`
 
@@ -359,7 +465,9 @@ CreateFtRanks(ArrangeTableRanks(op))
 
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Most Sought Species
 
 `r paste(trimws(GetQuestion(q, B2, 2025)),"  ", caption.percents, sep="")`
 
@@ -394,7 +502,9 @@ op<-base.summary.percent.selectAll(d, myFields, B2_Answered) %>%
 CreateFtRanks(ArrangeTableRanks(op))
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Fish Harvest and Release
 
 `r paste(trimws(GetQuestion(q, B3, 2025)),"  ", caption.percents, sep="")`
 
@@ -426,7 +536,9 @@ CreateFt(ArrangeTable(LabelResponses(op, l)))
 ```
 
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Days Fished
 
 `r paste(trimws(GetQuestion(q, C1, 2025)),"  ", caption.percents, sep="")`
 
@@ -603,7 +715,9 @@ mydata %>%
   theme(legend.position = "none")
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Angler Motivations
 
 `r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, sep="")`
 
@@ -616,31 +730,31 @@ op<-foreach(i=1:length(myFields), .combine = "rbind") %do% {
 CreateFt(ArrangeTable(SubstitueQuesForResponse(op, q, C2, 2025)))
 ```
 
-```{r C2_likert, fig.width=7.5, fig.height=8}
+```{r C2_likert, fig.width=6.5, fig.height=8}
 op<-CreateSubScaleLikertGraphs(d, "Motivations", q)
 ```
 
 <!---CHUNK_PAGEBREAK--->
 
-```{r, fig.width=7.5, fig.height=8}
+```{r, fig.width=6.5, fig.height=8}
 print(op[[1]])
 ```
 
 <!---CHUNK_PAGEBREAK--->
 
-```{r, fig.width=7.5, fig.height=8}
+```{r, fig.width=6.5, fig.height=8}
 print(op[[2]])
 ```
 
 <!---CHUNK_PAGEBREAK--->
 
-```{r, fig.width=7.5, fig.height=8}
+```{r, fig.width=6.5, fig.height=8}
 print(op[[3]])
 ```
 
 <!---CHUNK_PAGEBREAK--->
 
-```{r, fig.width=7.5, fig.height=8}
+```{r, fig.width=6.5, fig.height=8}
 print(op[[4]])
 ```
 
@@ -680,7 +794,9 @@ CreateFt(ArrangeTable(LabelResponses(op, l)))
 CreateMeanPlot(LabelResponses(op, l), freeScale = FALSE, numCols=4) + theme(panel.background = element_rect(fill="gray80"))
 ```
 
-<!---CHUNK_PAGEBREAK--->
+`r officer::run_pagebreak()`
+
+## Angler Attitudes
 
 `r paste(trimws(GetQuestion(q, E1, 2025)), "  ", caption.means, "  ", labels.agree, sep="")`
 
@@ -695,31 +811,31 @@ CreateFt(ArrangeTable(SubstitueQuesForResponse(op, q, E1, 2025)))
 
 <!---CHUNK_PAGEBREAK--->
 
-```{r E1_likert, fig.width=7.5, fig.height=8}
+```{r E1_likert, fig.width=6.5, fig.height=8}
 op<-CreateSubScaleLikertGraphs(d, "Attitudes", q)
 ```
 
 <!---CHUNK_PAGEBREAK--->
 
-```{r, fig.width=7.5, fig.height=8}
+```{r, fig.width=6.5, fig.height=8}
 print(op[[1]])
 ```
 
 <!---CHUNK_PAGEBREAK--->
 
-```{r, fig.width=7.5, fig.height=8}
+```{r, fig.width=6.5, fig.height=8}
 print(op[[2]])
 ```
 
 <!---CHUNK_PAGEBREAK--->
 
-```{r, fig.width=7.5, fig.height=8}
+```{r, fig.width=6.5, fig.height=8}
 print(op[[3]])
 ```
 
 <!---CHUNK_PAGEBREAK--->
 
-```{r, fig.width=7.5, fig.height=8}
+```{r, fig.width=6.5, fig.height=8}
 print(op[[4]])
 ```
 
@@ -739,5 +855,4 @@ CreateFt(ArrangeTable(LabelResponses(op, l)))
 
 ```{r E1_means_catch_noncatch}
 CreateMeanPlot(LabelResponses(op, l), freeScale = FALSE, numCols=4) + theme(panel.background = element_rect(fill="gray80"))
-toc()
 ```

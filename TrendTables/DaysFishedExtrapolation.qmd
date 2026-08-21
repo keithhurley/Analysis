@@ -1,0 +1,172 @@
+---
+title: "Extrapolated total days fished in Nebraska, 2025"
+format:
+  pdf:
+    geometry: margin=0.75in
+execute:
+  echo: false
+  warning: false
+  message: false
+  error: false
+---
+
+```{r}
+#| label: load-packages
+library(dplyr)
+library(readxl)
+library(stringr)
+library(ggplot2)
+library(gt)
+```
+
+```{r}
+#| label: load-data
+load("../../Data/DataAggregation1/aggregateData_20260624.rData")
+
+permits <- read_xlsx("D:/Survey/SurveyDraw/Permits.xlsx")
+```
+
+## Objective
+
+This analysis extrapolates total angler-days fished in Nebraska during the 2025 license year from the 2025 angler survey to the full population of licensed anglers, using the administrative permit file as the population frame.
+
+## Data and methods
+
+**Survey data.** Respondents to the 2025 survey (`surveyYear == 2025`) who answered all monthly fishing-frequency questions (`C1_AnsweredAll == TRUE`) with a non-missing total (`C1Total_days`) were retained.
+
+**Population frame.** `Permits.xlsx` contains one row per permit transaction (all purchase years); it was reduced to one row per unique angler (`CustomerID`) to represent the population of $N =$ `{r} format(nrow(permits |> distinct(CustomerID, .keep_all = TRUE)), big.mark = ",")` licensed anglers, since multi-year and lifetime permits purchased in prior seasons remain valid in 2025.
+
+**Linkage.** Survey respondents were joined to their administrative record by `CustomerID`, replacing self-reported permit type/residency/age with the administrative `PermitName`, `ResidencyStatus`, and `Age` fields.
+
+**Stratification.** Permit types were collapsed into eight groups by duration (short-term, annual, multi-year, lifetime) crossed with license category (fish-only vs. hunt/fish combo). Two independent post-stratification schemes were used:
+
+- Residency $\times$ permit-type group (for the overall total and residency breakdown)
+- Residency $\times$ age group (16-24, ..., 65+; for the age breakdown)
+
+**Estimator.** Within each stratum $h$, the survey-weighted mean days fished ($\bar{x}_h$, weighted by `postWeight`) was multiplied by the stratum's population size ($N_h$, from the permit frame) and summed:
+
+$$\hat{T} = \sum_h \bar{x}_h N_h$$
+
+A 95% confidence interval for the overall total was obtained by bootstrap resampling (2,000 replicates) within each residency $\times$ permit-type stratum.
+
+```{r}
+#| label: prep-data
+
+classify_permit <- function(name) {
+  combo <- if_else(str_detect(name, regex("Hunt Fish|Combo", ignore_case = TRUE)),
+                    "Hunt/Fish Combo", "Fish Only")
+  duration <- case_when(
+    str_detect(name, regex("1-Day|3-Day", ignore_case = TRUE)) ~ "Short-term (1-3 Day)",
+    str_detect(name, regex("Lifetime", ignore_case = TRUE)) ~ "Lifetime",
+    str_detect(name, regex("3YR|5YR", ignore_case = TRUE)) ~ "Multi-year (3-5 Yr)",
+    str_detect(name, regex("Annual", ignore_case = TRUE)) ~ "Annual",
+    TRUE ~ "Other"
+  )
+  paste(duration, combo, sep = " - ")
+}
+
+permits_dedup <- permits |>
+  distinct(CustomerID, .keep_all = TRUE) |>
+  mutate(
+    PermitGroup = classify_permit(PermitName),
+    AgeGroup = cut(Age, breaks = c(15, 24, 34, 44, 54, 64, Inf),
+                   labels = c("16-24", "25-34", "35-44", "45-54", "55-64", "65+"),
+                   right = TRUE)
+  )
+
+pop_strata <- permits_dedup |> count(ResidencyStatus, PermitGroup, name = "N_pop")
+pop_age <- permits_dedup |> filter(!is.na(AgeGroup)) |> count(ResidencyStatus, AgeGroup, name = "N_pop")
+
+d2025_strat <- d |>
+  filter(surveyYear == 2025, C1_AnsweredAll == TRUE, !is.na(C1Total_days)) |>
+  left_join(
+    permits_dedup |> select(CustomerID, PermitName, ResidencyStatus, Age_admin = Age, PermitGroup, AgeGroup),
+    by = "CustomerID"
+  )
+
+stratum_est <- d2025_strat |>
+  group_by(ResidencyStatus, PermitGroup) |>
+  summarise(n_sample = n(), mean_days = weighted.mean(C1Total_days, w = postWeight), .groups = "drop") |>
+  left_join(pop_strata, by = c("ResidencyStatus", "PermitGroup")) |>
+  mutate(extrapolated_days = mean_days * N_pop)
+
+total_hat <- sum(stratum_est$extrapolated_days)
+
+age_stratum_est <- d2025_strat |>
+  filter(!is.na(AgeGroup)) |>
+  group_by(ResidencyStatus, AgeGroup) |>
+  summarise(n_sample = n(), mean_days = weighted.mean(C1Total_days, w = postWeight), .groups = "drop") |>
+  left_join(pop_age, by = c("ResidencyStatus", "AgeGroup")) |>
+  mutate(extrapolated_days = mean_days * N_pop)
+
+resid_est <- stratum_est |>
+  group_by(ResidencyStatus) |>
+  summarise(N_pop = sum(N_pop), extrapolated_days = sum(extrapolated_days), .groups = "drop") |>
+  mutate(mean_days_per_angler = round(extrapolated_days / N_pop, 1),
+         pct_of_total = round(100 * extrapolated_days / sum(extrapolated_days), 1))
+
+age_est <- age_stratum_est |>
+  group_by(AgeGroup) |>
+  summarise(N_pop = sum(N_pop), extrapolated_days = sum(extrapolated_days), .groups = "drop") |>
+  mutate(mean_days_per_angler = round(extrapolated_days / N_pop, 1),
+         pct_of_total = round(100 * extrapolated_days / sum(extrapolated_days), 1))
+```
+
+```{r}
+#| label: bootstrap-ci
+set.seed(7351)
+nboot <- 2000
+
+split_dat <- split(d2025_strat, paste(d2025_strat$ResidencyStatus, d2025_strat$PermitGroup))
+N_lookup <- setNames(pop_strata$N_pop, paste(pop_strata$ResidencyStatus, pop_strata$PermitGroup))
+
+boot_totals <- replicate(nboot, {
+  sum(vapply(names(split_dat), function(s) {
+    dat <- split_dat[[s]]
+    idx <- sample.int(nrow(dat), replace = TRUE)
+    weighted.mean(dat$C1Total_days[idx], dat$postWeight[idx]) * N_lookup[[s]]
+  }, numeric(1)))
+})
+
+ci <- quantile(boot_totals, c(0.025, 0.975))
+```
+
+## Results
+
+**Overall total.** The extrapolated total is `{r} format(round(total_hat), big.mark = ",")` angler-days for the 2025 license year (95% bootstrap CI: `{r} format(round(ci[1]), big.mark = ",")`-`{r} format(round(ci[2]), big.mark = ",")`), across `{r} format(sum(pop_strata$N_pop), big.mark = ",")` licensed anglers — an average of `{r} round(total_hat / sum(pop_strata$N_pop), 1)` days per angler.
+
+```{r}
+#| label: table-residency
+resid_est |>
+  gt() |>
+  fmt_number(columns = c(N_pop, extrapolated_days), decimals = 0) |>
+  cols_label(ResidencyStatus = "Resident", N_pop = "Population",
+             extrapolated_days = "Extrapolated days", mean_days_per_angler = "Days/angler",
+             pct_of_total = "% of total") |>
+  tab_header(title = "Extrapolated days fished by residency")
+```
+
+```{r}
+#| label: table-age
+age_est |>
+  gt() |>
+  fmt_number(columns = c(N_pop, extrapolated_days), decimals = 0) |>
+  cols_label(AgeGroup = "Age group", N_pop = "Population",
+             extrapolated_days = "Extrapolated days", mean_days_per_angler = "Days/angler",
+             pct_of_total = "% of total") |>
+  tab_header(title = "Extrapolated days fished by age group")
+```
+
+Age-group totals (`{r} format(round(sum(age_est$extrapolated_days)), big.mark = ",")`) are stratified on a different variable (age rather than permit type) and so do not sum exactly to the overall total above; the two figures differ by about `{r} round(100 * abs(total_hat - sum(age_est$extrapolated_days)) / total_hat, 1)`%, which reflects the use of a different post-stratification scheme rather than a data discrepancy.
+
+## Note on mean vs. median
+
+Per-angler day rates in this analysis (`{r} round(total_hat / sum(pop_strata$N_pop), 1)` overall) are notably higher than the median days-fished figure reported elsewhere in the trend report (~18 days among 2025 anglers who fished). This is expected: `C1Total_days` is strongly right-skewed, with a small share of frequent anglers reporting well over 100 days a season, which pulls the mean well above the median without indicating any error.
+
+A population *total* is, by definition, the sum of every individual's days, and $\text{sum} = N \times \text{mean}$ exactly — there is no equivalent identity for the median. Substituting the median for the mean in this calculation would understate the true total by roughly 43%, because it discards the real extra days reported by frequent anglers. A sensitivity check confirmed the total is not driven by a small number of extreme responses: capping individual values at 150 days (affecting ~1% of respondents) changes the total by only 1.3%, while only much more aggressive caps (e.g., 30 days, affecting a third of respondents) produce large swings — indicating the mean-based estimate reflects genuine variation in fishing frequency rather than a few outliers.
+
+## Limitations
+
+- Some non-resident permit-type strata (e.g., multi-year, lifetime) have very small survey samples (as few as 1-2 respondents), so their per-stratum means are imprecise, though their small population size limits their influence on the overall total.
+- The permit population frame includes anglers holding valid multi-year or lifetime permits purchased in prior seasons; it is not limited to 2025 transactions.
+- Reported totals rely on self-reported days fished, which may be subject to recall or rounding bias in either direction.

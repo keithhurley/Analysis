@@ -200,13 +200,13 @@ CreateFlex(CreateTableB_selectOne_percent(d, A10))
 
 # Fishing Tournaments
 
-`r paste(trimws(GetQuestion(q, A13, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r paste("Percent of respondents who participated in at least one fishing tournament (derived from ", trimws(GetQuestion(q, A13, 2025)), ")","  ", caption.percents, "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableA_selectOne_percent(d, fishedTourney) %>% mutate(Response=c("No Tournaments","Fished Tournaments")))
 ```
 
-`r paste(trimws(GetQuestion(q, A13, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r paste("Percent of respondents who participated in at least one fishing tournament (derived from ", trimws(GetQuestion(q, A13, 2025)), ")","  ", caption.percents, "  ", caption.raked, sep="")`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, fishedTourney) %>% mutate(Response=c("No Tournaments","Fished Tournaments")))
@@ -1439,7 +1439,7 @@ CreateFlex(MarkReversedItems(SubstitueQuesForResponse(CreateTableB_means(d, myFi
 `r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", ReversedItemsNote("Regulations"), "  ", caption.raked, sep="")`
 
 ```{r }
-myFieldsQ31sub<-c("reg_complexity", "reg_trust", "reg_objectives")
+myFieldsQ31sub<-c("reg_comprehension", "reg_sitesupport", "reg_uniform")
 
 op<-foreach(i=myFieldsQ31sub, .combine="rbind") %do% {
   CreateTableA_means(d %>% filter(get(paste(i,"_AnsweredAll", sep=""))==TRUE), i)

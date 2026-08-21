@@ -119,17 +119,24 @@ base.summary.percent.selectOne <- function(
     group_by(surveyYear, group, response) %>%
     summarise(
       num = sum(postWeight, na.rm = TRUE),
+      sumsq = sum(postWeight^2, na.rm = TRUE),
       numRespondents = n(),
       .groups = "drop_last"
     ) %>%
     mutate(
       totNum = sum(num, na.rm = TRUE),
-      totRespondents = sum(numRespondents, na.rm = TRUE)
+      totRespondents = sum(numRespondents, na.rm = TRUE),
+      # Kish effective sample size: (sum w)^2 / sum(w^2). Used as the CI
+      # denominator so intervals are correct when weights are scaled to the
+      # population (e.g. 2025) rather than the sample, and so they reflect the
+      # design effect of unequal weighting. For unweighted years (w = 1) this
+      # equals the raw respondent count.
+      effN = (totNum^2) / sum(sumsq, na.rm = TRUE)
     ) %>%
     mutate(perc = num / totNum * 100) %>%
     mutate(
       ci = round(
-        (1.96 * (sqrt((perc / 100) * (1 - (perc / 100)) / totNum))) *
+        (1.96 * (sqrt((perc / 100) * (1 - (perc / 100)) / effN))) *
           100,
         4
       )
@@ -200,14 +207,19 @@ base.summary.percent.selectAll <- function(
     group_by(surveyYear, group, variable, value) %>%
     summarise(
       num = sum(postWeight, na.rm = TRUE),
+      sumsq = sum(postWeight^2, na.rm = TRUE),
       numRespondents = n(),
       .groups = "drop_last"
     ) %>%
-    mutate(totNum = sum(num, na.rm = TRUE)) %>%
+    mutate(
+      # Kish effective sample size (see selectOne).
+      totNum = sum(num, na.rm = TRUE),
+      effN = (totNum^2) / sum(sumsq, na.rm = TRUE)
+    ) %>%
     mutate(perc = num / totNum * 100) %>%
     mutate(
       ci = round(
-        (1.96 * (sqrt((perc / 100) * (1 - (perc / 100)) / totNum))) *
+        (1.96 * (sqrt((perc / 100) * (1 - (perc / 100)) / effN))) *
           100,
         4
       )
