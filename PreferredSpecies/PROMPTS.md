@@ -543,3 +543,7 @@ Tab "docx file is locked":
 ## 2026-09-18 — Prompt 68 (mean age in the Chapter 3 age table)
 
 > add the mean age and CI to the age table in chapter 3
+
+## 2026-09-18 — Prompt 69 (track the rendered report)
+
+> I'd rather add the drafts to git

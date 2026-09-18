@@ -13,8 +13,10 @@ Thumbs.db
 .verify2/
 .verifytmp/
 
-# Rendered report output
-PreferredSpeciesReport.docx
+# The rendered report IS tracked so drafts can be circulated through git.
+# The repo-root .gitignore ignores *.docx everywhere, so this negation is what
+# actually re-includes it; the root rule is left alone for every other project.
+!PreferredSpeciesReport.docx
 
 # Generated artifact from the abandoned Appendix A pour (D36). No longer
 # produced by the report; the copy left on disk can be deleted.

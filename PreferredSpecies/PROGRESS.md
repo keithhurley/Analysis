@@ -971,3 +971,13 @@ and any text drawing on this column should quote the weighted figure.
 unchanged; the `Mean age ± CI` header and the `46.0 ± 0.88` Overall cell are both present in
 `document.xml`; the A9 mean column is byte-identical to before the change (Overall 2.3 ± 0.06,
 Trout 1.8 ± 0.21).
+
+### Rendered drafts are now tracked (2026-09-18, prompt 69)
+
+| # | Decision | Date |
+|---|---|---|
+| D109 | **`PreferredSpeciesReport.docx` is tracked in git**, so drafts can be circulated through the repository. Supersedes the exclusion in D37. Implemented as a `!PreferredSpeciesReport.docx` negation in the project `.gitignore`, because the repo-root `.gitignore` ignores `*.docx` across all of `Analysis/` (F36); the root rule was deliberately not touched, so no other project's behaviour changes. The other `.gitignore` entries are unchanged — build artifacts (`.verify2/`, `.verifytmp/`), Word lock files, and the inert `SurveyInstrument_2025.docx` from D39 all stay ignored. Practical consequence: the ~550 KB binary is re-committed in full on every render, so the repository will grow with each draft. | 2026-09-18 |
+
+| # | Finding |
+|---|---|
+| F36 | **D37's premise was wrong: `CrossTabTables/` does not track its rendered `.docx`.** `git ls-files CrossTabTables` returns no Word document. The repo-root `.gitignore` at `F:/Survey/Analysis` ignores `*.docx` (along with `*.pdf`, `*.png`, and `*.jpg`) for the entire repository, so no project in `Analysis/` has ever tracked rendered output. The "divergence" D37 flagged therefore never existed, and D109's tracking of this report's `.docx` is a genuine *departure* from repo practice rather than a return to it. Nothing was changed in `CrossTabTables/` or in the root `.gitignore`. |
