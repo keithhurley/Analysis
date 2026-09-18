@@ -1,0 +1,31 @@
+{
+  "permission": {
+    "external_directory": {
+      "f:/Survey/Analysis/*": "allow",
+      "f:/Survey/Data/DataAggregation1/*": "allow",
+      "/tmp/*": "allow"
+    },
+    "edit": {
+      "*.md": "allow",
+      "*.R": "allow",
+      "*.rmd": "allow",
+      "*/.gitignore": "allow",
+      "*/.writetest2": "allow"
+    },
+    "executeCode": {
+      "*": "allow"
+    },
+    "bash": {
+      "sed *": "allow",
+      "cd *": "allow",
+      "grep *": "allow",
+      "head *": "allow",
+      "echo *": "allow",
+      "awk *": "allow",
+      "sort *": "allow",
+      "ls *": "allow",
+      "cp *": "allow",
+      "uniq *": "allow"
+    }
+  }
+}

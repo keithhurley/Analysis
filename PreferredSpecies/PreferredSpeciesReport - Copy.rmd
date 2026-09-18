@@ -1,0 +1,801 @@
+---
+#title: "2025 Licensed Angler Survey — Preferred Species"
+#date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  officedown::rdocx_document:
+    toc: false
+always_allow_html: yes
+---
+
+```{r setup, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, fig.width=7.5, fig.height=7}
+knitr::opts_chunk$set(echo=FALSE, include=TRUE, warning=FALSE, error=FALSE, message=FALSE, ft.align="left")
+library(tictoc)
+tic("Report Took ")
+options(stringsAsFactors = FALSE)
+library(officedown)
+library(officer)
+library(rmarkdown)
+library(tidyverse)
+library(knitr)
+library(flextable)
+library(stringr)
+library(survey)
+
+setwd("F:/Survey/Analysis/PreferredSpecies/")
+
+source("..\\BaseFunctions_2025_UPDATED.R") #load file of common functions
+# Sourced read-only to inherit the crosstab report's caption text and table
+# wrappers verbatim rather than duplicating them. Nothing in CrossTabTables/ is
+# modified. PreferredSpeciesFunctions.R is sourced last so it wins any conflict.
+source("..\\CrossTabTables\\CrossTabTableFunctions.R")
+source("PreferredSpeciesFunctions.R") #load file of preferred species report functions
+```
+
+```{r getData, echo=FALSE}
+load(file="../../Data/DataAggregation1/aggregateData_20260624.rData")
+
+# D76: 2018 snapshot for the Chapter 2 D4 slope figures, taken before d is
+# filtered to 2025. Same !is.na(B1) rule as the 2025 universe (D23); "No
+# preference" stays in d2018 here and is excluded later, item-by-item, only
+# from the slope comparison itself (D4SlopeData), not from this snapshot.
+d2018 <- d %>% filter(surveyYear == 2018, !is.na(B1))
+
+d <- d %>% filter(surveyYear==2025)
+
+# Population total over ALL 2025 respondents, captured before the B1 filter
+# because the expansion column is reported on the full-population basis (D29).
+popTotalAll <- sum(d$postWeight)
+nAll2025 <- nrow(d)
+nNoB1 <- sum(is.na(d$B1))
+
+# Captured before the B1 filter so Chapter 2 can report how many respondents
+# answered the D4 battery but are outside this report's universe (F12).
+nD4AnyAll2025 <- sum(rowSums(!is.na(d[, d4.items])) > 0)
+nD4AnyNoB1 <- sum(rowSums(!is.na(d[, d4.items])) > 0 & is.na(d$B1))
+
+# D23: the B1 filter is the first analytic filter. Respondents who left B1
+# blank are out of the report entirely, not merely out of the banner.
+d <- d %>% filter(!is.na(B1))
+
+# Rebuild scale/subscale scores from raw item factors, applying reversals
+# flagged in Scales.csv (single source of truth) at report time.
+d <- add_scale_scores(d)
+
+d$B1banner <- AssignBannerGroup(d$B1)
+
+q <- read.csv(file="../../Data/DataAggregation1/FactorLevels_aggregated.csv") %>% filter(Year==2025)
+l <- read.csv(file="../../Data/DataAggregation1/Labels.csv")
+```
+
+```{r dataChecks, echo=FALSE}
+# Checks after the universe is fixed. These stop the render rather than letting
+# a silent miscount propagate into every table.
+stopifnot(
+  nrow(d) == nAll2025 - nNoB1,
+  sum(is.na(d$B1)) == 0,
+  sum(!is.na(d$B1banner)) + sum(is.na(d$B1banner)) == nrow(d)
+)
+
+# D76: the 2018 snapshot must carry every species name the banner uses and
+# the same five D4 response levels, or D4SlopeData's cross-year join would
+# silently miss species rather than erroring.
+stopifnot(
+  all(unique(d2018$surveyYear) == 2018),
+  sum(is.na(d2018$B1)) == 0,
+  length(setdiff(unlist(banner.definition$Members), as.character(d2018$B1))) == 0,
+  identical(levels(d2018$D4a), levels(d$D4a))
+)
+
+sizeTbl <- SpeciesSizeTable(d, popTotalAll)
+
+stopifnot(
+  abs(sum(sizeTbl$Percent) - 100) < 1e-8,
+  sum(sizeTbl$Respondents) == nrow(d),
+  abs(sum(sizeTbl$TotalAnglers) - popTotalAll) < 1e-6
+)
+
+nBanner <- sum(!is.na(d$B1banner))
+nBannerExcluded <- sum(is.na(d$B1banner))
+
+# Sum of the banner column counts. Exceeds nBanner because family columns
+# contain their own species columns; quoted in Appendix B so the overlap is
+# documented with a live figure rather than a hardcoded one.
+nBannerCellSum <- sum(vapply(
+  banner.definition$Members,
+  function(m) sum(as.character(d$B1) %in% m),
+  integer(1)
+))
+
+popTotalAnalysis <- sum(d$postWeight)
+```
+
+<!--
+D33: page 1 is intentionally left blank for a hand-built title page, and the
+table of contents is placed explicitly rather than via the YAML `toc` option so
+that it follows the title page instead of preceding it.
+-->
+
+&nbsp;
+
+`r run_pagebreak()`
+
+```{r toc}
+block_toc()
+```
+
+`r run_pagebreak()`
+
+# Chapter 1: Determining Species Groupings
+
+`r paste0("This report covers only anglers who answered the preferred-species question. Of the ", format(nAll2025, big.mark=","), " anglers who responded to the 2025 survey, ", format(nNoB1, big.mark=","), " left that question blank, leaving an analysis sample of ", format(nrow(d), big.mark=","), ".")`
+
+`r paste0("Because of that restriction, the Overall column of this report describes anglers who stated a species preference rather than all licensed anglers, and it will therefore not match the Overall column of the 2025 Crosstabs report. The preferred-species distribution in the next table is the one quantity unaffected by the restriction, and it does match the Crosstabs report exactly.")`
+
+## Question Text
+
+`r paste0("*", trimws(GetQuestion(q, B1, 2025)), "*")`
+
+## Sample Sizes and Population Estimates by Species
+
+`r paste(caption.sizes, "  ", caption.raked, sep="")`
+
+```{r speciesSizes}
+CreateFlex(ArrangeSpeciesSizeTable(sizeTbl))
+```
+
+`r paste0("Total anglers applies each species percentage to the full weighted 2025 angler population of ", format(round(popTotalAll), big.mark=","), ", so the column sums to that population. This assumes that leaving the preferred-species question blank is unrelated to which species an angler prefers. The weights carried by the ", format(nrow(d), big.mark=","), " respondents in the analysis sample themselves total ", format(round(sum(d$postWeight)), big.mark=","), ".")`
+
+## Preferred Groups
+
+`r paste0("There are ", nrow(banner.definition), " preferred groups. Seven are family groups; eight are individual species reported alongside the family group that contains them; and two, northern pike and muskellunge, replace the Esocids family group outright. Species that fall outside every family group keep their place in the Overall column of every table but receive no preferred-group column of their own.")`
+
+`r paste(caption.banner, sep="")`
+
+```{r bannerSizes}
+CreateFlex(BannerSizeTable(d))
+```
+
+`r paste0("Preferred species that fall outside every family group. These ", nBannerExcluded, " respondents remain in the Overall column of every table but receive no preferred-group column.")`
+
+```{r bannerExclusions}
+CreateFlex(BannerExclusionTable(d))
+```
+
+`r paste0("The preferred groups cover ", format(nBanner, big.mark=","), " distinct respondents of the ", format(nrow(d), big.mark=","), " in the analysis sample; ", nBannerExcluded, " do not appear in any preferred-group column. Because family columns contain their own species columns, the respondent counts in the table above add to more than ", format(nBanner, big.mark=","), " and should not be totalled.")`
+
+## Comparisons Within Family Groups
+
+`r paste0("The four family groups below contain more than one species, so each is shown broken out by species alongside the family group as a whole. These are the comparisons used to decide whether any individual species is reported separately in later chapters.")`
+
+### Bass
+
+`r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, "  ", caption.comparison, sep="")`
+
+```{r bassMotivation}
+CreateFlex(GenusMeansTable(d, "Bass", motivation.vars, l))
+```
+
+`r paste(trimws(GetQuestion(q, E1, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.raked, "  ", caption.reversed, sep="")`
+
+```{r bassAttitude}
+CreateFlex(GenusMeansTable(d, "Bass", attitude.vars, l))
+```
+
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.means, "  ", caption.medians, "  ", caption.raked, sep="")`
+
+```{r bassEffort}
+CreateFlex(GenusEffortTable(d, "Bass"))
+```
+
+`r paste(caption.contrasts, sep="")`
+
+```{r bassContrasts}
+CreateFlex(ContrastTable(d, "Bass", c(motivation.vars, attitude.vars), l))
+```
+
+`r paste("Days fished, same species comparisons.", "  ", caption.contrasts, sep="")`
+
+```{r bassEffortContrasts}
+CreateFlex(EffortContrastTable(d, "Bass"))
+```
+
+### Panfish / Sunfish
+
+`r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, "  ", caption.comparison, sep="")`
+
+```{r panfishMotivation}
+CreateFlex(GenusMeansTable(d, "Panfish / Sunfish", motivation.vars, l))
+```
+
+`r paste(trimws(GetQuestion(q, E1, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.raked, "  ", caption.reversed, sep="")`
+
+```{r panfishAttitude}
+CreateFlex(GenusMeansTable(d, "Panfish / Sunfish", attitude.vars, l))
+```
+
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.means, "  ", caption.medians, "  ", caption.raked, sep="")`
+
+```{r panfishEffort}
+CreateFlex(GenusEffortTable(d, "Panfish / Sunfish"))
+```
+
+`r paste(caption.contrasts, sep="")`
+
+```{r panfishContrasts}
+CreateFlex(ContrastTable(d, "Panfish / Sunfish", c(motivation.vars, attitude.vars), l))
+```
+
+`r paste("Days fished, same species comparisons.", "  ", caption.contrasts, sep="")`
+
+```{r panfishEffortContrasts}
+CreateFlex(EffortContrastTable(d, "Panfish / Sunfish"))
+```
+
+### Esocids
+
+`r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, "  ", caption.comparison, sep="")`
+
+```{r esocidMotivation}
+CreateFlex(GenusMeansTable(d, "Esocids", motivation.vars, l))
+```
+
+`r paste(trimws(GetQuestion(q, E1, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.raked, "  ", caption.reversed, sep="")`
+
+```{r esocidAttitude}
+CreateFlex(GenusMeansTable(d, "Esocids", attitude.vars, l))
+```
+
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.means, "  ", caption.medians, "  ", caption.raked, sep="")`
+
+```{r esocidEffort}
+CreateFlex(GenusEffortTable(d, "Esocids"))
+```
+
+`r paste(caption.contrasts, sep="")`
+
+```{r esocidContrasts}
+CreateFlex(ContrastTable(d, "Esocids", c(motivation.vars, attitude.vars), l))
+```
+
+`r paste("Days fished, same species comparisons.", "  ", caption.contrasts, sep="")`
+
+```{r esocidEffortContrasts}
+CreateFlex(EffortContrastTable(d, "Esocids"))
+```
+
+### Catfish
+
+`r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, "  ", caption.comparison, sep="")`
+
+```{r catfishMotivation}
+CreateFlex(GenusMeansTable(d, "Catfish", motivation.vars, l))
+```
+
+`r paste(trimws(GetQuestion(q, E1, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.raked, "  ", caption.reversed, sep="")`
+
+```{r catfishAttitude}
+CreateFlex(GenusMeansTable(d, "Catfish", attitude.vars, l))
+```
+
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.means, "  ", caption.medians, "  ", caption.raked, sep="")`
+
+```{r catfishEffort}
+CreateFlex(GenusEffortTable(d, "Catfish"))
+```
+
+`r paste(caption.contrasts, sep="")`
+
+```{r catfishContrasts}
+CreateFlex(ContrastTable(d, "Catfish", c(motivation.vars, attitude.vars), l))
+```
+
+`r paste("Days fished, same species comparisons.", "  ", caption.contrasts, sep="")`
+
+```{r catfishEffortContrasts}
+CreateFlex(EffortContrastTable(d, "Catfish"))
+```
+
+<!--
+Chapter 1 is complete apart from the 3.6 disposition table, which is not needed
+now that the split decisions have been made (D31).
+-->
+
+`r run_pagebreak()`
+
+# Chapter 2: Species-Linked Scale Questions
+
+```{r d4Setup}
+# Universe for the battery: the report universe, with each item keeping its own
+# non-missing filter as the crosstab report does (2025CrossTabReport.rmd L768).
+nD4Any <- sum(rowSums(!is.na(d[, d4.items])) > 0)
+d4.categories <- levels(d[[d4.items[1]]])
+
+stopifnot(
+  length(d4.items) == 13,
+  all(d4.items %in% names(d)),
+  length(d4.categories) == 5
+)
+```
+
+`r paste0("*", trimws(GetQuestion(q, D4, 2025)), "*")`
+
+`r paste0("Each item is reported in its own table. Rows are the preferred groups from Chapter 1, with individual species indented beneath the family group that contains them; family rows include the respondents in their species rows, so rows overlap and must not be totalled. Of the analysis sample of ", format(nrow(d), big.mark=","), " anglers, ", format(nD4Any, big.mark=","), " answered at least one item in this battery.")`
+
+`r paste0("This battery diverges from the 2025 Crosstabs report by more than the rest of the report does. The preferred-species question was not a strict gate on the battery in the delivered data: across all ", format(nAll2025, big.mark=","), " respondents to the 2025 survey, ", format(nD4AnyAll2025, big.mark=","), " answered at least one item in this battery, of whom ", format(nD4AnyNoB1, big.mark=","), " left the preferred-species question blank. Those respondents are outside this report's universe, so the Overall row here rests on fewer respondents than the corresponding Crosstabs report table.")`
+
+`r paste(caption.d4gate, sep="")`
+
+## `r ItemQuestionText("D4a", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4a}
+CreateFlex(D4ItemTable(d, "D4a", d4.categories))
+```
+
+```{r d4aPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4a", d4.categories, titleText = ItemQuestionText("D4a", q))
+```
+
+```{r d4aMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4a", titleText = ItemQuestionText("D4a", q))
+```
+
+```{r d4aSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4a", titleText = ItemQuestionText("D4a", q))
+```
+
+`r paste0("For this item, Trout and Channel catfish anglers report the highest satisfaction, each averaging roughly 3.6 on the five-point scale, with more than half of each group agreeing or strongly agreeing and well under a fifth disagreeing. Walleye/Sauger anglers -- the largest single preferred group in the survey -- report the lowest satisfaction of any well-represented group, averaging 2.8, and are the only large group where more anglers disagree (40%) than agree (28%). The roughly three-quarter-point gap between Walleye/Sauger and Trout/Channel catfish anglers is the largest contrast among the larger preferred groups for this item, and may point to a difference in how reliably each species can be caught rather than a difference in how much anglers enjoy the pursuit itself. A similar pattern shows up within single families: Channel catfish anglers are considerably more satisfied (3.6) than Blue catfish (2.8) or Flathead catfish (3.0) anglers, and Yellow perch anglers report much lower satisfaction (2.4) than Bluegill/Sunfish (3.3) or Crappie (3.2) anglers within the panfish group.")`
+
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Within 2025, one further pattern stands out: anglers with no single preferred species report above-average satisfaction (3.4, against 3.2 overall) and the largest neutral share of any group (45%), and neutral responses are common across the board -- roughly three in ten anglers in most groups take neither side -- so the group differences described above rest on the balance between agreement and disagreement rather than on lopsided views within any group.")`
+
+## `r ItemQuestionText("D4b", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4b}
+CreateFlex(D4ItemTable(d, "D4b", d4.categories))
+```
+
+```{r d4bPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4b", d4.categories, titleText = ItemQuestionText("D4b", q))
+```
+
+```{r d4bMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4b", titleText = ItemQuestionText("D4b", q))
+```
+
+```{r d4bSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4b", titleText = ItemQuestionText("D4b", q))
+```
+
+`r paste0("Overall, disagreement (38%) outweighs agreement (24%) with this trade-off. Northern pike and Muskellunge anglers reject it most strongly of any preferred group, both averaging about 2.4 on the five-point scale, and Flathead catfish and Yellow perch anglers post the next-highest disagreement rates, at about half of each group. Pike and muskellunge anglers pursue larger, trophy-oriented fish, which may explain their reluctance to trade size for numbers. Blue catfish anglers stand apart at the opposite end as the only group where agreement (48%) outweighs disagreement (17%) by a wide margin, suggesting Blue catfish anglers place comparatively more value on numbers over size than anglers preferring any other species.")`
+
+`r paste0("Blue catfish anglers' agreement rose sharply between 2018 and 2025, from 2.3 to 3.4 -- the largest year-over-year movement seen on this item, carrying them from the most reluctant group in 2018 to the most willing in 2025. No other group's change was large enough to appear in the figure above.")`
+
+## `r ItemQuestionText("D4c", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4c}
+CreateFlex(D4ItemTable(d, "D4c", d4.categories))
+```
+
+```{r d4cPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4c", d4.categories, titleText = ItemQuestionText("D4c", q))
+```
+
+```{r d4cMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4c", titleText = ItemQuestionText("D4c", q))
+```
+
+```{r d4cSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4c", titleText = ItemQuestionText("D4c", q))
+```
+
+`r paste0("Support for size-increasing regulations is broad across every preferred group, but Muskellunge (4.5), Moronides (4.2), and Northern pike (4.0) anglers support it most strongly, while Yellow perch anglers support it least (3.3) and also disagree more than any other group (27%) -- a pattern that may reflect perch anglers' comparative indifference to trophy size on a species rarely pursued for its size in the first place. Largemouth and Smallmouth bass anglers are closely aligned with each other on this item (3.9 each), unlike several other items in this battery where the two bass species diverge.")`
+
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. What distinguishes the groups in 2025 is instead the firmness of the support: in every group but Yellow perch, supporters outnumber opponents by at least three to one, and not a single Muskellunge respondent chose neutral -- every angler in that group took a side.")`
+
+## `r ItemQuestionText("D4d", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4d}
+CreateFlex(D4ItemTable(d, "D4d", d4.categories))
+```
+
+```{r d4dPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4d", d4.categories, titleText = ItemQuestionText("D4d", q))
+```
+
+```{r d4dMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4d", titleText = ItemQuestionText("D4d", q))
+```
+
+```{r d4dSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4d", titleText = ItemQuestionText("D4d", q))
+```
+
+`r paste0("Support for regulations aimed at increasing numbers is stronger and more uniform across preferred groups than support for size-increasing regulations was on the previous item -- disagreement stays in the single digits for most groups, and every Muskellunge respondent agreed. Muskellunge and Blue catfish anglers support numbers-focused regulation most strongly; Yellow perch and Crappie anglers support it comparatively least, though a clear majority of both still agree.")`
+
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Set against the previous item, most groups support numbers-focused regulation more strongly than size-focused regulation; Northern pike anglers are the main exception, backing size rules somewhat more strongly, with Moronides and Crappie anglers rating the two about equally. That tilt toward numbers over size may indicate that, for most anglers, catching fish at all matters more than catching bigger ones.")`
+
+## `r ItemQuestionText("D4e", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4e}
+CreateFlex(D4ItemTable(d, "D4e", d4.categories))
+```
+
+```{r d4ePercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4e", d4.categories, titleText = ItemQuestionText("D4e", q))
+```
+
+```{r d4eMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4e", titleText = ItemQuestionText("D4e", q))
+```
+
+```{r d4eSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4e", titleText = ItemQuestionText("D4e", q))
+```
+
+`r paste0("This item asks about the opposite trade-off from the harvest-satisfaction item above -- willingness to accept fewer fish in exchange for larger ones -- and the pattern largely mirrors it. Muskellunge (3.9) and Smallmouth bass (3.9) anglers are most willing to make that trade; Bluegill/Sunfish (3.2) and Walleye/Sauger anglers are least willing among the larger groups. Yellow perch anglers land in the middle on average but are unusually divided, with about a third disagreeing, one of the higher disagreement rates on this item.")`
+
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. The 2025 pattern is internally consistent with the harvest-versus-size question two items later: the groups most willing to sacrifice numbers for size here -- Muskellunge and both bass groups -- are the same ones that lean toward size over harvest opportunity there, while Walleye/Sauger anglers, among the least willing here, lean furthest toward harvest opportunity. No group falls below neutral on average, so the differences are in degree of willingness, not direction.")`
+
+## `r ItemQuestionText("D4f", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4f}
+CreateFlex(D4ItemTable(d, "D4f", d4.categories))
+```
+
+```{r d4fPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4f", d4.categories, titleText = ItemQuestionText("D4f", q))
+```
+
+```{r d4fMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4f", titleText = ItemQuestionText("D4f", q))
+```
+
+```{r d4fSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4f", titleText = ItemQuestionText("D4f", q))
+```
+
+`r paste0("Yellow perch and Blue catfish anglers feel most strongly that their preferred fish has become harder to catch, and Walleye/Sauger anglers -- the largest preferred group -- also lean toward agreement, with 56% agreeing. Bluegill/Sunfish and Channel catfish anglers feel this least. The two catfish species diverge sharply from each other here -- Channel catfish anglers see little change in difficulty while Blue catfish anglers see a great deal -- and the same divergence appears within panfish, where Yellow perch anglers report much more difficulty than Bluegill/Sunfish anglers despite both belonging to the same combined preferred group.")`
+
+`r paste0("Agreement that the preferred fish has become harder to catch rose modestly across all anglers between 2018 and 2025, from 3.2 to 3.3 -- one of only two items in this battery, along with the water-availability item at the end, where the change across all anglers is what stands out between years. No individual preferred group's change was large enough to appear in the figure above, which suggests a broad, shallow drift toward agreement rather than a sharp movement concentrated in any one group.")`
+
+## `r ItemQuestionText("D4g", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4g}
+CreateFlex(D4ItemTable(d, "D4g", d4.categories))
+```
+
+```{r d4gPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4g", d4.categories, titleText = ItemQuestionText("D4g", q))
+```
+
+```{r d4gMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4g", titleText = ItemQuestionText("D4g", q))
+```
+
+```{r d4gSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4g", titleText = ItemQuestionText("D4g", q))
+```
+
+`r paste0("Trout (3.3) and Walleye/Sauger (3.2) anglers lean furthest toward valuing the opportunity to harvest their preferred fish over its size, though neither sits far above the scale midpoint. Smallmouth bass anglers are the clear outlier at the other end, disagreeing by more than four to one -- consistent with smallmouth bass fisheries' typical size- and release-oriented management. Both bass species in fact lean toward size over harvest, but Smallmouth bass anglers (2.4) do so far more sharply than Largemouth bass anglers (2.7), and Moronides (2.6) and Muskellunge (2.7) anglers land near them at the size-oriented end of the scale.")`
+
+`r paste0("Moronides anglers are the only group whose change between 2018 and 2025 appears in the figure above, moving from leaning toward harvest opportunity (3.2) to leaning toward size (2.6) -- one of the larger single-group shifts in this battery, and one that carries Moronides anglers from the harvest-oriented end of this item across to the size-oriented end, alongside the bass groups.")`
+
+## `r ItemQuestionText("D4h", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4h}
+CreateFlex(D4ItemTable(d, "D4h", d4.categories))
+```
+
+```{r d4hPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4h", d4.categories, titleText = ItemQuestionText("D4h", q))
+```
+
+```{r d4hMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4h", titleText = ItemQuestionText("D4h", q))
+```
+
+```{r d4hSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4h", titleText = ItemQuestionText("D4h", q))
+```
+
+`r paste0("Bluegill/Sunfish anglers register the strongest disagreement seen anywhere in this battery -- roughly three in four disagree that they travel too far -- consistent with panfish being widely available close to home, and Largemouth bass and catfish anglers broadly share that view. Yellow perch (3.8) and Muskellunge (3.6) anglers sit at the opposite extreme -- not a single Yellow perch respondent disagreed -- suggesting perch and muskellunge anglers travel farther for their preferred fish than most other anglers do. Walleye/Sauger, Moronides, and Trout anglers also lean further toward agreement than the overall average, which may reflect how concentrated the waters holding those species are.")`
+
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. The travel pattern does line up with the water-availability item at the end of this battery: Yellow perch, Muskellunge, and Northern pike anglers sit at or near the top of both, while Bluegill/Sunfish and Channel catfish anglers sit at or near the bottom of both, suggesting that travel distance and the perceived shortage of places to fish are two readings of the same underlying access picture for these species.")`
+
+## `r ItemQuestionText("D4i", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4i}
+CreateFlex(D4ItemTable(d, "D4i", d4.categories))
+```
+
+```{r d4iPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4i", d4.categories, titleText = ItemQuestionText("D4i", q))
+```
+
+```{r d4iMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4i", titleText = ItemQuestionText("D4i", q))
+```
+
+```{r d4iSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4i", titleText = ItemQuestionText("D4i", q))
+```
+
+`r paste0("Moronides (3.8) and Muskellunge (3.8) anglers report the highest satisfaction with the size of fish they catch; Yellow perch (2.8) and Northern pike (3.0) anglers report the lowest. The gap between Muskellunge and Northern pike anglers is notable given both prefer esocids -- muskellunge, which grow considerably larger than pike, appear to deliver more size satisfaction to the anglers who pursue them. Within the bass and panfish families, Smallmouth bass and Bluegill/Sunfish anglers (both 3.5) are clearly more size-satisfied than Largemouth bass (3.0) and Yellow perch anglers respectively.")`
+
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Within 2025, how the groups arrive at their averages differs as much as the averages themselves: Northern pike anglers split into opposing camps (43% agree, 37% disagree, only a fifth neutral), while nearly half of Blue catfish anglers (47%) and four in ten Trout anglers take no side at all.")`
+
+## `r ItemQuestionText("D4j", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4j}
+CreateFlex(D4ItemTable(d, "D4j", d4.categories))
+```
+
+```{r d4jPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4j", d4.categories, titleText = ItemQuestionText("D4j", q))
+```
+
+```{r d4jMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4j", titleText = ItemQuestionText("D4j", q))
+```
+
+```{r d4jSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4j", titleText = ItemQuestionText("D4j", q))
+```
+
+`r paste0("Bluegill/Sunfish anglers (3.9) and Muskellunge anglers are most satisfied with the size limits that govern harvest of their preferred fish, and agreement outweighs disagreement in every group but one: Northern pike anglers, where disagreement (40%) edges out agreement (38%). That echoes the pike/muskellunge gap seen on the size-satisfaction item above -- pike anglers appear comparatively dissatisfied with both the size of fish they catch and the size they are allowed to keep.")`
+
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Compared with the previous item, nearly every group rates the size they are allowed to harvest at least as favorably as the size they actually catch; Moronides anglers are the one clear exception, rating the size they catch (3.8) above the size they are allowed to keep (3.5), which may hint that where Moronides anglers have a complaint, it is with the rules rather than the fish.")`
+
+## `r ItemQuestionText("D4k", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4k}
+CreateFlex(D4ItemTable(d, "D4k", d4.categories))
+```
+
+```{r d4kPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4k", d4.categories, titleText = ItemQuestionText("D4k", q))
+```
+
+```{r d4kMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4k", titleText = ItemQuestionText("D4k", q))
+```
+
+```{r d4kSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4k", titleText = ItemQuestionText("D4k", q))
+```
+
+`r paste0("Bluegill/Sunfish (3.6) and Channel catfish (3.4) anglers are most satisfied with the number of fish they catch; Yellow perch (2.7) and Flathead catfish (2.8) anglers are least. The catfish family splits sharply on this item: half of Flathead catfish anglers disagree -- the highest disagreement rate of any group on this item -- and Blue catfish anglers also lean toward dissatisfaction, while Channel catfish anglers are among the most satisfied groups, which may point to differences in how consistently each catfish species can be caught rather than anything about catfish angling as a whole.")`
+
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. The 2025 ranking largely mirrors the overall fishing-success item at the top of this battery -- Channel catfish and Trout anglers near the top of both, Yellow perch and Walleye/Sauger anglers near the bottom of both -- which may indicate that when anglers judge their overall success, the number of fish caught weighs at least as heavily as their size.")`
+
+## `r ItemQuestionText("D4l", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4l}
+CreateFlex(D4ItemTable(d, "D4l", d4.categories))
+```
+
+```{r d4lPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4l", d4.categories, titleText = ItemQuestionText("D4l", q))
+```
+
+```{r d4lMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4l", titleText = ItemQuestionText("D4l", q))
+```
+
+```{r d4lSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4l", titleText = ItemQuestionText("D4l", q))
+```
+
+`r paste0("Bluegill/Sunfish anglers (3.9) are again the most satisfied group, this time with harvest-number limits, and a majority of most groups agree. Both esocid species land at the bottom together on average, but they arrive there differently: Northern pike anglers (3.1) show real dissatisfaction, with about three in ten disagreeing, while Muskellunge anglers (3.2) are overwhelmingly neutral rather than dissatisfied -- not one disagreed. Yellow perch anglers (3.3) sit just above the esocids, continuing the comparatively low perch satisfaction that runs through most of the satisfaction items in this battery.")`
+
+`r paste0("Moronides anglers are the only group whose change between 2018 and 2025 appears in the figure above, declining by nearly half a point -- from the most satisfied group on this item in 2018 to the lower third in 2025, a reversal worth noting given their generally high standing on the other satisfaction items in this battery.")`
+
+## `r ItemQuestionText("D4m", q)`
+
+`r paste(caption.d4item, "  ", caption.raked, sep="")`
+
+```{r d4m}
+CreateFlex(D4ItemTable(d, "D4m", d4.categories))
+```
+
+```{r d4mPercentPlot, fig.width=6.5, fig.height=6}
+D4PercentStackPlot(d, "D4m", d4.categories, titleText = ItemQuestionText("D4m", q))
+```
+
+```{r d4mMeansPlot, fig.width=6.5, fig.height=5}
+D4MeansOrderedPlot(d, "D4m", titleText = ItemQuestionText("D4m", q))
+```
+
+```{r d4mSlopePlot, fig.width=6.5, fig.height=4}
+D4SlopePlot(d, d2018, "D4m", titleText = ItemQuestionText("D4m", q))
+```
+
+`r paste0("Muskellunge anglers agree more strongly than any other preferred group (4.3) that there are not enough places to fish for their preferred fish, and Northern pike (3.5) and Yellow perch (3.5) anglers also lean toward agreement -- consistent with muskellunge, pike, and perch all being managed in a comparatively limited number of Nebraska waters. Bluegill/Sunfish and Channel catfish anglers feel the opposite, disagreeing by roughly two to one, consistent with how widely those species are stocked and available.")`
+
+`r paste0("Flathead catfish anglers' agreement rose sharply between 2018 and 2025, from 2.5 to 3.3 -- the largest movement of any group on this item, and second in this battery only to Blue catfish anglers' shift on the smaller-fish trade-off item. Agreement across all anglers also crept upward between the two years, from 2.9 to 3.1, another instance, like the difficulty-of-catching item earlier, where the shift shows up broadly rather than only within individual preferred groups.")`
+```
+
+# Chapter 3: Crosstabs by Preferred Species
+
+<!-- Step 3. Coverage and layout deferred (Q7, D8). Not started. -->
+
+<!--
+There is no visualizations chapter. Step 4 of the plan produces figures that are
+interspersed within Chapters 1-3 next to the questions they illustrate (D34).
+-->
+
+`r run_pagebreak()`
+
+<!--
+D36: Appendix A is a deliberately blank placeholder. The paper questionnaire is
+pasted in by hand, matching 2025CrossTabReport.rmd L1545-1547, which does the
+same thing. Do not pour the instrument in programmatically.
+-->
+
+# Appendix A - Nebraska Licensed Angler Survey (Paper Version)
+
+`r run_pagebreak()`
+
+# Appendix B - Statistical Methodology
+
+## Analysis sample
+
+`r paste0("This report is restricted to respondents who answered the preferred-species question. Of the ", format(nAll2025, big.mark=","), " anglers who responded to the 2025 survey, ", format(nNoB1, big.mark=","), " left that question blank and are excluded from the report entirely rather than merely from the species columns. The analysis sample is therefore ", format(nrow(d), big.mark=","), " respondents.")`
+
+`r paste0("A second, narrower exclusion applies only to the preferred groups. ", nBannerExcluded, " respondents in the analysis sample prefer a species that falls outside every family group -- bullhead, drum, sturgeon, common carp, invasive carp, paddlefish, and the literal \"Other\" response. They remain in the Overall column of every table but receive no preferred-group column of their own. The two exclusions are distinct and are reported separately in Chapter 1.")`
+
+`r paste0("Because of the first restriction, the Overall column of this report estimates a different population than the Overall column of the 2025 Crosstabs report: anglers who stated a species preference, rather than all licensed anglers. The two reports will therefore not agree in that column, and no attempt has been made to reconcile them. The one exception is the preferred-species distribution itself, which is computed on respondents to that question in both reports and does match exactly.")`
+
+## Weighting and raking by survey year
+
+Every respondent record carries a pre-calculated weight that is computed during data aggregation and stored with the survey data. All percentages and means in this report are weighted using that stored value; sample sizes (N) shown in parentheses are always
+**raw, unweighted respondent counts** and not weighted Ns.  Calculated weights for the 2025 sum to population size values and not sample size values and displaying the weighted N's would be difficult for readers to interpret. Full detail on
+how the 2025 raking weights themselves were constructed can be found in Hurley (2026).
+
+## Percentage confidence intervals
+
+Percentage tables (`base.summary.percent.selectOne` /
+`base.summary.percent.selectAll` in `BaseFunctions_2025_UPDATED.R`) use a
+normal-approximation (Wald) interval:
+
+$$CI = 1.96 \times \sqrt{\frac{p(1-p)}{effN}} \times 100$$
+
+where $p$ is the weighted proportion and $effN$ is the **Kish effective
+sample size**, not the raw respondent count or the raw sum of weights:
+
+$$effN = \frac{(\sum w)^2}{\sum w^2}$$
+
+This matters because of the population-scaling difference noted above: 2025
+weights sum to roughly 234,000 with a mean weight around 83. Using the
+raw sum of weights as the CI denominator would make intervals roughly 9x too
+tight. The Kish effective sample size
+corrects for this by accounting for the variance introduced by unequal
+weighting (the "design effect").
+
+## Mean confidence intervals
+
+Mean tables (`base.summary.means`) compute a weighted mean and a weighted
+standard deviation, then a standard error using the same **Kish effective
+sample size** ($effN$) used by the percentage formula above, rather than the
+raw respondent count:
+
+$$SE = \frac{SD_w}{\sqrt{effN}}, \qquad CI = 1.96 \times SE$$
+
+This mirrors the percentage CI fix for the same underlying reason: using $effN$ keeps mean
+CIs on the same design-effect-corrected basis as percentage CIs. The sample size (N) displayed alongside each mean is still the raw, unweighted respondent count; only the internal SE calculation changed.
+
+## Median confidence intervals
+
+Median tables report a weighted median together with
+a genuine 95% confidence interval for that median, computed by weighted
+bootstrap: respondents are resampled with replacement, with selection probability
+proportional to the precalculated weight values, 1,000 times; the (unweighted) median is
+computed for each resample; and the 2.5th and 97.5th percentiles of those
+1,000 bootstrap medians form the reported CI bounds. A fixed random seed
+(7361) is set before each grouped computation so results are reproducible
+from one render to the next. This method was chosen because there is no
+simple closed-form confidence interval for a weighted median under
+arbitrary, non-integer survey weights.
+
+## Reverse-coded item markers (dagger, &dagger;)
+
+Some questions in this report mark individual items with a dagger and a
+caption explaining that dagger-marked items "are reverse coded... before
+computing scale means." That marking is only meaningful when a table
+actually being shown reflects a reversed value. That is
+true for the Angler Attitudes (E1) tables -- `attitude_catch` and
+`attitude_harvest`, both shown in this report, genuinely reverse items E1a,
+E1k, E1f, and E1l when computing those subscale and item means.
+
+## Scale scores and the completeness gate
+
+`r paste0("The motivation and attitude scale scores are rebuilt from the raw item responses at render time, applying the reversals flagged in Scales.csv. Each scale table is restricted to respondents who answered every item in that sub-scale, matching the 2025 Crosstabs report. The gate is applied per scale, so each scale carries its own sample size; across the eight scales used here the analysis sample ranges from 1,653 to 1,715 respondents. This is an inherited listwise requirement rather than a discretionary exclusion, and the resulting sample size is printed beside every estimate.")`
+
+## Population expansions
+
+`r paste0("The species table in Chapter 1 reports a population expansion, obtained by applying each weighted percentage to the full weighted 2025 angler population of ", format(round(popTotalAll), big.mark=","), ". That column therefore sums to the full angler population. The weights carried by the ", format(nrow(d), big.mark=","), " respondents in the analysis sample themselves total only ", format(round(popTotalAnalysis), big.mark=","), ", or about ", round(popTotalAnalysis / popTotalAll * 100), " percent of the population, because the respondents who skipped the preferred-species question carry weight too.")`
+
+`r paste0("Expanding to the full population rather than to the ", format(round(popTotalAnalysis), big.mark=","), " represented by the analysis sample assumes that skipping the preferred-species question is unrelated to which species an angler prefers. That assumption cannot be tested with these data, since no preference was recorded for the respondents who skipped the question. Readers who prefer not to make it should scale the expansion column by ", round(popTotalAnalysis / popTotalAll, 3), ".")`
+
+## The preferred groups, and why columns do not sum
+
+`r paste0("The preferred groups are not a partition. Bass, Panfish / Sunfish, and Catfish each appear both as a combined family column and as one column per constituent species, so a respondent who prefers largemouth bass is counted in both the Bass column and the Largemouth bass column. The Esocids family was replaced outright by separate northern pike and muskellunge columns and has no combined column.")`
+
+`r paste0("Two consequences follow. Preferred-group column counts sum to ", format(nBannerCellSum, big.mark=","), " against ", format(nBanner, big.mark=","), " distinct respondents, so they must never be totalled. And because each column is computed on its own respondents and uses its own denominator, the percentages within any single column remain correct; only addition across columns is invalid.")`
+
+## Comparisons between species
+
+Chapter 1 compares species within a family using design-based two-sample
+comparisons (`svyttest` from the **survey** package) on a design object built
+with the survey weights rescaled to sum to the number of respondents in the
+pair being compared:
+
+$$w_{norm} = w \times \frac{n}{\sum w}$$
+
+The rescaling is presentational rather than a variance correction. With
+independent sampling units, the linearized standard errors that **survey**
+computes are scale-invariant in the weights: the raw weights and the rescaled
+weights give identical standard errors and identical degrees of freedom. The
+"roughly 9x too tight" problem described under percentage confidence intervals
+above belongs specifically to the manual sum-of-weights calculation that the
+Kish effective sample size corrects, and it does **not** carry over to the
+design objects used here.
+
+**No omnibus test is reported.** Each row of a comparison table is a single
+two-species contrast. An overall F-test across the species in a family was
+considered and dropped, and with it any model $R^2$ or $\eta^2$, because the
+split-or-combine decisions were made from the species estimates directly.
+
+## Multiplicity
+
+`r paste0("Where a family contains three species there are three possible pairwise comparisons, and the unadjusted p-value for each is multiplied by three (Bonferroni). Where a family contains two species there is a single comparison and no adjustment is applied. Both the unadjusted and the Bonferroni-adjusted p-value are printed, rather than a single verdict against a fixed threshold.")`
+
+Bonferroni was chosen over Holm for simplicity of exposition. The two rest on
+identical assumptions and Bonferroni is uniformly the more conservative of the
+two, so any comparison Bonferroni separates, Holm would separate as well.
+Tukey's HSD was not used: it is not valid here given the unequal group sizes and
+the weighted design. Benjamini-Hochberg was not used because false-discovery
+control is suited to screening rather than to the go/no-go grouping decisions
+this chapter supports.
+
+**The adjustment covers one dimension only.** It accounts for the number of
+species comparisons made within a single outcome, not for the number of
+outcomes examined. Each family is compared on eight scale scores plus days
+fished, so a three-species family carries 27 comparisons in total with no
+adjustment across the outcome dimension. Readers should treat a single
+adjusted p-value near the conventional threshold accordingly.
+
+## Effect sizes
+
+`r paste0("Every comparison reports the weighted difference in means with a 95% confidence interval, and Hedges' g, a standardized difference computed by pooling the two weighted standard deviations on the effective sample sizes and applying the usual small-sample correction. Both are shown because several species in this survey are represented by very few respondents, where a comparison that separates nothing is not evidence that the species behave alike -- the interval is simply too wide to distinguish the two possibilities. The difference, its interval, and g together let the reader tell those cases apart.")`
+
+## Display precision
+
+`r paste0("Scale means and their confidence intervals are printed to three decimal places in Chapter 1, rather than the one decimal place used in the 2025 Crosstabs report. At one decimal place a scale-mean interval of roughly plus or minus 0.04 rounds to zero, which would make the species comparisons unreadable. This is a rounding change in presentation only; the underlying values are identical to those the inherited functions produce.")`
+
+```{r timing}
+toc()
+```
