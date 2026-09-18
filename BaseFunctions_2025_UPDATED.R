@@ -121,8 +121,27 @@ base.summary.percent.selectOne <- function(
       num = sum(postWeight, na.rm = TRUE),
       sumsq = sum(postWeight^2, na.rm = TRUE),
       numRespondents = n(),
-      .groups = "drop_last"
-    ) %>%
+      .groups = "drop"
+    )
+
+  # Ensure every response category shows up for every (surveyYear, group)
+  # that actually has data for this question, filling in explicit zeros for
+  # categories nobody selected instead of silently dropping that row. Scoped
+  # to existing groups only, so we don't fabricate rows for group/question
+  # combinations with no respondents at all (which would divide by zero).
+  if (is.factor(qData$response)) {
+    responseLevels <- levels(qData$response)
+    qData <- qData %>%
+      group_by(surveyYear, group) %>%
+      tidyr::complete(
+        response = factor(responseLevels, levels = responseLevels),
+        fill = list(num = 0, sumsq = 0, numRespondents = 0)
+      ) %>%
+      ungroup()
+  }
+
+  qData <- qData %>%
+    group_by(surveyYear, group) %>%
     mutate(
       totNum = sum(num, na.rm = TRUE),
       totRespondents = sum(numRespondents, na.rm = TRUE),
@@ -204,13 +223,58 @@ base.summary.percent.selectAll <- function(
       values_to = "value"
     ) %>%
     filter(!is.na(value)) %>%
+    mutate(value = as.character(value)) %>%
     group_by(surveyYear, group, variable, value) %>%
     summarise(
       num = sum(postWeight, na.rm = TRUE),
       sumsq = sum(postWeight^2, na.rm = TRUE),
       numRespondents = n(),
-      .groups = "drop_last"
-    ) %>%
+      .groups = "drop"
+    )
+
+  # Ensure the "checked" label shows up for every (surveyYear, group,
+  # variable) that actually has data for this item, filling in an explicit
+  # zero when nobody in that group checked it instead of silently dropping
+  # the item from that group's table (mirrors the selectOne fix). The
+  # "checked" level is item-specific (e.g. a species name like "Largemouth
+  # bass"), not the literal string "Checked", so it's read from each field's
+  # own factor levels rather than hardcoded. Scoped to existing
+  # group/variable combinations only, so we don't fabricate rows for groups
+  # that never had this item at all.
+  itemLevels <- do.call(
+    rbind,
+    lapply(myQuestions, function(colName) {
+      col <- mydata[[colName]]
+      if (is.factor(col)) {
+        data.frame(
+          variable = colName,
+          value = levels(col),
+          stringsAsFactors = FALSE
+        )
+      } else {
+        NULL
+      }
+    })
+  )
+
+  if (!is.null(itemLevels) && nrow(itemLevels) > 0) {
+    scaffold <- qData %>%
+      distinct(surveyYear, group, variable) %>%
+      # Intentional cross join: every (surveyYear, group, variable) combo
+      # gets crossed with that variable's 2 levels (checked label + Unchecked).
+      inner_join(itemLevels, by = "variable", relationship = "many-to-many")
+
+    qData <- scaffold %>%
+      left_join(qData, by = c("surveyYear", "group", "variable", "value")) %>%
+      mutate(
+        num = ifelse(is.na(num), 0, num),
+        sumsq = ifelse(is.na(sumsq), 0, sumsq),
+        numRespondents = ifelse(is.na(numRespondents), 0, numRespondents)
+      )
+  }
+
+  qData <- qData %>%
+    group_by(surveyYear, group, variable) %>%
     mutate(
       # Kish effective sample size (see selectOne).
       totNum = sum(num, na.rm = TRUE),
@@ -251,7 +315,13 @@ base.summary.percent.selectAll <- function(
 # ============================================================================
 # FUNCTION 8: base.summary.means
 # ============================================================================
-# UPDATED: Now uses pre-calculated postWeight instead of raking
+# UPDATED: Now uses pre-calculated postWeight instead of raking. The standard
+# error uses the Kish effective sample size (effN), not the raw respondent
+# count, for the same reason as the percent functions: 2025's postWeight is
+# scaled to the population rather than the sample, so a raw-n-based SE
+# understates the design effect of unequal weighting. Number (N) shown to
+# readers is still the raw respondent count -- only the internal SE
+# denominator changed. See Appendix B in 2025CrossTabReport.rmd.
 
 base.summary.means <- function(
   mydata,
@@ -296,11 +366,16 @@ base.summary.means <- function(
           (value - weighted.mean(value, w = postWeight, na.rm = TRUE))^2,
         na.rm = TRUE
       )),
+      sumsq = sum(postWeight^2, na.rm = TRUE),
+      totWeight = sum(postWeight, na.rm = TRUE),
       n = n(),
       .groups = "drop"
     ) %>%
     mutate(
-      se = sd / sqrt(n),
+      # Kish effective sample size (see selectOne/selectAll). Reduces to n
+      # when weights are equal (2002/2012, and any group with w=1).
+      effN = (totWeight^2) / sumsq,
+      se = sd / sqrt(effN),
       ci = round(1.96 * se, 4)
     ) %>%
     dplyr::select(
@@ -318,12 +393,19 @@ base.summary.means <- function(
 # ============================================================================
 # FUNCTION 9: base.summary.medians
 # ============================================================================
-# UPDATED: Now uses pre-calculated postWeight and weighted.quantile function
+# UPDATED: Now uses pre-calculated postWeight, weighted.quantile for the point
+# estimate, and a weighted bootstrap for a genuine 95% CI on the median (see
+# weighted_median_boot_ci below). Previously this function returned Q1/Q3
+# (weighted quartiles) in place of a CI, which did not match the on-report
+# caption text describing "lower/upper 95% median confidence limit" -- see
+# Appendix B for the full writeup.
 
 base.summary.medians <- function(
   mydata,
   myQuestion,
-  myGroupVar = NA
+  myGroupVar = NA,
+  n_boot = 1000,
+  boot_seed = 7361
 ) {
   #enquo arguments
   myQuestion <- enquo(myQuestion)
@@ -351,38 +433,84 @@ base.summary.medians <- function(
     qData$postWeight <- 1
   }
 
-  # Calculate weighted median and quartiles by group using weighted.quantile
+  # Calculate weighted median and a bootstrap 95% CI by group. set.seed() is
+  # called once before the grouped computation so results are reproducible
+  # from run to run.
+  set.seed(boot_seed)
   qData <- qData %>%
     mutate(!!quo_name(myQuestion) := as.numeric(!!myQuestion)) %>%
     select(surveyYear, group, value = !!myQuestion, postWeight) %>%
     group_by(surveyYear, group) %>%
     summarise(
-      q1 = weighted.quantile(value, w = postWeight, probs = 0.25, na.rm = TRUE),
       median = weighted.quantile(
         value,
         w = postWeight,
         probs = 0.5,
         na.rm = TRUE
       ),
-      q3 = weighted.quantile(value, w = postWeight, probs = 0.75, na.rm = TRUE),
-      min = min(value, na.rm = TRUE),
-      max = max(value, na.rm = TRUE),
+      ci = list(weighted_median_boot_ci(value, postWeight, n_boot = n_boot)),
       n = n(),
       .groups = "drop"
+    ) %>%
+    mutate(
+      ciLower = vapply(ci, `[[`, numeric(1), "lower"),
+      ciUpper = vapply(ci, `[[`, numeric(1), "upper")
     ) %>%
     dplyr::select(
       Year = surveyYear,
       Group = group,
-      Q1 = q1,
-      Median = median,
-      Q3 = q3,
-      Min = min,
-      Max = max,
-      N = n
+      Value = median,
+      CIlower = ciLower,
+      CIupper = ciUpper,
+      Number = n
     ) %>%
     mutate(Response = quo_name(myQuestion))
 
   return(qData)
+}
+
+# ============================================================================
+# FUNCTION 9b: weighted_median_boot_ci (HELPER FUNCTION)
+# ============================================================================
+# Weighted bootstrap 95% CI for a weighted median. There is no simple
+# closed-form CI for a weighted median under arbitrary, non-integer survey
+# weights, so this resamples rows WITH REPLACEMENT using selection
+# probability proportional to postWeight (so each resample's composition
+# reflects the weighting), computes the (unweighted, since weighting is
+# already encoded in the resampling probabilities) median of each resample,
+# and returns the empirical 2.5th/97.5th percentile of those bootstrap
+# medians as the CI bounds. See Appendix B for the full writeup.
+weighted_median_boot_ci <- function(value, weight, n_boot = 1000, conf = 0.95) {
+  ok <- !is.na(value) & !is.na(weight) & weight > 0
+  value <- value[ok]
+  weight <- weight[ok]
+  n <- length(value)
+
+  if (n == 0) {
+    return(c(lower = NA_real_, upper = NA_real_))
+  }
+  if (n == 1) {
+    return(c(lower = value[1], upper = value[1]))
+  }
+
+  probs <- weight / sum(weight)
+  bootMedians <- vapply(
+    seq_len(n_boot),
+    function(i) {
+      idx <- sample.int(n, size = n, replace = TRUE, prob = probs)
+      stats::median(value[idx])
+    },
+    numeric(1)
+  )
+
+  alpha <- (1 - conf) / 2
+  bounds <- stats::quantile(
+    bootMedians,
+    probs = c(alpha, 1 - alpha),
+    names = FALSE,
+    na.rm = TRUE
+  )
+  c(lower = bounds[1], upper = bounds[2])
 }
 
 # ============================================================================
@@ -494,8 +622,8 @@ add_scale_scores <- function(
   scales$Reversed <- as.logical(scales$Reversed)
 
   for (vn in unique(scales$VarName)) {
-    defn    <- scales[scales$VarName == vn, ]
-    fields  <- defn$Field
+    defn <- scales[scales$VarName == vn, ]
+    fields <- defn$Field
     revFlds <- defn$Field[defn$Reversed]
 
     present <- fields[fields %in% names(mydata)]
@@ -544,7 +672,8 @@ scale_reversed_items <- function(
   scales <- read.csv(scalesFile, stringsAsFactors = FALSE)
   scales$Reversed <- as.logical(scales$Reversed)
   hits <- scales[
-    scales$ScaleName %in% scope |
+    scales$ScaleName %in%
+      scope |
       scales$SubScaleName %in% scope |
       scales$VarName %in% scope,
   ]

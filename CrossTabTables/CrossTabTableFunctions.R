@@ -160,7 +160,7 @@ ArrangeTableA <- function(myData, roundDigits = 1, ordered = FALSE) {
     myData <- myData %>%
       mutate(
         Value = round(Value, roundDigits),
-        CI = round(CI, roundDigits + 1)
+        CI = round(CI, roundDigits)
       ) %>%
       mutate(text = paste(Value, "+-", CI, " (", Number, ")", sep = "")) %>%
       select(Response, Group, text, Year) %>%
@@ -172,7 +172,7 @@ ArrangeTableA <- function(myData, roundDigits = 1, ordered = FALSE) {
       mutate(
         Value = round(Value, roundDigits),
         CIupper = round(CIupper, roundDigits),
-        CIlower = round(CIlower, roundDigits + 1)
+        CIlower = round(CIlower, roundDigits)
       ) %>%
       mutate(
         text = paste(
@@ -205,7 +205,15 @@ ArrangeTableA <- function(myData, roundDigits = 1, ordered = FALSE) {
       select(-Year)
   }
 
-  if (ordered == TRUE && "Overall" %in% names(myData)) {
+  # Yes/No response categories should always display Yes first, No second,
+  # taking priority over the numeric `ordered` sort.
+  respKey <- trimws(tolower(as.character(myData$Response)))
+  if (setequal(respKey, c("yes", "no"))) {
+    myData <- myData %>%
+      mutate(.order = match(respKey, c("yes", "no"))) %>%
+      arrange(.order) %>%
+      select(-.order)
+  } else if (ordered == TRUE && "Overall" %in% names(myData)) {
     myData <- myData %>%
       separate(Overall, c("val", "deleteMe"), sep = "\\+-", remove = FALSE) %>%
       mutate(val = as.numeric(val)) %>%
@@ -244,7 +252,7 @@ ArrangeTableB <- function(myData, roundDigits = 1, ordered = FALSE) {
     myData <- myData %>%
       mutate(
         Value = round(Value, roundDigits),
-        CI = round(CI, roundDigits + 1)
+        CI = round(CI, roundDigits)
       ) %>%
       mutate(text = paste(Value, "+-", CI, " (", Number, ")", sep = "")) %>%
       select(Response, Group, text, Year) %>%
@@ -255,8 +263,8 @@ ArrangeTableB <- function(myData, roundDigits = 1, ordered = FALSE) {
     myData <- myData %>%
       mutate(
         Value = round(Value, roundDigits),
-        CIupper = round(CIupper, roundDigits + 1),
-        CIlower = round(CIlower, roundDigits + 1)
+        CIupper = round(CIupper, roundDigits),
+        CIlower = round(CIlower, roundDigits)
       ) %>%
       mutate(
         text = paste(
@@ -289,7 +297,15 @@ ArrangeTableB <- function(myData, roundDigits = 1, ordered = FALSE) {
       select(-Year)
   }
 
-  if (ordered == TRUE && "Overall" %in% names(myData)) {
+  # Yes/No response categories should always display Yes first, No second,
+  # taking priority over the numeric `ordered` sort.
+  respKey <- trimws(tolower(as.character(myData$Response)))
+  if (setequal(respKey, c("yes", "no"))) {
+    myData <- myData %>%
+      mutate(.order = match(respKey, c("yes", "no"))) %>%
+      arrange(.order) %>%
+      select(-.order)
+  } else if (ordered == TRUE && "Overall" %in% names(myData)) {
     myData <- myData %>%
       separate(Overall, c("val", "deleteMe"), sep = "\\+-", remove = FALSE) %>%
       mutate(val = as.numeric(val)) %>%

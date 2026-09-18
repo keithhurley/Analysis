@@ -1,0 +1,21 @@
+{
+  "permission": {
+    "edit": {
+      "*.R": "allow"
+    },
+    "executeCode": {
+      "*": "allow"
+    },
+    "external_directory": {
+      "../*": "allow",
+      "F:/Survey/Analysis/*": "allow",
+      "f:/Survey/Data/DataAggregation1/*": "allow",
+      "f:/Survey/*": "allow"
+    },
+    "bash": {
+      "python3 *": "allow",
+      "python *": "allow",
+      "file *": "allow"
+    }
+  }
+}

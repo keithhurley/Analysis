@@ -856,3 +856,264 @@ CreateFt(ArrangeTable(LabelResponses(op, l)))
 ```{r E1_means_catch_noncatch}
 CreateMeanPlot(LabelResponses(op, l), freeScale = FALSE, numCols=4) + theme(panel.background = element_rect(fill="gray80"))
 ```
+
+
+`r officer::run_pagebreak()`
+
+# Appendix B - Statistical Methodology
+
+This appendix documents how weighting and confidence intervals are calculated
+in this report, and how those calculations differ across the four survey
+years (2002, 2012, 2018, 2025) that appear in the combined LAS dataset. It is
+intended so that future analyses building on this report understand what each
+number represents and why cross-year comparisons behave the way they do.
+
+## Weighting and raking by survey year
+
+Every respondent record carries a pre-calculated `postWeight` column, computed
+during data aggregation (`Data/DataAggregation1/AggregateData.R`) rather than
+on the fly in this report. All percentages and means in this report are
+weighted using `postWeight`; sample sizes (N) shown in parentheses are always
+**raw, unweighted respondent counts**, by project convention, not weighted Ns.
+
+```{r appendixB_weighting_table, echo=FALSE}
+weightingTable <- data.frame(
+  Year = c("2002", "2012", "2018", "2025"),
+  Weighting = c(
+    "None (postWeight = 1 for all respondents).",
+    "None (postWeight = 1 for all respondents).",
+    "Age-group raking weight computed 2019-07-05 (weights_raked_ageGroup_20190705.rData), joined by license ID. Respondents without a matching weight default to 1.",
+    "Per-respondent raking weight from 2025_raking_weights.csv, post-stratified on age group and residency (Hurley 2026). Scaled to the licensed-angler population rather than the sample, so weights sum to roughly the population size (~234,000) rather than to the sample size."
+  ),
+  check.names = FALSE
+)
+CreateFlex(weightingTable)
+```
+
+The practical consequence is that 2002/2012 percentages and means are
+effectively unweighted (raw sample proportions), 2018 is lightly weighted on
+age group only, and 2025 is weighted on age group and residency with weights
+scaled to the full licensed-angler population. This last point -- that 2025
+weights are population-scaled rather than sample-normalized -- is the root
+cause of the confidence-interval difference described next. Full detail on
+how the 2025 raking weights themselves were constructed (target margins,
+convergence, etc.) is outside this codebase; see Hurley (2026) and the Bureau
+of Sociological Research methodology report (2026).
+
+## Percentage confidence intervals
+
+Percentage tables (`base.summary.percent.selectOne` /
+`base.summary.percent.selectAll` in `BaseFunctions_2025_UPDATED.R`) use a
+normal-approximation (Wald) interval:
+
+$$CI = 1.96 \times \sqrt{\frac{p(1-p)}{effN}} \times 100$$
+
+where $p$ is the weighted proportion and $effN$ is the **Kish effective
+sample size**, not the raw respondent count or the raw sum of weights:
+
+$$effN = \frac{(\sum w)^2}{\sum w^2}$$
+
+This matters because of the population-scaling difference noted above: 2025
+weights sum to roughly 234,000 with a mean weight around 83, while 2002,
+2012, and 2018 weights are sample-normalized (mean at or near 1). Using the
+raw sum of weights as the CI denominator made 2025 intervals roughly 9x too
+tight before this correction was made. The Kish effective sample size
+corrects for this by accounting for the variance introduced by unequal
+weighting (the "design effect"): for unweighted years (all weights equal to
+1), $effN$ reduces exactly to the raw respondent count, so 2002/2012 and the
+non-raked portions of 2018 are unaffected. Applying this correction slightly
+widened 2018's confidence intervals relative to the originally published 2018
+report (which effectively used raw n as the denominator) -- e.g. the A2 "No"
+interval widens from &plusmn;1.37 to &plusmn;1.55 -- while percentages and
+means themselves are unchanged. This tradeoff was accepted because it makes
+CI methodology consistent across all four years rather than leaving 2025
+intervals artificially tight.
+
+## Mean confidence intervals
+
+Mean tables (`base.summary.means`) compute a weighted mean and a weighted
+standard deviation, then a standard error using the same **Kish effective
+sample size** ($effN$) used by the percentage formula above, rather than the
+raw respondent count:
+
+$$SE = \frac{SD_w}{\sqrt{effN}}, \qquad CI = 1.96 \times SE$$
+
+This mirrors the percentage CI fix for the same underlying reason: 2025's
+population-scaled weighting inflates the variance of the weighted mean beyond
+what a raw-n-based standard error would suggest, so using $effN$ keeps mean
+CIs on the same design-effect-corrected basis as percentage CIs. As with
+percentages, this reduces to the ordinary raw-n standard error whenever
+weights are equal (2002/2012, and any unweighted subgroup), so those years'
+mean CIs are unaffected. The sample size (N) displayed alongside each mean is
+still the raw, unweighted respondent count, per this report's convention;
+only the internal SE calculation changed.
+
+**This is a change from earlier drafts of this report**, which used raw n for
+the mean SE denominator. That was not identified as a problem until the
+percentage CI fix prompted a closer look at whether the same design-effect
+issue applied elsewhere in the report -- it does, so both were brought onto
+a consistent basis together.
+
+## Median confidence intervals
+
+Median tables (`base.summary.medians`) report a weighted median together with
+a genuine 95% confidence interval for that median, computed by weighted
+bootstrap (`weighted_median_boot_ci` in `BaseFunctions_2025_UPDATED.R`):
+respondents are resampled with replacement, with selection probability
+proportional to `postWeight`, 1,000 times; the (unweighted) median is
+computed for each resample; and the 2.5th and 97.5th percentiles of those
+1,000 bootstrap medians form the reported CI bounds. A fixed random seed
+(7361) is set before each grouped computation so results are reproducible
+from one render to the next. This method was chosen because there is no
+simple closed-form confidence interval for a weighted median under
+arbitrary, non-integer survey weights.
+
+**This is a change from earlier drafts of this report.** Prior to this
+update, `base.summary.medians` returned the weighted 25th and 75th
+percentiles (Q1 and Q3) in the two positions where the report's own caption
+text ("Values represent lower 95% median confidence limit, median response,
+and upper 95% median confidence limit...") claimed a confidence interval was
+shown. Q1/Q3 describe the spread of individual responses around the median
+and are **not** a confidence interval for the median itself, so the two did
+not previously match. The caption text was accurate as written; the
+underlying calculation has now been changed to match it. One consequence
+worth understanding when reading these tables: because a bootstrap CI
+reflects uncertainty in the estimate of the population median (which shrinks
+as sample size grows) rather than the spread of individual responses, these
+intervals are typically much narrower than the old Q1/Q3 display was --
+including, for large or lopsided subgroups, collapsing to a very narrow range
+or a single value when the weighted median is well-determined. This is
+expected behavior, not an error.
+
+Note that the separate Trend report (`Analysis/TrendTables/`) defines its own
+version of `base.summary.medians` in `TrendTableFunctions.R` to preserve the
+original 2018 report's median display convention (50th/95th percentile
+bounds) for year-over-year continuity with that published report, and is
+unaffected by the change described here.
+
+## Consistency with the Trend report
+
+The 4-year Trend report (`Analysis/TrendTables/TrendReport.rmd` and
+`TrendTableFunctions.R`) sources the same `BaseFunctions_2025_UPDATED.R` used
+by this report, and does **not** define its own version of
+`base.summary.percent.selectOne`, `base.summary.percent.selectAll`, or
+`base.summary.means`. It only overrides `base.summary.medians`, specifically
+to preserve the original 2018 report's median display convention rather than
+adopt the bootstrap CI described above. Practical consequences:
+
+- **Percentage and mean CIs in the Trend report are automatically identical
+  in methodology to this report**, since both call the exact same shared
+  functions. No separate code changes were needed there for either the
+  percentage effN fix or the mean effN fix described above -- they apply
+  the moment the Trend report is rendered against the current
+  `BaseFunctions_2025_UPDATED.R`.
+- **Median CIs in the Trend report are unaffected by the bootstrap change**,
+  by design, since `TrendTableFunctions.R`'s own `base.summary.medians`
+  definition overwrites the shared one for that report only.
+- `TrendReport.docx` has been re-rendered against the current
+  `BaseFunctions_2025_UPDATED.R` and reflects both fixes -- spot-checked
+  against the A2 "No" example above, which now shows the same 2018 CI
+  (1.55) and a 2025 CI of 1.24. `TrendReport.html` has **not** been
+  regenerated since (still dated 2026-07-09) and remains on the pre-fix
+  methodology; regenerate it too if that output format is still needed.
+
+### How this affects each survey year's values in the Trend report
+
+Point estimates (percentages and means) are **unchanged** for every year --
+these fixes only affect confidence interval width, not the values
+themselves. CI width changes are also identical in kind to what's described
+above for this report, since the calculation is shared:
+
+- **2002 and 2012** (`postWeight = 1` for all respondents): $effN$ equals the
+  raw respondent count exactly, so percentage and mean CIs for these two
+  years are **unchanged** by either fix.
+- **2018** (age-group raking only, weights close to sample-normalized):
+  $effN$ is close to, but not identical to, the raw respondent count, so
+  percentage and mean CIs widen **slightly** -- consistent with the
+  previously-documented example (A2 "No" CI: 1.37 -> 1.55). The mean CI fix
+  introduces a comparably small widening for 2018 means, confirmed directly
+  below.
+- **2025** (population-scaled raking weights): this is where both fixes
+  matter most. Percentage CIs were previously ~9x too tight and are now
+  corrected; mean CIs were similarly too tight (though not by as extreme a
+  factor, since the mean formula's weighted-SD term already partially
+  reflects the weight distribution) and are now corrected on the same basis.
+
+**Mean CI validation against the published 2018 PDF.** Using the A9
+(satisfaction) item -- the same item the original `BaseFunctions.R` used as
+its own worked example -- against `SAS_2018_Trends_Final.pdf`
+(`Analysis/TrendTables/2018/`):
+
+```{r appendixB_mean_validation_table, echo=FALSE}
+meanValidationTable <- data.frame(
+  Year = c("2002", "2012", "2018"),
+  `Published mean (CI)` = c("2.6 (\u00b10.07)", "2.3 (\u00b10.02)", "2.3 (\u00b10.04)"),
+  `Reproduced, raw-n CI` = c("2.59 (\u00b10.067)", "2.27 (\u00b10.025)", "2.31 (\u00b10.043)"),
+  `Current, effN CI` = c("2.59 (\u00b10.067)", "2.27 (\u00b10.025)", "2.31 (\u00b10.049)"),
+  check.names = FALSE
+)
+CreateFlex(meanValidationTable)
+```
+
+This confirms three things at once: the weighted mean point estimate matches
+the published value in all three years (to rounding); reproducing the
+original raw-n CI formula exactly matches the published CI in all three
+years, confirming the pre-fix formula was indeed what was published; and the
+new effN-based CI is identical to the raw-n CI for 2002/2012 (effN equals
+raw n exactly when all weights equal 1, verified: n = effN = 1,157 for 2002
+and 7,244 for 2012) while widening modestly for 2018, from 0.043 to 0.049 --
+the same direction and a comparable relative size to the percentage CI's
+1.37 -> 1.55 widening for that year. This closes out the validation noted
+as outstanding earlier: the mean CI fix behaves exactly as expected across
+all three pre-2025 years, with no surprises.
+
+## Reverse-coded item markers (dagger, &dagger;)
+
+Some questions in this report mark individual items with a dagger and a
+caption explaining that dagger-marked items "are reverse coded... before
+computing scale means." That marking is only meaningful when a table
+actually being shown reflects a reversed value. As of this update, that is
+true for the Angler Attitudes (E1) tables -- `attitude_catch` and
+`attitude_harvest`, both shown in this report, genuinely reverse items E1a,
+E1k, E1f, and E1l when computing those subscale means -- so the dagger there
+is accurate and was left as-is.
+
+It was **not** true for the Regulations (Q31) tables, and the dagger there
+has been removed. `Scales.csv` does flag Q31a, Q31b, Q31d, Q31f, and Q31i as
+reversed, but only for the `RegulationsBipolar` composite (`reg_orientation`)
+used in the separate Regs deep-dive report (`Analysis/Regs/`) -- a composite
+that is never displayed anywhere in this report. Neither table shown in this
+report's Regulations section used that reversal: the raw 12-item table
+displays unadjusted item means (verified against the source PDF's own
+Appendix A), and the three derived scales shown here (Comprehension,
+Site-specific, Simplification) require no internal item reversal at all
+(`Scales.csv` already marks all their items `Reversed = FALSE`, consistent
+with all items loading the same direction within each scale). Since no
+result actually shown in this report reflects that reversal, marking those
+five items with a dagger and a "these were reverse coded" caption was
+misleading, so the marking and caption text were removed from the raw
+12-item Q31 table. If the `RegulationsBipolar` composite is ever added to
+this report in the future, the dagger marking should be reinstated for that
+specific table.
+
+## Summary of what changed and why
+
+```{r appendixB_summary_table, echo=FALSE}
+summaryTable <- data.frame(
+  Statistic = c("Percentage CI", "Mean CI", "Median CI"),
+  Denominator = c(
+    "Kish effective sample size (design-effect corrected)",
+    "Kish effective sample size (design-effect corrected)",
+    "N/A \u2013 empirical bootstrap percentiles"
+  ),
+  `Differs across years because` = c(
+    "2025 weights are population-scaled; 2002/2012/2018 are sample-normalized (or unweighted), so the design effect differs by year.",
+    "Same reason as percentage CI \u2013 shares the same effN calculation.",
+    "Not affected by the weight-scaling difference; the bootstrap resamples with probability proportional to whatever postWeight values exist for that year/group."
+  ),
+  check.names = FALSE
+)
+CreateFlex(summaryTable)
+```
+
+`r officer::run_pagebreak()`

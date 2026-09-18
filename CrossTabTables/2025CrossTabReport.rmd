@@ -22,7 +22,7 @@ library(knitr)
 library(flextable)
 library(stringr)
 
-setwd("D:/Survey/Analysis/CrossTabTables/")
+setwd("F:/Survey/Analysis/CrossTabTables/")
 
 source("..\\BaseFunctions_2025_UPDATED.R") #load file of common functions
 source("CrossTabTableFunctions.R") #load file of cross tab report functions
@@ -30,7 +30,7 @@ source("CrossTabTableFunctions.R") #load file of cross tab report functions
 
 
 ```{r getData, echo=FALSE}
-setwd("D:/Survey/Analysis/CrossTabTables/")
+setwd("F:/Survey/Analysis/CrossTabTables/")
 
 #load data
 load(file="../../Data/DataAggregation1/aggregateData_20260624.rData")
@@ -105,8 +105,7 @@ This report is organized in the order questions were asked in the LAS.  A copy o
 CreateFlex(CreateTableA_selectOne_percent(d %>% mutate(postWeight = 1), A1, ordered=TRUE))
 ```
 
-
-`r paste(trimws(GetQuestion(q, A1, 2025)),"  ", caption.percents, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d %>% mutate(postWeight = 1), A1, ordered=TRUE))
@@ -123,7 +122,7 @@ CreateFlex(CreateTableB_selectOne_percent(d %>% mutate(postWeight = 1), A1, orde
 CreateFlex(CreateTableA_selectOne_percent(d, A2))
 ```
 
-`r paste(trimws(GetQuestion(q, A2, 2025)),"  ", caption.percents,"  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, A2))
@@ -140,7 +139,7 @@ CreateFlex(CreateTableB_selectOne_percent(d, A2))
 CreateFlex(CreateTableA_selectOne_percent(d, A3, ordered=TRUE))
 ```
 
-`r paste(trimws(GetQuestion(q, A3, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, A3, ordered=TRUE))
@@ -157,7 +156,7 @@ CreateFlex(CreateTableB_selectOne_percent(d, A3, ordered=TRUE))
 CreateFlex(CreateTableA_selectOne_percent(d, A11))
 ```
 
-`r paste(trimws(GetQuestion(q, A11, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, A11))
@@ -173,7 +172,7 @@ CreateFlex(CreateTableB_selectOne_percent(d, A11))
 CreateFlex(CreateTableA_selectOne_percent(d %>% filter(A11=="Yes"), A12))
 ```
 
-`r paste(trimws(GetQuestion(q, A12, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d %>% filter(A11=="Yes"), A12))
@@ -190,7 +189,7 @@ CreateFlex(CreateTableB_selectOne_percent(d %>% filter(A11=="Yes"), A12))
 CreateFlex(CreateTableA_selectOne_percent(d, A10))
 ```
 
-`r paste(trimws(GetQuestion(q, A10, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, A10))
@@ -206,7 +205,7 @@ CreateFlex(CreateTableB_selectOne_percent(d, A10))
 CreateFlex(CreateTableA_selectOne_percent(d, fishedTourney) %>% mutate(Response=c("No Tournaments","Fished Tournaments")))
 ```
 
-`r paste("Percent of respondents who participated in at least one fishing tournament (derived from ", trimws(GetQuestion(q, A13, 2025)), ")","  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, fishedTourney) %>% mutate(Response=c("No Tournaments","Fished Tournaments")))
@@ -219,7 +218,7 @@ CreateFlex(CreateTableB_selectOne_percent(d, fishedTourney) %>% mutate(Response=
 CreateFlex(CreateTableA_selectOne_percent(d %>% filter(A13_corrected>0), "A13_corrected") %>% mutate(Response=as.integer(Response)))
 ```
 
-`r paste(trimws(GetQuestion(q, A13, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d %>% filter(A13_corrected>0), "A13_corrected") %>% mutate(Response=as.integer(Response)))
@@ -232,7 +231,7 @@ CreateFlex(CreateTableB_selectOne_percent(d %>% filter(A13_corrected>0), "A13_co
 CreateFlex(CreateTableA_means(d %>% filter(A13_corrected>0), "A13_corrected")[,-1] )
 ```
 
-`r paste(trimws(GetQuestion(q, A13, 2025)),"  ", caption.means, "  Only respondants who participated in AT LEAST ONE tournament are included in this calculation", "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_means(d %>% filter(A13_corrected>0), "A13_corrected")[,-1])
@@ -250,7 +249,7 @@ CreateFlex(CreateTableA_selectAll_percent(d, myFields, myAnsweredVar = A4_Answer
 
 ```
 
-`r paste(trimws(GetQuestion(q, A4, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectAll_percent(d, myFields, myAnsweredVar = A4_Answered, ordered=TRUE))
@@ -267,7 +266,7 @@ myFields<-d %>% dplyr::select(contains("A5")) %>% select(-contains("Answered")) 
 CreateFlex(CreateTableA_selectAll_percent(d, myFields, myAnsweredVar = A5_Answered, ordered=TRUE))
 ```
 
-`r paste(trimws(GetQuestion(q, A5, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectAll_percent(d, myFields, myAnsweredVar = A5_Answered, ordered=TRUE))
@@ -285,7 +284,7 @@ myFields<-d %>% dplyr::select(contains("A6")) %>% select(-contains("Answered")) 
 CreateFlex(CreateTableA_selectAll_percent(d, myFields, myAnsweredVar = A6_Answered, ordered=TRUE))
 ```
 
-`r paste(trimws(GetQuestion(q, A6, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectAll_percent(d, myFields, myAnsweredVar = A6_Answered, ordered=TRUE))
@@ -302,7 +301,7 @@ CreateFlex(CreateTableB_selectAll_percent(d, myFields, myAnsweredVar = A6_Answer
 CreateFlex(CreateTableA_selectOne_percent(d %>% filter(!is.na(Q11)), "Q11"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q11, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d %>% filter(!is.na(Q11)), "Q11"))
@@ -335,11 +334,9 @@ l_a17 <- l %>%
     Label    = c(l$Label[l$Response == "A17priv"],
                  l$Label[l$Response == "A17pub"])
   ))
-myFields <- d %>%
-  dplyr::select(contains("A17")) %>%
-  select(-contains("Answered")) %>%
-  select(-A17priv, -A17pub) %>%
-  names()
+# Explicit display order: Public, Private, Both, Only Used Public, Only Used
+# Private (rather than relying on column order in the data).
+myFields <- c("A17Pub_corrected", "A17Priv_corrected", "A17both", "A17justPub", "A17justPriv")
 op<-foreach(i=1:length(myFields), .combine = "rbind") %do% {
   # "any access" rows (corrected pub/priv) use the full answered base;
   # partition rows (justPub/justPriv/both) use the access-only base.
@@ -349,15 +346,12 @@ op<-foreach(i=1:length(myFields), .combine = "rbind") %do% {
 CreateFlex(LabelResponses(op %>% filter(Response=="Yes") %>% mutate(Response=Type) %>% select(-Type) , l_a17))
 ```
 
-
-`r paste(trimws(GetQuestion(q, A17, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
-myFields <- d %>%
-  dplyr::select(contains("A17")) %>%
-  select(-contains("Answered")) %>%
-  select(-A17priv, -A17pub) %>%
-  names()
+# Explicit display order: Public, Private, Both, Only Used Public, Only Used
+# Private (rather than relying on column order in the data).
+myFields <- c("A17Pub_corrected", "A17Priv_corrected", "A17both", "A17justPub", "A17justPriv")
 op<-foreach(i=1:length(myFields), .combine = "rbind") %do% {
   src <- if (myFields[i] %in% c("A17justPub", "A17justPriv", "A17both")) dAccess else d
   data.frame(Type=myFields[i], CreateTableB_selectOne_percent(src %>% filter(!is.na(get(myFields[i]))), myFields[i]), check.names = FALSE)
@@ -407,10 +401,10 @@ venn_grob <- draw.pairwise.venn(area1 = vennCounts$pub,
                                 ext.text=FALSE,
                                 cat.pos=c(225, 150),
                                 cat.dist=c(0.05,0.06),
-                                cat.cex=1.2,
-                                print.mode="percent",
-                                sigdigs=4,
-                                margin = 0.075)
+                cat.cex=1.2,
+                print.mode="percent",
+                sigdigs=4,
+                margin = 0.15)
 
 # Reformat percent labels to fixed 1 decimal place (sigdigs controls sig figs, not decimals)
 fmt_pct_grobs <- function(g) {
@@ -444,7 +438,7 @@ grid::grid.draw(fmt_pct_grobs(venn_grob))
 CreateFlex(CreateTableA_selectOne_percent(d, A7))
 ```
 
-`r paste(trimws(GetQuestion(q, A7, 2025)),"  ", caption.percents, "  ", labels.distance, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, A7))
@@ -457,7 +451,7 @@ CreateFlex(CreateTableB_selectOne_percent(d, A7))
 CreateFlex(CreateTableA_medians(d, "A7_miles")[,-1])
 ```
 
-`r paste(trimws(GetQuestion(q, A7, 2025)),"  ", caption.medians, "  ", labels.distance, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_medians(d, "A7_miles")[,-1])
@@ -474,7 +468,7 @@ CreateFlex(CreateTableB_medians(d, "A7_miles")[,-1])
 CreateFlex(CreateTableA_selectOne_percent(d, A8))
 ```
 
-`r paste(trimws(GetQuestion(q, A8, 2025)),"  ", caption.percents, "  ", labels.distance, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, A8))
@@ -487,7 +481,7 @@ CreateFlex(CreateTableB_selectOne_percent(d, A8))
 CreateFlex(CreateTableA_medians(d, "A8_miles")[,-1])
 ```
 
-`r paste(trimws(GetQuestion(q, A8, 2025)),"  ", caption.medians, "  ", labels.distance, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_medians(d, "A8_miles")[,-1])
@@ -504,7 +498,7 @@ CreateFlex(CreateTableB_medians(d, "A8_miles")[,-1])
 CreateFlex(CreateTableA_selectOne_percent(d, A9))
 ```
 
-`r paste(trimws(GetQuestion(q, A9, 2025)),"  ", caption.percents, "  ", labels.satisfaction, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, A9))
@@ -517,7 +511,7 @@ CreateFlex(CreateTableB_selectOne_percent(d, A9))
 CreateFlex(SubstitueQuesForResponse(CreateTableA_means(d, "A9"),q, A9, 2025))
 ```
 
-`r paste(trimws(GetQuestion(q, A9, 2025)),"  ", caption.means, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(SubstitueQuesForResponse(CreateTableB_means(d, "A9"),q, A9, 2025))
@@ -534,7 +528,7 @@ CreateFlex(SubstitueQuesForResponse(CreateTableB_means(d, "A9"),q, A9, 2025))
 CreateFlex(CreateTableA_selectOne_percent(d %>% filter(!is.na(Q16)), "Q16"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q16, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d %>% filter(!is.na(Q16)), "Q16"))
@@ -551,7 +545,7 @@ CreateFlex(CreateTableB_selectOne_percent(d %>% filter(!is.na(Q16)), "Q16"))
 CreateFlex(CreateTableA_selectOne_percent(d, E7))
 ```
 
-`r paste(trimws(GetQuestion(q, E7, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, E7))
@@ -597,6 +591,8 @@ guideRows <- bind_rows(
 CreateFlex(guideRows)
 
 ```
+
+`r "....."`
 
 ```{r }
 
@@ -648,7 +644,7 @@ op <- foreach(s = specs, .combine = "rbind") %do% {
 CreateFlex(op)
 ```
 
-`r paste(trimws(GetQuestion(q, Q18c, 2025)),"  Only respondants that hired at least one guide are included in this calculation.  ", caption.means, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 op <- foreach(s = specs, .combine = dplyr::bind_rows) %do% {
@@ -673,7 +669,7 @@ CreateFlex(LabelResponses(op, l, responseField="Location"), mergeOnFirst=TRUE)
 
 ```
 
-`r paste(trimws(GetQuestion(q, D13oga, 2025)),"  ", caption.percents, "  These values only represent the respondants that selected they fished for TROUT elsewhere in the survey.", "  ", caption.raked,sep="")`
+`r "....."`
 
 ```{r }
 op<-foreach(i=1:length(myFields), .combine = "rbind") %do% {
@@ -735,7 +731,7 @@ trout_venn_grob <- draw.quad.venn(area1 = sum(op$Freq[op$D13lrp==1], na.rm=TRUE)
                 cat.cex=1.2,
                 print.mode="percent",
                 sigdigs=4,
-                margin = 0.075)
+                margin = 0.15)
 
 grid::grid.newpage()
 grid::grid.draw(fmt_pct_grobs(trout_venn_grob))
@@ -753,8 +749,7 @@ grid::grid.draw(fmt_pct_grobs(trout_venn_grob))
 CreateFlex(CreateTableA_selectOne_percent(d, B1, ordered = TRUE))
 ```
 
-
-`r paste(trimws(GetQuestion(q, B1, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d, B1, ordered=TRUE))
@@ -776,7 +771,7 @@ op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
 CreateFlex(op, mergeOnFirst = TRUE)
 ```
 
-`r paste(trimws(GetQuestion(q, D4, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
@@ -798,8 +793,7 @@ op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
 CreateFlex(op, mergeOnFirst = TRUE)
 ```
 
-
-`r paste(trimws(GetQuestion(q, D4, 2025)),"  ", caption.means, "  ", labels.agree, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
@@ -1053,7 +1047,7 @@ ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_1)) %>%
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_1"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_1"))
@@ -1068,7 +1062,7 @@ ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_2)) %>%
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_2"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_2"))
@@ -1083,7 +1077,7 @@ ddQ23 <- d %>% filter(Q23_Answered & !is.na(Q23_3)) %>%
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_3"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Percent of all respondants at each frequency.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_3"))
@@ -1098,7 +1092,7 @@ ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_1) != optoutQ23 & !is.na(Q
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_1"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_1, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_1"))
@@ -1113,7 +1107,7 @@ ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_2) != optoutQ23 & !is.na(Q
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_2"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_2, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_2"))
@@ -1128,7 +1122,7 @@ ddQ23 <- d %>% filter(Q23_Answered & as.character(Q23_3) != optoutQ23 & !is.na(Q
 CreateFlex(CreateTableA_selectOne_percent(ddQ23, "Q23_3"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q23_3, 2025)),"  Only respondants that experienced low water levels are included in this calculation.  ", caption.percents, "  ", "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(ddQ23, "Q23_3"))
@@ -1150,8 +1144,7 @@ myFields<-d %>% dplyr::select(contains("B2")) %>% select(-contains("_")) %>% sel
 CreateFlex(CreateTableA_selectAll_percent(d, myFields, B2_Answered, ordered=TRUE))
 ```
 
-
-`r paste(trimws(GetQuestion(q, B2, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectAll_percent(d, myFields, B2_Answered, ordered=TRUE))
@@ -1165,8 +1158,7 @@ myFields<-d %>% dplyr::select(contains("B2")) %>% select(contains("_lrp")) %>% s
 CreateFlex(CreateTableA_selectAll_percent(d, myFields, B2_Answered, ordered=TRUE))
 ```
 
-
-`r paste(trimws(GetQuestion(q, B2, 2025)),"  Specifically, respondants indicated that they tried to catch these species in lakes, reservoirs, or ponds.", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectAll_percent(d, myFields, B2_Answered, ordered=TRUE))
@@ -1180,8 +1172,7 @@ myFields<-d %>% dplyr::select(contains("B2")) %>% select(contains("_rsc")) %>% s
 CreateFlex(CreateTableA_selectAll_percent(d, myFields, B2_Answered, ordered=TRUE))
 ```
 
-
-`r paste(trimws(GetQuestion(q, B2, 2025)),"  Specifically, respondants indicated that they tried to catch these species in rivers, streams, and canals.", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectAll_percent(d, myFields, B2_Answered, ordered=TRUE))
@@ -1202,8 +1193,7 @@ op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
 CreateFlex(LabelResponses(op,l, responseField="Species"), mergeOnFirst = TRUE)
 ```
 
-
-`r paste(trimws(GetQuestion(q, B3, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
@@ -1223,8 +1213,7 @@ op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
 CreateFlex(LabelResponses(op,l))
 ```
 
-
-`r paste(trimws(GetQuestion(q, B3, 2025)),"  ", caption.means, "  ", labels.release, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 op<-foreach(i=1:length(myFields), .combine="rbind") %do% {
@@ -1250,6 +1239,15 @@ dQ26 <- d %>%
   mutate(Q26 = factor(Q26, levels = c("Yes", "No")))
 
 iceBase <- d %>% filter(Q26 == "Yes")
+
+# Reorder Q28 (proportion of harvest taken while ice fishing) response
+# levels so the display matches other harvest questions in the report:
+# highest-harvest category first, "None" just above the opt-out, and the
+# opt-out always last.
+q28Fields <- iceBase %>% dplyr::select(contains("Q28")) %>% select(-contains("Answered")) %>% names()
+q28Levels <- c("All", "More than Half", "Half", "Less than half", "None", "I did not harvest any of these fish in 2025")
+iceBase <- iceBase %>%
+  mutate(across(all_of(q28Fields), ~factor(as.character(.x), levels = q28Levels)))
 ```
 
 `r paste(trimws(GetQuestion(q, Q26, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
@@ -1258,7 +1256,7 @@ iceBase <- d %>% filter(Q26 == "Yes")
 CreateFlex(CreateTableA_selectOne_percent(dQ26, "Q26"))
 ```
 
-`r paste(trimws(GetQuestion(q, Q26, 2025)),"  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(dQ26, "Q26"))
@@ -1271,7 +1269,7 @@ CreateFlex(CreateTableB_selectOne_percent(dQ26, "Q26"))
 CreateFlex(CreateTableA_medians(iceBase %>% filter(Q27 > 0), "Q27") %>% select(-Response))
 ```
 
-`r paste(trimws(GetQuestion(q, Q27, 2025)),"  Only respondants that ice fished at least one day are included in this calculation.  ", caption.medians, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_medians(iceBase %>% filter(Q27 > 0), "Q27") %>% select(-Response))
@@ -1288,7 +1286,7 @@ op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
 CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
 ```
 
-`r paste(trimws(GetQuestion(q, Q28_1, 2025)),"  Proportion of harvest taken while ice fishing.  Only respondants that ice fished are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
@@ -1308,7 +1306,7 @@ op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
 CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
 ```
 
-`r paste(trimws(GetQuestion(q, Q28_1, 2025)),"  Proportion of harvest taken while ice fishing.  Only respondants that ice fished and harvested at least one of these species are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
@@ -1328,7 +1326,7 @@ op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
 CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
 ```
 
-`r paste(trimws(GetQuestion(q, Q29_1, 2025)),"  Of legal fish caught while ice fishing, the proportion that were harvested.  Only respondants that ice fished are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
@@ -1348,7 +1346,7 @@ op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
 CreateFlex(LabelResponses(op, l, responseField = "Species"), mergeOnFirst = TRUE)
 ```
 
-`r paste(trimws(GetQuestion(q, Q29_1, 2025)),"  Of legal fish caught while ice fishing, the proportion that were harvested.  Only respondants that ice fished and caught at least one of these species are included in this calculation.  ", caption.percents, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r }
 op <- foreach(i = 1:length(myFields), .combine = "rbind") %do% {
@@ -1369,8 +1367,7 @@ myFields<-d %>% dplyr::select(contains("C2")) %>% select(-contains("Answered")) 
 CreateFlex(SubstitueQuesForResponse(CreateTableA_means(d, myFields), q, C2, 2025))
 ```
 
-
-`r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r}
 CreateFlex(SubstitueQuesForResponse(CreateTableB_means(d, myFields), q, C2, 2025))
@@ -1387,7 +1384,7 @@ op<-foreach(i=myFields, .combine="rbind") %do% {
 CreateFlex(LabelResponses(op,l))
 ```
 
-`r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r}
 op<-foreach(i=myFields, .combine="rbind") %do% {
@@ -1406,7 +1403,7 @@ op<-foreach(i=myFields, .combine="rbind") %do% {
 CreateFlex(LabelResponses(op,l))
 ```
 
-`r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r}
 op<-foreach(i=myFields, .combine="rbind") %do% {
@@ -1421,18 +1418,21 @@ CreateFlex(LabelResponses(op,l))
 
 # Regulations
 
-`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
+`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.raked, sep="")`
 
 ```{r Q31}
+# No dagger/reversed-item marking here: these raw per-item means are not
+# adjusted for directionality (unlike the RegulationsBipolar composite used
+# in the separate Regs report, this report never reverses these items), so
+# marking them as reverse-coded would be misleading. See Appendix B.
 myFieldsQ31<-d %>% dplyr::select(contains("Q31")) %>% select(-contains("Answered")) %>% names()
-CreateFlex(MarkReversedItems(SubstitueQuesForResponse(CreateTableA_means(d, myFieldsQ31), q, Q31, 2025), q, 2025))
+CreateFlex(SubstitueQuesForResponse(CreateTableA_means(d, myFieldsQ31), q, Q31, 2025))
 ```
 
-
-`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r}
-CreateFlex(MarkReversedItems(SubstitueQuesForResponse(CreateTableB_means(d, myFieldsQ31), q, Q31, 2025), q, 2025))
+CreateFlex(SubstitueQuesForResponse(CreateTableB_means(d, myFieldsQ31), q, Q31, 2025))
 ```
 
 
@@ -1448,7 +1448,7 @@ CreateFlex(LabelResponses(op,l))
 
 ```
 
-`r paste(trimws(GetQuestion(q, Q31, 2025)), "  ", caption.means, "  ", labels.agree, "  ", ReversedItemsNote("Regulations"), "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r}
 op<-foreach(i=myFieldsQ31sub, .combine="rbind") %do% {
@@ -1469,8 +1469,7 @@ myFields<-d %>% dplyr::select(contains("E1")) %>% select(-contains("Answered")) 
 CreateFlex(MarkReversedItems(SubstitueQuesForResponse(CreateTableA_means(d, myFields), q, E1, 2025), q, 2025))
 ```
 
-
-`r paste(trimws(GetQuestion(q, E1, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.reversed, "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r}
 CreateFlex(MarkReversedItems(SubstitueQuesForResponse(CreateTableB_means(d, myFields), q, E1, 2025), q, 2025))
@@ -1489,7 +1488,7 @@ CreateFlex(LabelResponses(op,l))
 
 ```
 
-`r paste(trimws(GetQuestion(q, E1, 2025)), "  ", caption.means, "  ", labels.agree, "  ", ReversedItemsNote("Attitudes"), "  ", caption.raked, sep="")`
+`r "....."`
 
 ```{r}
 op<-foreach(i=myFields, .combine="rbind") %do% {
@@ -1510,7 +1509,7 @@ CreateFlex(LabelResponses(op,l))
 CreateFlex(CreateTableA_selectOne_percent(d %>% mutate(postWeight = 1), E2))
 ```
 
-`r paste(trimws(GetQuestion(q, E2, 2025)),"  ", caption.percents, sep="")`
+`r "....."`
 
 ```{r}
 CreateFlex(CreateTableB_selectOne_percent(d %>% mutate(postWeight = 1), E2))
@@ -1526,13 +1525,11 @@ CreateFlex(CreateTableB_selectOne_percent(d %>% mutate(postWeight = 1), E2))
 CreateFlex(CreateTableA_selectOne_percent(d %>% mutate(postWeight = 1), E3))
 ```
 
-`r paste(trimws(GetQuestion(q, E3, 2025)),"  ", caption.percents, sep="") `
+`r "....."`
 
 ```{r }
 CreateFlex(CreateTableB_selectOne_percent(d %>% mutate(postWeight = 1), E3))
 ```
-
-
 
 
 `r officer::run_pagebreak()`
@@ -1546,3 +1543,73 @@ Hurley, Keith.  2026.  2026 Nebraska Licensed Angler Survey - Respondents and Re
 `r officer::run_pagebreak()`
 
 # Appendix A - 2026 Nebraska Licensed Angler Survey (Paper Version)
+
+`r officer::run_pagebreak()`
+
+# Appendix B - Statistical Methodology
+
+## Weighting and raking by survey year
+
+Every respondent record carries a pre-calculated weight that is computed during data aggregation and stored with the survey data. All percentages and means in this report are weighted using that stored value; sample sizes (N) shown in parentheses are always
+**raw, unweighted respondent counts** and not weighted Ns.  Calculated weights for the 2025 sum to population size values and not sample size values and displaying the weighted N's would be difficult for readers to interpret. Full detail on
+how the 2025 raking weights themselves were constructed can be found in Hurley (2026).
+
+## Percentage confidence intervals
+
+Percentage tables (`base.summary.percent.selectOne` /
+`base.summary.percent.selectAll` in `BaseFunctions_2025_UPDATED.R`) use a
+normal-approximation (Wald) interval:
+
+$$CI = 1.96 \times \sqrt{\frac{p(1-p)}{effN}} \times 100$$
+
+where $p$ is the weighted proportion and $effN$ is the **Kish effective
+sample size**, not the raw respondent count or the raw sum of weights:
+
+$$effN = \frac{(\sum w)^2}{\sum w^2}$$
+
+This matters because of the population-scaling difference noted above: 2025
+weights sum to roughly 234,000 with a mean weight around 83. Using the
+raw sum of weights as the CI denominator would make intervals roughly 9x too
+tight. The Kish effective sample size
+corrects for this by accounting for the variance introduced by unequal
+weighting (the "design effect"). 
+
+## Mean confidence intervals
+
+Mean tables (`base.summary.means`) compute a weighted mean and a weighted
+standard deviation, then a standard error using the same **Kish effective
+sample size** ($effN$) used by the percentage formula above, rather than the
+raw respondent count:
+
+$$SE = \frac{SD_w}{\sqrt{effN}}, \qquad CI = 1.96 \times SE$$
+
+This mirrors the percentage CI fix for the same underlying reason: using $effN$ keeps mean
+CIs on the same design-effect-corrected basis as percentage CIs. The sample size (N) displayed alongside each mean is still the raw, unweighted respondent count; only the internal SE calculation changed.
+
+## Median confidence intervals
+
+Median tables report a weighted median together with
+a genuine 95% confidence interval for that median, computed by weighted
+bootstrap: respondents are resampled with replacement, with selection probability
+proportional to the precalculated weight values, 1,000 times; the (unweighted) median is
+computed for each resample; and the 2.5th and 97.5th percentiles of those
+1,000 bootstrap medians form the reported CI bounds. A fixed random seed
+(7361) is set before each grouped computation so results are reproducible
+from one render to the next. This method was chosen because there is no
+simple closed-form confidence interval for a weighted median under
+arbitrary, non-integer survey weights.
+
+## Reverse-coded item markers (dagger, &dagger;)
+
+Some questions in this report mark individual items with a dagger and a
+caption explaining that dagger-marked items "are reverse coded... before
+computing scale means." That marking is only meaningful when a table
+actually being shown reflects a reversed value. That is
+true for the Angler Attitudes (E1) tables -- `attitude_catch` and
+`attitude_harvest`, both shown in this report, genuinely reverse items E1a,
+E1k, E1f, and E1l when computing those subscale and item means.
+
+## Summary of what changed and why
+```
+
+`r officer::run_pagebreak()`
