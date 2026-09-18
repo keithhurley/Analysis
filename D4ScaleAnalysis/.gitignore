@@ -1,0 +1,14 @@
+# Mirrors CrossTabTables/.gitignore
+.Rproj.user/
+*.Rhistory
+*.RData
+Thumbs.db
+*.html
+*_files/
+
+# Word lock files
+~$*.docx
+
+# Rendered report output
+D4ScaleReport.docx
+D4ScaleReport_waveDesign.docx

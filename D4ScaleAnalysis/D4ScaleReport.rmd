@@ -1,0 +1,802 @@
+---
+#title: "Licensed Angler Survey — Structure of the D4 Preferred-Species Battery"
+#date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  officedown::rdocx_document:
+    toc: false
+always_allow_html: yes
+---
+
+```{r setup, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, fig.width=7.5, fig.height=5}
+knitr::opts_chunk$set(echo=FALSE, include=TRUE, warning=FALSE, error=FALSE, message=FALSE, ft.align="left", fig.width=7.5, fig.height=5)
+library(tictoc)
+tic("Report Took ")
+options(stringsAsFactors = FALSE)
+library(officedown)
+library(officer)
+library(rmarkdown)
+library(tidyverse)
+library(knitr)
+library(flextable)
+
+setwd("F:/Survey/Analysis/D4ScaleAnalysis/")
+
+source("D4ScaleFunctions.R")
+```
+
+```{r getData}
+load(file = "../../Data/DataAggregation1/aggregateData_20260624.rData")
+
+q <- read.csv(file = "../../Data/DataAggregation1/FactorLevels_aggregated.csv")
+itemText <- ItemText(q, 2025)
+
+d4.waves <- c(2018, 2025)
+
+# Both waves pooled, then split at random into a development half and a test
+# half, stratified by wave so neither half is wave-heavy (D63).
+pooled <- BuildD4Universe(d, d4.waves) %>% SplitSample(prop = 0.5)
+
+dev <- pooled %>% filter(Half == "Development")
+tst <- pooled %>% filter(Half == "Test")
+
+iPooled <- ItemMatrix(pooled)
+iDev <- ItemMatrix(dev)
+iTst <- ItemMatrix(tst)
+
+lwDev <- iDev[complete.cases(iDev), ]
+lwTst <- iTst[complete.cases(iTst), ]
+
+nPooled <- nrow(iPooled)
+nDev <- nrow(iDev)
+nTst <- nrow(iTst)
+nLwDev <- nrow(lwDev)
+nLwTst <- nrow(lwTst)
+
+waveN <- pooled %>% count(surveyYear)
+
+# Respondents routed away from the battery, and respondents inside the
+# universe who skipped every item.
+noPref <- d %>%
+  filter(surveyYear %in% d4.waves, !is.na(B1),
+         B1 == "I do not prefer any particular type of fish")
+nNoPref <- nrow(noPref)
+nNoPrefAnswered <- sum(rowSums(!is.na(ItemMatrix(noPref))) > 0)
+nSkippedAll <- sum(rowSums(!is.na(iPooled)) == 0)
+```
+
+```{r dataChecks}
+# The wave sizes were verified before this report was built. A change means the
+# universe rule or the delivered data has moved, and every number downstream
+# would be affected, so the render stops.
+stopifnot(
+  all(d4.items %in% names(d)),
+  length(d4.items) == 13,
+  nPooled == 3076,
+  waveN$n[waveN$surveyYear == 2018] == 1500,
+  waveN$n[waveN$surveyYear == 2025] == 1576,
+  nDev + nTst == nPooled,
+  abs(nDev - nTst) <= 1,
+  identical(levels(pooled$D4a), d4.response.levels)
+)
+```
+
+```{r correlations}
+# Development half only. The test half is not touched until Chapter 8.
+R <- PolychoricMatrix(lwDev)
+Rpair <- PolychoricMatrix(iDev)
+
+stopifnot(
+  all(dim(R) == c(13, 13)),
+  isTRUE(all.equal(diag(R), setNames(rep(1, 13), d4.items)))
+)
+```
+
+```{r factorAnalysis}
+parDev <- ParallelAnalysis(R, nLwDev)
+
+kRetained <- 3
+
+efaSolutions <- lapply(
+  (kRetained - 1):(kRetained + 1),
+  FitEFA,
+  R = R,
+  nObs = nLwDev
+)
+names(efaSolutions) <- paste((kRetained - 1):(kRetained + 1), "factors")
+
+efaRetained <- efaSolutions[[paste(kRetained, "factors")]]
+named <- NameFactors(AlignLoadings(efaRetained))
+
+stopifnot(!is.null(named))
+
+L3 <- named$loadings
+factorNames <- named$names
+phi3 <- diag(named$flip) %*% AlignedPhi(efaRetained) %*% diag(named$flip)
+
+assignment <- AssignItems(L3, factorNames)
+assignedItems <- assignment$Item[assignment$Assigned]
+unassignedItems <- assignment$Item[!assignment$Assigned]
+
+stopifnot(
+  length(assignedItems) + length(unassignedItems) == 13,
+  length(unique(assignment$Scale[assignment$Assigned])) == kRetained
+)
+
+# The k+1 solution, carried into Chapter 8 as a competing model. Its factors
+# have no content names, so they are assigned by the same rule under generic
+# labels.
+L4 <- AlignLoadings(efaSolutions[[paste(kRetained + 1, "factors")]])
+assignment4 <- AssignItems(L4, paste("Factor", seq_len(kRetained + 1)))
+assignedItems4 <- assignment4$Item[assignment4$Assigned]
+
+# Stability refit on the assigned items only.
+R11 <- PolychoricMatrix(lwDev[, assignedItems])
+efaReduced <- lapply(kRetained:(kRetained + 1), FitEFA, R = R11, nObs = nLwDev)
+names(efaReduced) <- paste(
+  kRetained:(kRetained + 1),
+  "factors,",
+  length(assignedItems),
+  "items"
+)
+maxLoadReduced <- vapply(
+  efaReduced,
+  function(f) max(abs(unclass(f$loadings))),
+  numeric(1)
+)
+```
+
+```{r reliability}
+scaleRel <- ScaleReliabilityTable(R, assignment, nLwDev)
+itemRel <- ItemReliabilityTable(R, assignment, nLwDev, itemText)
+
+alphaDropD4a <- itemRel[["Alpha if dropped"]][itemRel$Item == "D4a"]
+alphaDropD4e <- itemRel[["Alpha if dropped"]][itemRel$Item == "D4e"]
+
+scoredPooled <- ScaleScores(pooled, assignment)
+scoreTbl <- ScaleScoreTable(scoredPooled, assignment)
+scoredN <- as.numeric(gsub(",", "", scoreTbl[["Respondents scored"]]))
+```
+
+```{r developmentMisfit}
+# Where the retained model misfits in the DEVELOPMENT half. This is what
+# licenses the one respecification carried into Chapter 8: it is derived here
+# and then tested on data that had no part in suggesting it.
+devData <- ItemMatrix(dev, items = assignedItems) %>% filter(complete.cases(.))
+fitDev <- FitCFA(CFASyntax(assignment), devData)
+devResiduals <- ResidualTable(fitDev, 5)
+
+devMI <- lavaan::modindices(fitDev, sort = TRUE) %>%
+  filter(op == "~~") %>%
+  slice_head(n = 3) %>%
+  transmute(
+    `Item pair` = paste(lhs, "with", rhs),
+    `Modification index` = Fmt1(mi),
+    `Expected change` = Fmt2(epc)
+  )
+```
+
+```{r cfa}
+# Alternative placement of D4a, tested rather than argued about.
+assignmentAltA <- assignment %>%
+  mutate(
+    Scale = if_else(Item == "D4a", "Satisfaction", Scale),
+    Sign = if_else(Item == "D4a", 1, Sign)
+  )
+
+tstData <- ItemMatrix(tst, items = assignedItems) %>% filter(complete.cases(.))
+tstData4 <- ItemMatrix(tst, items = union(assignedItems, assignedItems4)) %>%
+  filter(complete.cases(.))
+
+modelSet <- list(
+  `One factor` = list(
+    syntax = CFASyntax(
+      assignment,
+      merge = c(
+        "Satisfaction" = "General",
+        "Constraints" = "General",
+        "Regulation support" = "General"
+      )
+    ),
+    data = tstData
+  ),
+  `Two factors` = list(
+    syntax = CFASyntax(
+      assignment,
+      merge = c(
+        "Satisfaction" = "Fishing experience",
+        "Constraints" = "Fishing experience"
+      )
+    ),
+    data = tstData
+  ),
+  `Three factors (retained)` = list(
+    syntax = CFASyntax(assignment),
+    data = tstData
+  ),
+  `Three factors, D4a on Satisfaction` = list(
+    syntax = CFASyntax(assignmentAltA),
+    data = tstData
+  ),
+  `Three factors, D4h and D4m residual freed` = list(
+    syntax = paste(CFASyntax(assignment), "D4h ~~ D4m", sep = "\n"),
+    data = tstData
+  ),
+  `Four factors (development solution)` = list(
+    syntax = CFASyntax(assignment4),
+    data = tstData4
+  )
+)
+
+cfaFits <- lapply(modelSet, function(x) FitCFA(x$syntax, x$data))
+cfaFitTable <- CFAFitTable(cfaFits)
+cfaRetained <- cfaFits[["Three factors (retained)"]]
+
+devTestTable <- CFAFitTable(
+  list(Development = fitDev, Test = cfaRetained)
+) %>%
+  rename(Sample = Model)
+
+waveFitTable <- WaveFitTable(CFASyntax(assignment), tst, assignedItems)
+waveCongruence <- WaveCongruenceTable(CFASyntax(assignment), tst, assignedItems)
+
+stopifnot(
+  all(assignedItems4 %in% d4.items),
+  nrow(waveFitTable) == length(d4.waves)
+)
+```
+
+&nbsp;
+
+`r run_pagebreak()`
+
+```{r toc}
+block_toc()
+```
+
+`r run_pagebreak()`
+
+# Chapter 1: Scope, Sample, and Design
+
+## What this report does
+
+The D4 battery asks anglers to think about the one type of fish they prefer to
+fish for, and then to agree or disagree with a series of statements about that
+fishing. The battery has `r length(d4.items)` items. The survey reports that
+already exist treat those items one at a time: each item is tabulated on its
+own, and no composite score is formed from them. That is a defensible default,
+but it is a default, not a finding. This report asks whether the items measure a
+smaller number of underlying constructs, and if so, which items belong together
+and how reliably those groupings can be scored.
+
+The question has a practical consequence. The Preferred Species report needs to
+know whether its D4 chapter should present `r length(d4.items)` separate item
+tables or a handful of sub-scale means. `Scales.csv`, which defines every other
+composite used in the survey reporting (C2, E1, D1, D3, Q31), contains no D4
+rows at all, so there is no inherited answer to adopt.
+
+`r paste0("*", caption.unweighted, "*")`
+
+## The pooled sample
+
+`r paste0("The universe is anglers who responded in one of the two waves that carried the battery, answered the preferred-species question, and named an actual species rather than \"I do not prefer any particular type of fish\". Pooling ", paste(d4.waves, collapse = " and "), " gives ", format(nPooled, big.mark = ","), " respondents: ", format(waveN$n[waveN$surveyYear == 2018], big.mark = ","), " from 2018 and ", format(waveN$n[waveN$surveyYear == 2025], big.mark = ","), " from 2025.")`
+
+`r paste0("The species-preference condition is a routing condition rather than an analytic exclusion. The battery asks about \"the one type of fish that you prefer\", so it is not defined for the ", format(nNoPref, big.mark = ","), " respondents across the two waves who named no preference. That routing was not perfectly observed -- ", nNoPrefAnswered, " of them answered at least one item anyway -- and they are excluded here because the referent of their answers is unknown, which is a different reason from the one that applies to item non-response.")`
+
+Pooling carries two assumptions that should be stated plainly rather than
+buried in a methods appendix.
+
+`r paste0("**The item structure is assumed to be stable across the two waves.** If the items related to one another differently in 2018 than in 2025, pooling blends the two patterns into an average that describes neither. Chapter 2 compares item means by wave, and Chapter 8 fits the retained model separately within each wave, so the assumption is checked rather than asserted -- but it is checked after the fact, and pooling is what the whole analysis rests on.")`
+
+`r paste0("**Respondents are assumed to be distinct across waves.** This one cannot be checked with the delivered data: the two waves carry different identifier systems (2018 records an angler license identifier, 2025 records a customer identifier) with no overlap and no crosswalk between them. If some anglers answered both waves, they appear twice in the pooled sample and could fall on both sides of the split below, which would make the replication in Chapter 8 look slightly better than it is. The size of that effect is unknown.")`
+
+## The development and test split
+
+`r paste0("The pooled sample is split at random into two halves, stratified by wave so that neither half is wave-heavy. The development half carries every decision in this report: which correlations to look at, how many factors to retain, which items belong to which scale, and the one respecification examined in Chapter 8. The test half is not examined at all until Chapter 8, where it is used once, to fit the resulting models.")`
+
+```{r splitTable}
+CreateFlex(SplitTable(pooled), firstColWidth = 0.8)
+```
+
+`r paste0("The split is ", format(nDev, big.mark = ","), " and ", format(nTst, big.mark = ","), " respondents, of whom ", format(nLwDev, big.mark = ","), " and ", format(nLwTst, big.mark = ","), " answered all ", length(d4.items), " items. The random assignment is seeded (", d4.seed, ") so it is identical on every render; it is applied to respondents rather than to complete cases, so the split does not depend on item response.")`
+
+This design answers a narrower question than it might appear to. It establishes
+whether a structure found in one random half of these respondents reappears in
+the other half, which is a test of whether the structure is an artifact of
+particular respondents. It does not establish that the structure would appear in
+a different population, in a different survey mode, or in a future wave.
+
+## Item non-response
+
+`r paste0("Missing rates are reported on the full pooled sample, since they describe the data rather than inform any modelling decision. They are similar across items, which is what would be expected if non-response were driven by respondents abandoning the battery rather than by particular statements being hard to answer.")`
+
+```{r missingness}
+CreateFlex(MissingnessTable(iPooled, itemText), firstColWidth = 0.5)
+```
+
+`r paste0("The pattern below makes that more explicit. Responding is close to all-or-nothing: ", Fmt1(sum(complete.cases(iPooled)) / nPooled * 100), " percent of the pooled sample answered every item and ", Fmt1(nSkippedAll / nPooled * 100), " percent answered none, leaving a small minority who answered some.")`
+
+```{r completeness}
+CreateFlex(CompletenessTable(iPooled), firstColWidth = 1.1)
+```
+
+## Who listwise deletion removes
+
+Listwise deletion is used for the factor analysis because polychoric
+correlation matrices assembled pairwise are not guaranteed to be positive
+definite, and because factor analysis on a matrix whose cells rest on different
+subsamples has no single sample size. The cost is that the analysis sample is not
+the survey sample. The table below shows how the two groups differ within the
+development half.
+
+```{r droppedProfile}
+CreateFlex(DroppedProfileTable(dev, iDev), firstColWidth = 1.6)
+```
+
+`r paste0("The respondents dropped by listwise deletion are older, fish markedly fewer days, and are more likely to have left the age question blank as well. Deletion is therefore not a neutral thinning of the sample. For the psychometric question at hand this matters less than it would for an estimate of a population quantity -- the object of interest is the correlation structure among items, not a mean -- but it does mean the structure described here is best supported for anglers who complete long question batteries.")`
+
+## Listwise versus pairwise
+
+`r paste0("The sensitivity check below recomputes the development-half correlation matrix with pairwise deletion, which uses all ", format(nDev, big.mark = ","), " respondents in that half, and compares both the correlations and the factor solutions they produce.")`
+
+```{r sensitivity}
+CreateFlex(SensitivityTable(R, Rpair, nLwDev, nDev, kRetained), firstColWidth = 3.2)
+```
+
+`r paste0("The two matrices are close, and the factor solutions they produce are effectively identical by the usual congruence standard. The choice between listwise and pairwise deletion does not drive any conclusion in this report.")`
+
+`r run_pagebreak()`
+
+# Chapter 2: Item Distributions
+
+`r paste0("Chapters 2 through 7 use the development half only (", format(nDev, big.mark = ","), " respondents; ", format(nLwDev, big.mark = ","), " complete on all items). Percentages are of respondents who answered the item, so each row has its own denominator, shown in the N column. Mean and standard deviation treat the five response categories as scores of 1 to 5, matching the convention the survey reports already use. Skew and kurtosis are reported because severe non-normality is one of the reasons to prefer polychoric correlations over Pearson correlations; all items here are mild on that scale, and the stronger reason is simply that five ordered categories are not an interval measurement.")`
+
+```{r distributionTable}
+CreateFlex(DistributionTable(dev, itemText), firstColWidth = 0.5)
+```
+
+```{r distributionPlot, fig.height=5}
+DistributionPlot(dev)
+```
+
+`r paste0("Two features are worth carrying into the later chapters. Neutral is heavily used throughout, which is common in batteries that ask about conditions the respondent may not have thought about. And the items are not all worded in the same direction: some describe satisfaction, some describe difficulty, and agreement means opposite things in the two cases.")`
+
+## Item means by wave
+
+`r paste0("Pooling the two waves assumes the items behave similarly in each. The comparison below is the first of the two checks on that assumption; the second, which matters more for this report's purpose, is the model-level check in Chapter 8. Both waves are shown within the development half, so the test half remains untouched. No significance test is reported: 13 of them would invite reading noise as signal.")`
+
+```{r waveItems}
+CreateFlex(WaveItemTable(dev, itemText), firstColWidth = 0.5)
+```
+
+`r paste0("Wave differences in item means are small relative to the item standard deviations, which are all near 1.0. That is consistent with pooling, though item means are a weak check -- two waves could have identical means and different correlation structures, which is why the model-level check exists.")`
+
+`r run_pagebreak()`
+
+# Chapter 3: Correlations Among the Items
+
+`r paste(caption.polychoric, " ", caption.listwiseDev, sep = "")`
+
+A polychoric correlation estimates the correlation between the continuous
+variables presumed to underlie two ordered categorical responses. It is the
+standard choice for five-point Likert items, and it typically produces
+correlations somewhat larger in magnitude than the Pearson correlations of the
+same data, because it removes the attenuation caused by collapsing a continuum
+into five categories.
+
+```{r correlationPlot, fig.height=6}
+CorrelationPlot(R)
+```
+
+```{r correlationTable}
+CreateFlex(CorrelationTable(R), firstColWidth = 0.5)
+```
+
+`r paste0("Three blocks are visible by inspection. The four satisfaction items (D4i, D4j, D4k, D4l) intercorrelate from ", Fmt2(min(R[c("D4i","D4j","D4k","D4l"), c("D4i","D4j","D4k","D4l")][lower.tri(diag(4))])), " to ", Fmt2(max(R[c("D4i","D4j","D4k","D4l"), c("D4i","D4j","D4k","D4l")][lower.tri(diag(4))])), "; the three regulation items (D4c, D4d, D4e) from ", Fmt2(min(R[c("D4c","D4d","D4e"), c("D4c","D4d","D4e")][lower.tri(diag(3))])), " to ", Fmt2(max(R[c("D4c","D4d","D4e"), c("D4c","D4d","D4e")][lower.tri(diag(3))])), "; and the three difficulty items (D4f, D4h, D4m) from ", Fmt2(min(R[c("D4f","D4h","D4m"), c("D4f","D4h","D4m")][lower.tri(diag(3))])), " to ", Fmt2(max(R[c("D4f","D4h","D4m"), c("D4f","D4h","D4m")][lower.tri(diag(3))])), ". Two items, D4b and D4g, correlate weakly with everything: their largest absolute correlation with any other item is ", Fmt2(max(abs(R["D4b", setdiff(d4.items, "D4b")]))), " and ", Fmt2(max(abs(R["D4g", setdiff(d4.items, "D4g")]))), " respectively.")`
+
+`r run_pagebreak()`
+
+# Chapter 4: Is the Matrix Factorable?
+
+Before extracting factors it is worth confirming that the correlation matrix has
+enough shared variance to support them, and that it is not so nearly singular
+that the extraction becomes unstable. Three standard diagnostics are reported.
+
+`r paste0("*", caption.cutoffs, "*")`
+
+```{r factorability}
+CreateFlex(FactorabilityTable(R, nLwDev), firstColWidth = 3.2)
+```
+
+`r paste0("The overall KMO of ", Fmt3(psych::KMO(R)$MSA), " clears the usual floor without being high. Bartlett's test rejects the identity-matrix hypothesis, which at this sample size is close to inevitable and is reported for completeness rather than as evidence. The determinant is well away from zero, so the matrix is not near-singular and no item is redundant with a combination of the others.")`
+
+The per-item measures of sampling adequacy below locate where the shared
+variance is thin.
+
+```{r itemMSA}
+CreateFlex(ItemMSATable(R, itemText), firstColWidth = 0.5)
+```
+
+`r paste0("D4b is the weakest item at ", Fmt2(psych::KMO(R)$MSAi[["D4b"]]), ", at or below the boundary usually described as unacceptable, with D4g next at ", Fmt2(psych::KMO(R)$MSAi[["D4g"]]), ". These are the same two items that correlate weakly with everything in Chapter 3. They are retained through the extraction so their behaviour can be seen, and the question of dropping them is settled in Chapter 6 by where they land.")`
+
+`r run_pagebreak()`
+
+# Chapter 5: How Many Factors to Retain
+
+There is no single correct answer to this question, and the criteria below are
+known to disagree; parallel analysis tends to be generous with survey data
+containing correlated residuals, while MAP tends to be conservative. They are
+reported together rather than one being picked in advance.
+
+```{r retention}
+CreateFlex(RetentionTable(R, nLwDev, parDev), firstColWidth = 4.0)
+```
+
+```{r scree, fig.height=4.5}
+ScreePlot(parDev)
+```
+
+`r paste0("The criteria span two to five factors. The scree plot shows a clear break after the first factor and a softer one after the third, with the fourth and fifth eigenvalues small and close to the simulated values. Parallel analysis nominates five, but the fourth and fifth eigenvalues sit barely above the simulated line, which is the situation in which parallel analysis is least reliable.")`
+
+`r paste0("The retained solution in this report is **", kRetained, " factors**. It is the smallest number that separates the content blocks visible in Chapter 3, and it is what MAP and VSS complexity 2 nominate. The ", kRetained + 1, "-factor solution is carried forward as a competing model rather than dismissed: Chapter 6 shows what it does to the item assignment, and Chapter 8 fits both to the held-out half. The split design means this choice does not have to be settled by argument.")`
+
+`r run_pagebreak()`
+
+# Chapter 6: Exploratory Factor Analysis
+
+`r paste(caption.loadings, " ", caption.listwiseDev, sep = "")`
+
+Extraction is by minimum residuals and rotation is oblimin, an oblique rotation
+that allows the factors to correlate. An oblique rotation is the appropriate
+default here: there is no reason to expect satisfaction with fishing and
+perceived difficulty of fishing to be uncorrelated, and if they turn out to be
+uncorrelated the oblique rotation will report that.
+
+## Fit of the three solutions
+
+```{r efaFit}
+CreateFlex(EFAFitTable(efaSolutions), firstColWidth = 1.1)
+```
+
+`r paste0("Fit improves with each added factor, as it must. None of the three solutions reaches the RMSEA values conventionally described as close fit; that is taken up in Chapter 8, where the same structures are tested with proper confirmatory models on data that had no part in choosing them.")`
+
+## Loadings, `r kRetained - 1` factors
+
+```{r loadings2}
+CreateFlex(
+  LoadingsTable(
+    AlignLoadings(efaSolutions[[paste(kRetained - 1, "factors")]]),
+    efaSolutions[[paste(kRetained - 1, "factors")]],
+    itemText
+  ),
+  firstColWidth = 0.5
+)
+```
+
+`r paste0("At two factors the satisfaction and difficulty items collapse onto a single bipolar factor -- satisfaction items positive, difficulty items negative -- and the regulation items form the second. This is a coherent solution, and it is the one VSS complexity 1 nominates. Its cost is that it treats \"I am satisfied with the size of fish I catch\" and \"I have to travel too far to fish\" as opposite ends of one continuum.")`
+
+## Loadings, `r kRetained` factors (retained)
+
+```{r loadings3}
+CreateFlex(LoadingsTable(L3, efaRetained, itemText, factorNames), firstColWidth = 0.5)
+```
+
+```{r factorCorr3}
+CreateFlex(FactorCorrelationTable(phi3, factorNames), firstColWidth = 1.6)
+```
+
+`r paste0("The three factors are interpretable from their items. Satisfaction covers the four items about being satisfied with the size and number of preferred fish caught and kept. Constraints covers the three difficulty items plus D4a, happiness with fishing success, which loads negatively on it. Regulation support covers the three items about supporting regulations and accepting a size-for-harvest trade-off. Satisfaction and Constraints correlate ", Fmt2(phi3[which(factorNames == "Satisfaction"), which(factorNames == "Constraints")]), ", which is substantial but well short of the correlation that would make them one factor; Regulation support is nearly independent of both.")`
+
+## Loadings, `r kRetained + 1` factors
+
+```{r loadings4}
+CreateFlex(LoadingsTable(L4, efaSolutions[[paste(kRetained + 1, "factors")]], itemText), firstColWidth = 0.5)
+```
+
+`r paste0("At four factors the satisfaction block splits. Three items about satisfaction with what is caught or kept (D4j, D4k, D4l) stay together, while D4i moves to a fourth factor alongside D4g -- one of the two items that loaded on nothing in the retained solution. That fourth factor rests on ", sum(assignment4$Assigned & assignment4$Factor == "Factor 4"), " items and pairs a satisfaction statement with a harvest-priority statement, which is not an obvious construct. It is carried into Chapter 8 as a model rather than argued about here.")`
+
+## Item assignment
+
+`r paste0("Items are assigned to the factor carrying their largest absolute loading, provided that loading is at least ", Fmt2(d4.loading.threshold), " in absolute value. A negative sign means the item is scored in the opposite direction from the factor's name.")`
+
+```{r assignment}
+CreateFlex(AssignmentTable(assignment, itemText), firstColWidth = 0.5)
+```
+
+`r paste0("Two items, ", paste(unassignedItems, collapse = " and "), ", clear no factor and are left out of the scales. Both concern the trade-off between the size of fish and the number that may be harvested, and both were flagged in Chapters 3 and 4. They should continue to be reported item by item.")`
+
+`r paste0("One assignment is worth flagging as arbitrary rather than settled. D4a (\"I am happy with my success fishing for my preferred fish\") loads ", Fmt2(assignment$Loading[assignment$Item == "D4a"]), " on Constraints and ", Fmt2(L3["D4a", which(factorNames == "Satisfaction")]), " on Satisfaction. On content it reads like a satisfaction item; on the data it goes with the difficulty items, reversed. Both placements are fitted to the held-out half in Chapter 8.")`
+
+## Stability without the two unassigned items
+
+`r paste0("Refitting on the ", length(assignedItems), " assigned items asks whether the solutions depend on the two weak items being present.")`
+
+```{r efaReduced}
+CreateFlex(EFAFitTable(efaReduced), firstColWidth = 1.8)
+```
+
+`r paste0("Both solutions remain within admissible bounds on the reduced item set, with largest absolute loadings of ", Fmt2(maxLoadReduced[1]), " at ", kRetained, " factors and ", Fmt2(maxLoadReduced[2]), " at ", kRetained + 1, " factors. Neither produces a loading at or above 1.0, which would indicate negative residual variance. The choice between them is therefore left to the held-out test in Chapter 8 rather than settled on stability grounds here.")`
+
+## Where the retained model misfits in the development half
+
+`r paste0("Fitting the retained structure as a confirmatory model within the development half locates its weak points. This is done here, on the development data, precisely so that any respecification it suggests can be tested on the untouched half rather than on the data that suggested it.")`
+
+```{r devResiduals}
+CreateFlex(devResiduals, firstColWidth = 2.0)
+```
+
+```{r devMI}
+CreateFlex(devMI, firstColWidth = 2.0)
+```
+
+`r paste0("The largest candidate residual covariance is between D4h (\"I have to travel too far\") and D4m (\"I do not have enough places to fish\"). These two statements overlap in content well beyond what a general constraints factor implies, which is the textbook case for a freed residual covariance. Freeing it is therefore specified here, on the development half, and tested in Chapter 8.")`
+
+`r run_pagebreak()`
+
+# Chapter 7: Internal Consistency
+
+`r paste0("Two reliability coefficients are reported. Ordinal alpha is Cronbach's alpha computed on the polychoric correlation matrix rather than the raw covariances, which avoids the well-known downward bias of ordinary alpha with five-point items. Congeneric omega relaxes alpha's assumption that all items measure the construct equally well, and is generally the more defensible of the two; where they agree closely, as they do here, the choice does not matter. Values are conventionally described as acceptable from about 0.70 and good from about 0.80, though those are rules of thumb, and a three-item scale is always at a disadvantage because alpha rises with the number of items.")`
+
+```{r scaleReliability}
+CreateFlex(scaleRel, firstColWidth = 1.4)
+```
+
+`r paste0("All three scales fall between ", Fmt2(min(as.numeric(scaleRel[["Ordinal alpha"]]))), " and ", Fmt2(max(as.numeric(scaleRel[["Ordinal alpha"]]))), " on ordinal alpha, with congeneric omega within 0.02 of alpha in each case. The item-level detail below shows whether any single item is carrying or dragging a scale.")`
+
+```{r itemReliability}
+CreateFlex(itemRel, firstColWidth = 1.2, mergeOnFirst = TRUE)
+```
+
+`r paste0("No item would raise its scale's alpha by being dropped except D4e, in the Regulation support scale, where alpha would rise from ", scaleRel[["Ordinal alpha"]][scaleRel$Scale == "Regulation support"], " to ", alphaDropD4e, ". D4e is the size-for-harvest trade-off item rather than a regulation-support item on its face, so this is consistent with the content: it is the least central of the three. It is retained because a two-item scale has no internal structure to speak of, but a user who wanted the cleanest possible regulation-support measure could use D4c and D4d alone.")`
+
+`r paste0("One caveat applies to the Constraints scale. Chapter 6 identified a content overlap between D4h and D4m beyond what the factor implies; redundant items inflate alpha, so ", scaleRel[["Ordinal alpha"]][scaleRel$Scale == "Constraints"], " should be read as a mild overstatement of how much distinct information those four items carry.")`
+
+`r run_pagebreak()`
+
+# Chapter 8: Confirmatory Test on the Held-Out Half
+
+## What is being tested
+
+`r paste0("Everything to this point used the development half. The models below are fitted to the test half -- ", format(nTst, big.mark = ","), " respondents, ", format(nrow(tstData), big.mark = ","), " of them complete on the ", length(assignedItems), " assigned items -- which has had no part in choosing the number of factors, assigning items, or specifying the one freed residual. Six models are compared:")`
+
+- **One factor.** Everything the battery measures is one thing.
+- **Two factors.** Satisfaction and Constraints merged into a single bipolar experience factor, with Regulation support separate.
+- **Three factors (retained).** The Chapter 6 solution.
+- **Three factors, D4a on Satisfaction.** The alternative placement of the one ambiguous item.
+- **Three factors with the D4h–D4m residual freed.** The respecification specified in Chapter 6 from development data.
+- `r paste0("**Four factors.** The ", kRetained + 1, "-factor development solution, which requires a twelfth item (D4g) and so is not directly comparable to the others on fit; it is included mainly to see whether its fourth factor survives at all.")`
+
+Estimation is by WLSMV with the items declared ordinal, which treats each item
+as a coarse realization of an underlying continuum rather than as a numeric
+score, and is the standard approach for ordered categorical indicators.
+
+`r paste0("*", caption.fit, "*")`
+
+```{r cfaFit}
+CreateFlex(cfaFitTable, firstColWidth = 2.4)
+```
+
+`r paste0("Four things follow from that table. The one-factor model is clearly rejected: the battery is not measuring a single thing. The two-factor merger is also rejected, so the distinction between satisfaction and perceived constraint is carrying real information. The retained three-factor model reaches CFI ", cfaFitTable$CFI[cfaFitTable$Model == "Three factors (retained)"], " and RMSEA ", cfaFitTable$RMSEA[cfaFitTable$Model == "Three factors (retained)"], " on data it was not fitted to. And the ambiguous item belongs where the exploratory analysis put it: moving D4a to Satisfaction makes fit worse on every index (CFI ", cfaFitTable$CFI[cfaFitTable$Model == "Three factors, D4a on Satisfaction"], " against ", cfaFitTable$CFI[cfaFitTable$Model == "Three factors (retained)"], "), which settles a question the development data could only pose.")`
+
+`r paste0("The four-factor model is **inadmissible** on the held-out half: it produces a negative estimated latent variance, which is what happens when a factor defined by two loosely related items has no stable variance to estimate. Its fit indices are printed for completeness but should not be read as a competing result. The extra factor that looked plausible in the development half does not survive contact with new respondents, which is precisely the comparison this design exists to make.")`
+
+`r paste0("The freed-residual model is the best-fitting admissible specification, at CFI ", cfaFitTable$CFI[str_detect(cfaFitTable$Model, "residual freed")], " and RMSEA ", cfaFitTable$RMSEA[str_detect(cfaFitTable$Model, "residual freed")], ". Because it was specified from the development half and tested here, that improvement is a genuine out-of-sample result rather than a post-hoc fit repair. It does not change which items belong to which scale; it records that two of the Constraints items overlap in content.")`
+
+`r paste0("No model meets the conventional RMSEA cutoff of 0.06. Two points of context. RMSEA is known to be inflated for models with few degrees of freedom and large samples, and these models have ", cfaFitTable$df[cfaFitTable$Model == "Three factors (retained)"], " to ", cfaFitTable$df[str_detect(cfaFitTable$Model, "Four factors")], " degrees of freedom on more than a thousand cases. SRMR, which is less sensitive to that, is at or below the 0.08 reference for the three-factor models. The honest summary is that the three-factor structure reproduces the broad pattern of the correlations in fresh data but leaves identifiable local misfit.")`
+
+## Does fit shrink from development to test?
+
+`r paste0("A structure chosen on one sample usually fits that sample better than it fits a new one. The retained model is fitted to both halves below.")`
+
+```{r devTest}
+CreateFlex(devTestTable, firstColWidth = 1.2)
+```
+
+`r paste0("Fit does not shrink -- the test half is fitted marginally better than the development half (CFI ", devTestTable$CFI[devTestTable$Sample == "Test"], " against ", devTestTable$CFI[devTestTable$Sample == "Development"], "). With a structure this coarse, defined by three content blocks visible in the raw correlations, there was little sample-specific detail to overfit in the first place.")`
+
+## Does the structure hold in both waves?
+
+`r paste0("Pooling assumed the item structure was stable across waves. The retained model is fitted separately within each wave of the test half. Sample sizes are roughly halved relative to the pooled fit, so these are the least precise fits in the report.")`
+
+```{r waveFit}
+CreateFlex(waveFitTable, firstColWidth = 0.7)
+```
+
+```{r waveCongruence}
+CreateFlex(waveCongruence, firstColWidth = 1.2)
+```
+
+`r paste0("The two waves give closely similar fit, and the standardized loadings agree almost exactly: the lowest Tucker congruence across the three factors is ", min(waveCongruence[["Tucker congruence"]]), ", where 0.95 is conventionally read as the same factor and 1.000 is the maximum. The pooling assumption is supported at the level that matters for this report. Note what this is not: a formal test of measurement invariance, which would constrain loadings and thresholds across waves and compare the resulting fit. It is a check that the same model describes both waves, not a demonstration that the scales are metrically equivalent.")`
+
+## Loadings and factor correlations in the retained model
+
+```{r cfaLoadings}
+CreateFlex(CFALoadingTable(cfaRetained, itemText), firstColWidth = 0.8, mergeOnFirst = TRUE)
+```
+
+```{r cfaFactorCorr}
+CreateFlex(CFAFactorCorrelationTable(cfaRetained), firstColWidth = 1.2)
+```
+
+```{r cfaResiduals}
+CreateFlex(ResidualTable(cfaRetained, 8), firstColWidth = 2.0)
+```
+
+`r paste0("All standardized loadings are substantial and in the expected direction, including the negative loading of D4a on Constraints. The factor correlations reproduce the development-half exploratory pattern: Satisfaction and Constraints are strongly negatively related, and Regulation support is close to independent of both. The residual correlations in the held-out half point at the same D4h-D4m overlap identified in the development half, which is why freeing it improved fit out of sample.")`
+
+`r run_pagebreak()`
+
+# Chapter 9: Recommendation
+
+## The recommendation
+
+`r paste0("The D4 battery supports **", kRetained, " sub-scales**, not one composite and not ", length(d4.items), " unrelated items. They are:")`
+
+```{r recommendation}
+CreateFlex(
+  assignment %>%
+    filter(Assigned) %>%
+    left_join(itemText, by = "Item") %>%
+    group_by(Scale) %>%
+    summarise(
+      Items = paste(
+        if_else(Sign < 0, paste0(Item, " (reversed)"), Item),
+        collapse = ", "
+      ),
+      .groups = "drop"
+    ) %>%
+    left_join(
+      scaleRel %>% select(Scale, `Ordinal alpha`, `Congeneric omega`),
+      by = "Scale"
+    ),
+  firstColWidth = 1.4
+)
+```
+
+`r paste0("Two items, ", paste(unassignedItems, collapse = " and "), ", belong to no scale and should continue to be reported individually. Both ask about trading fish size against harvest opportunity, and the data give no indication that they share a factor with anything else in the battery. The four-factor solution that attached D4g to a factor of its own did not survive the held-out test.")`
+
+## How to score them
+
+`r paste0("Each scale is the mean of its items on the 1 to 5 metric, with D4a reverse-scored (6 minus the response) before averaging so that a high Constraints score means more perceived constraint. A respondent is scored only if they answered every item in that scale, which matches the *_AnsweredAll convention already used for the C2, E1, D1, D3 and Q31 scales in the survey reporting. Scored this way on the full pooled sample of both waves and both halves:")`
+
+```{r scaleScores}
+CreateFlex(scoreTbl, firstColWidth = 1.4)
+```
+
+```{r scaleScoreCorr}
+CreateFlex(ScaleScoreCorrelationTable(scoredPooled, assignment), firstColWidth = 1.4)
+```
+
+`r paste0("Scoring by scale rather than listwise across the whole battery recovers ", min(scoredN) - sum(complete.cases(iPooled)), " to ", max(scoredN) - sum(complete.cases(iPooled)), " respondents relative to the ", format(sum(complete.cases(iPooled)), big.mark = ","), " who answered all ", length(d4.items), " items.")`
+
+## What this changes for the Preferred Species report
+
+`r paste0("That report's D4 chapter can present ", kRetained, " sub-scale means by species group, with the ", length(unassignedItems), " unassigned items shown item by item, instead of ", length(d4.items), " separate item tables. The sub-scale means are compact enough to cross with the full species banner, and the item-level percentage tables can be kept as supporting detail. Two differences to handle at that point: that report uses 2025 only, while these scales were derived on both waves pooled, and its banner retains a \"no preference\" column for respondents this battery does not apply to.")`
+
+## Qualifications
+
+The following limit how far the recommendation should be pushed.
+
+`r paste0("Confirmatory fit does not reach conventional cutoffs. The retained model reproduces the broad structure of the correlations in held-out data but leaves local misfit, concentrated in the overlap between D4h and D4m. Treating the scales as approximate summaries of related items is supported; treating them as a validated measurement model is not.")`
+
+`r paste0("The split establishes replication across respondents, not across populations or time. The by-wave check in Chapter 8 is reassuring but is not a measurement-invariance test, and both waves come from the same survey programme, the same state, and the same sampling frame.")`
+
+`r paste0("Whether any angler appears in both waves is unknown, because the two waves carry different identifier systems with no crosswalk. If repeat respondents exist, they could appear in both halves of the split and the replication would be modestly flattered.")`
+
+`r paste0("The placement of D4a is empirically supported but substantively odd. The held-out comparison favours Constraints over Satisfaction, and the loading is clear, but its wording reads like a satisfaction item. Anyone uncomfortable with it can drop D4a: Constraints alpha falls only to ", alphaDropD4a, ".")`
+
+`r paste0("The analysis sample is not the survey sample. Listwise deletion removes respondents who are older and fish fewer days (Chapter 1), and the battery is only defined for anglers who named a preferred species. The structure described here is the structure among anglers who stated a preference and completed the battery.")`
+
+`r paste0("Nothing in this report is weighted. Sub-scale means computed for the Preferred Species report should be weighted in the usual way; the unweighted analysis here concerns only which items group together.")`
+
+`r run_pagebreak()`
+
+# Appendix A - The D4 Battery
+
+`r paste0("Stem: *", d4.stem, "*")`
+
+```{r appendixItems}
+CreateFlex(
+  itemText %>%
+    left_join(
+      assignment %>%
+        transmute(
+          Item,
+          Assignment = if_else(
+            Assigned,
+            if_else(Sign < 0, paste0(Scale, " (reversed)"), Scale),
+            "Unassigned"
+          )
+        ),
+      by = "Item"
+    ) %>%
+    rename(Statement = Text),
+  firstColWidth = 0.5
+)
+```
+
+`r paste0("Response options, coded 1 to 5 in the order shown: ", paste(d4.response.levels, collapse = ", "), ".")`
+
+`r run_pagebreak()`
+
+# Appendix B - Statistical Methodology
+
+## What this report does and does not share with the other survey reports
+
+`r paste0("This report is a psychometric analysis of a single question battery, not an estimate of any population quantity. It therefore departs from the Crosstabs, Trends, and Preferred Species reports in one important respect: **no survey weights are used anywhere in it**. Weights exist to make sample estimates represent the angler population; the object of analysis here is the pattern of association among items within respondents, which weighting does not improve and which weighted estimation would complicate with no corresponding benefit. Every count, percentage, correlation, loading, and reliability coefficient in this report is unweighted, and none of them should be quoted as a population figure.")`
+
+`r paste0("The universe rule is also narrower than any of those reports, and the sample is wider. It requires a non-missing preferred species and a preference other than \"no particular type\", and it pools the ", paste(d4.waves, collapse = " and "), " waves, giving ", format(nPooled, big.mark = ","), " respondents. The Crosstabs report tabulates the same items for a single year over a larger universe, so item percentages here will not match it.")`
+
+## Pooling the two waves
+
+`r paste0("Pooling assumes the items relate to one another similarly in both waves. It buys sample size, which is what makes a development and test split affordable: ", format(nPooled, big.mark = ","), " respondents divide into halves of roughly ", format(round(nPooled / 2), big.mark = ","), ", each large enough for a factor analysis and a WLSMV confirmatory model. The assumption is checked twice -- descriptively in Chapter 2 and at model level in Chapter 8, where the retained model is fitted separately within each wave -- but both checks come after the pooling, not before it.")`
+
+`r paste0("A second assumption cannot be checked at all. The two waves carry different respondent identifiers with no overlap and no crosswalk, so whether any angler answered both waves is unknown. Repeat respondents would appear twice in the pooled sample and could land in both halves of the split, which would inflate the apparent replication in Chapter 8 by an unknown and probably small amount. This is disclosed rather than adjusted for.")`
+
+`r paste0("An earlier version of this report used the waves themselves as the development and test samples -- exploratory analysis on 2025, confirmatory on 2018 -- and is retained as D4ScaleReport_waveDesign.rmd. That design tested replication across time but confounded it with everything else that differs between waves, and it could not test a respecification without reusing one of the two samples. The pooled split separates the replication question from the time question; the time question is then answered separately, by wave, in Chapter 8.")`
+
+## The development and test split
+
+`r paste0("The split is a simple random assignment of respondents to two halves of equal size, stratified by survey year so that wave composition is balanced. It is seeded (", d4.seed, ") for reproducibility and applied to respondents rather than to complete cases, so the split does not depend on item response.")`
+
+`r paste0("The discipline the split imposes is that the test half is read once. Every choice reported here -- the number of factors, the assignment of items to factors, the threshold, the single freed residual covariance -- was made on the development half. Chapter 8 then fits the resulting models to the test half and reports what happens, including where a model that looked reasonable in development fails. Had the test half been consulted while choosing, its fit statistics would describe the choosing rather than the structure.")`
+
+`r paste0("What the design establishes is narrow: that a structure found among one random half of these respondents reappears among the other half. It does not establish generalization to a different population, survey mode, or future wave, and it is not a test of measurement invariance.")`
+
+## Polychoric correlations
+
+Five-point Likert items are ordered categories, not interval measurements.
+Treating them as interval and computing Pearson correlations attenuates the
+associations, and the attenuation is worse for items with skewed response
+distributions. A polychoric correlation instead estimates the correlation
+between two continuous latent variables assumed to underlie the observed
+categories, given the observed contingency table and a normality assumption on
+those latent variables. All correlations, factor analyses, and reliability
+coefficients in this report are computed from the polychoric matrix of the
+development half.
+
+`r paste0("The matrix is computed with smoothing enabled, which repairs a matrix that is not positive definite by shrinking its smallest eigenvalues. Whether smoothing was necessary is not separately reported by the routine; the determinant of the resulting matrix, in Chapter 4, indicates a matrix comfortably away from singularity.")`
+
+## Missing data
+
+`r paste0("Listwise deletion is primary: the correlation matrix, the factor analyses, and the reliability coefficients use the ", format(nLwDev, big.mark = ","), " development-half respondents who answered all ", length(d4.items), " items, and the confirmatory models use the ", format(nrow(tstData), big.mark = ","), " test-half respondents complete on the modelled items. Pairwise deletion is reported as a sensitivity check in Chapter 1. No values are imputed and no respondent is altered. The characteristics of the respondents that listwise deletion removes are reported in Chapter 1 rather than assumed to be ignorable.")`
+
+The one place a different rule applies is the scale scores in Chapter 9, which
+are computed per scale for respondents who completed that scale, matching the
+completeness convention already used elsewhere in the survey reporting.
+
+## Extraction and rotation
+
+Factors are extracted by minimum residuals (`fm = "minres"` in the **psych**
+package), which minimizes the off-diagonal residual correlations and does not
+require the distributional assumptions of maximum likelihood. Rotation is
+oblimin, an oblique rotation permitting the factors to correlate; the factor
+correlation matrix is reported with each solution. Loadings shown are pattern
+coefficients.
+
+`r paste0("Factor solutions are sign- and order-indeterminate. For display, each factor is oriented so that its largest loading is positive. For the retained solution, the factors are additionally named and oriented by marker items -- ", paste(paste0(names(d4.markers), " by ", d4.markers), collapse = ", "), " -- and the render stops if any marker fails to identify exactly one factor, so a mislabelled column cannot reach the page. Congruence comparisons match each factor to its best counterpart in the other solution on absolute congruence, rather than comparing columns by position, for the same reason.")`
+
+`r paste0("Items are assigned to the factor carrying their largest absolute loading, provided it reaches ", Fmt2(d4.loading.threshold), ". The threshold is a convention; 0.30, 0.32, and 0.40 are all in common use, and 0.40 was chosen as the more demanding of them. The item assignment used downstream is derived from the fitted loadings at render time rather than typed in, so the confirmatory models in Chapter 8 cannot drift from the exploratory solution in Chapter 6.")`
+
+## Retention criteria
+
+`r paste0("Parallel analysis compares observed eigenvalues to those from 100 simulated datasets of the same size with no factor structure. Velicer's MAP examines the average squared partial correlation after successively removing factors. Very Simple Structure evaluates how well simplified loading matrices reproduce the correlations. Empirical BIC and the Kaiser eigenvalue rule are reported for completeness; the Kaiser rule in particular is known to over-retain and is included only because readers expect it. These criteria are reported together because they routinely disagree, as they do here -- which is why the number of factors is also put to the held-out test rather than decided by them alone.")`
+
+## Reliability coefficients
+
+`r paste0("Ordinal alpha is Cronbach's alpha computed on the polychoric correlation matrix, which removes the categorization bias that makes ordinary alpha understate the reliability of Likert scales. Congeneric omega is computed from a one-factor solution on the same matrix as the squared sum of loadings divided by that quantity plus the sum of the uniquenesses, and does not assume that all items relate equally strongly to the construct. Item-rest correlations and alpha-if-dropped are computed on the same matrix, with reverse-scored items sign-aligned first. Both coefficients assume the items are not redundant; where two items overlap in content, as D4h and D4m do, they overstate reliability somewhat.")`
+
+## Confirmatory factor analysis
+
+`r paste0("Models are fitted in **lavaan** with items declared ordinal and estimated by WLSMV (diagonally weighted least squares with robust standard errors and a mean- and variance-adjusted test statistic), the standard estimator for ordered categorical indicators. Reported fit statistics are the scaled versions. Latent variables are scaled by fixing the first indicator's loading; within each factor the item with the largest positive exploratory loading is listed first so that each factor is oriented in the direction its name implies.")`
+
+`r paste0("Each fitted model is checked for admissibility -- whether the estimated latent covariance matrix is positive definite and the variance estimates are within bounds -- and the result is reported in the model table, because an inadmissible solution can otherwise appear as an attractive set of fit statistics. One model in Chapter 8 is inadmissible, and its fit indices should be disregarded accordingly.")`
+
+`r paste0("Models are compared on the same items wherever possible. The four-factor model is the exception: its fourth factor requires a twelfth item, so its fit statistics rest on a different observed-variable set and are not directly comparable to the others. N and the item count are reported per model for that reason.")`
+
+## Reproducibility
+
+`r paste0("A fixed seed (", d4.seed, ") is set before every routine with a random component: the development and test split, the polychoric estimation, parallel analysis, and each factor extraction. Wave sample sizes and the balance of the split are asserted at the top of the render, which stops if the delivered data no longer produces them. Nothing in the upstream data or in the other survey reporting projects is modified by this report.")`
+
+```{r timing}
+toc()
+```
