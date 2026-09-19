@@ -1681,3 +1681,326 @@ Ch3ScaleFacetPlot <- function(
   }
   p
 }
+
+# ============================================================================
+# CHAPTER 4 - SATISFACTION (D111)
+# ============================================================================
+# Collects the satisfaction measures that Chapters 2 and 3 report separately.
+# Nothing is recomputed differently here: the same base.summary.* functions and
+# the same D4RowSpec row set are used, so a Chapter 4 cell and its Chapter 2 or
+# 3 counterpart are the same number by construction. The single transformation
+# is A9, reversed so every column in the chapter runs the same direction (D113).
+
+ch4.sat.items <- tibble::tibble(
+  Field = c("A9rev", "D4a", "D4i", "D4j", "D4k", "D4l"),
+  Source = c("A9", "D4a", "D4i", "D4j", "D4k", "D4l"),
+  Short = c(
+    "Season overall",
+    "Success",
+    "Size caught",
+    "Size harvestable",
+    "Number caught",
+    "Number harvestable"
+  ),
+  Reported = c("Chapter 3", rep("Chapter 2", 5))
+)
+
+# Differences between two items are small relative to the 1 dp used elsewhere
+# (D93): the overall catch gap is 0.07, which 1 dp would render as 0.1 next to
+# an interval of 0.06. Gap columns therefore carry 2 dp (D115).
+FmtMeanGap <- function(value, ci) {
+  paste0(
+    formatC(value, format = "f", digits = 2),
+    " \u00b1 ",
+    formatC(ci, format = "f", digits = 2)
+  )
+}
+
+ch4.lab.meanci <- "Overall mean \u00b1 CI"
+ch4.lab.diffci <- "Difference \u00b1 CI"
+
+caption.ch4a9 <-
+  "A9 appears here as 6 minus the recorded response, so that every item in this chapter runs the same way and a higher score is always more satisfied. Chapter 3 reports A9 on its recorded scale, where 1 is Very satisfied. The two are the same estimate with the same confidence interval: the overall 2.3 plus or minus 0.06 in Chapter 3 is 3.7 plus or minus 0.06 here."
+caption.ch4corr <-
+  "Cells are weighted Pearson correlations on the respondents who answered all six items. They are descriptive: no test and no adjustment for multiple comparisons is reported."
+caption.ch4groupcorr <-
+  "Cells are Spearman rank correlations between the 17 preferred-group means, one observation per group, taken from the table above. The groups overlap, because a family row contains its own species rows, so these summarise that table rather than estimate a population quantity; no standard error or test is reported."
+caption.ch4gap <-
+  "Both mean columns and the difference are computed on the same respondents, those who answered both items, so the difference is a paired comparison and equals the difference of the two means shown. Intervals are 95 percent and are built exactly as every other mean interval in this report. They are not adjusted for the number of groups compared."
+
+# A9 reversed, plus the two paired differences as their own numeric columns so
+# that base.summary.means gives the difference the same Kish-effN interval it
+# gives any other mean, rather than a second interval formula appearing in the
+# report.
+Ch4AddSatVars <- function(mydata) {
+  mydata %>%
+    mutate(
+      A9rev = 6 - as.numeric(A9),
+      satGapCatch = as.numeric(D4i) - as.numeric(D4k),
+      satGapHarvest = as.numeric(D4j) - as.numeric(D4l)
+    )
+}
+
+Ch4ItemTable <- function(mydata, codebook) {
+  purrr::pmap_dfr(ch4.sat.items, function(Field, Source, Short, Reported) {
+    sub <- mydata %>% filter(!is.na(.data[[Field]]))
+    mn <- base.summary.means(sub, !!sym(Field)) %>% as_tibble()
+    tibble(
+      Item = Source,
+      `Question text` = ItemQuestionText(Source, codebook),
+      `Short name` = Short,
+      `Also in` = Reported,
+      N = FmtCount(mn$Number),
+      !!ch4.lab.meanci := FmtMeanD4(mn$Value, mn$CI)
+    )
+  })
+}
+
+# Lower triangle only: the upper triangle repeats it and doubles the reading
+# effort in a table this wide.
+FormatCorrMatrix <- function(S, labels) {
+  S <- round(S, 2)
+  S[upper.tri(S)] <- NA_real_
+  out <- as.data.frame(S)
+  names(out) <- labels
+  out <- out %>%
+    mutate(across(
+      everything(),
+      ~ if_else(is.na(.x), "", formatC(.x, format = "f", digits = 2))
+    ))
+  bind_cols(tibble(Item = labels), out)
+}
+
+Ch4CorrComplete <- function(mydata, fields = ch4.sat.items$Field) {
+  x <- mydata %>% mutate(across(all_of(fields), as.numeric))
+  sum(complete.cases(x[, fields]))
+}
+
+Ch4CorrTable <- function(
+  mydata,
+  fields = ch4.sat.items$Field,
+  labels = ch4.sat.items$Short
+) {
+  x <- mydata %>% mutate(across(all_of(fields), as.numeric))
+  keep <- complete.cases(x[, fields])
+  m <- as.matrix(x[keep, fields])
+  S <- stats::cov.wt(m, wt = x$postWeight[keep], cor = TRUE)$cor
+  FormatCorrMatrix(S, labels)
+}
+
+# Weighted group means as numbers rather than formatted cells, so the
+# group-level correlation and the dumbbell figures read the same values the
+# matrix table prints.
+Ch4GroupMeans <- function(mydata, fields = ch4.sat.items$Field) {
+  spec <- D4RowSpec(includeOverall = TRUE)
+  purrr::pmap_dfr(
+    spec,
+    function(RawLabel, IndentedLabel, Type, Members, Order) {
+      sub <- mydata
+      if (!is.null(Members)) {
+        sub <- sub %>% filter(as.character(B1) %in% Members)
+      }
+      vals <- purrr::map_dbl(fields, function(v) {
+        s2 <- sub %>% filter(!is.na(.data[[v]]))
+        if (nrow(s2) < 3) {
+          return(NA_real_)
+        }
+        base.summary.means(s2, !!sym(v))$Value[1]
+      })
+      bind_cols(
+        tibble(RawLabel = RawLabel, Type = Type, N = nrow(sub)),
+        as_tibble(set_names(as.list(vals), fields))
+      )
+    }
+  )
+}
+
+Ch4GroupCorrTable <- function(
+  groupMeans,
+  fields = ch4.sat.items$Field,
+  labels = ch4.sat.items$Short
+) {
+  m <- groupMeans %>%
+    filter(Type != "Overall") %>%
+    select(all_of(fields)) %>%
+    as.matrix()
+  S <- cor(m, method = "spearman", use = "pairwise.complete.obs")
+  FormatCorrMatrix(S, labels)
+}
+
+# Paired comparison of two items within each preferred group. The universe is
+# respondents who answered BOTH items, so the two means and their difference
+# describe the same people and the difference column is not the difference of
+# two independently gated estimates.
+Ch4GapTable <- function(mydata, v1, v2, lab1, lab2) {
+  spec <- D4RowSpec(includeOverall = TRUE)
+  purrr::pmap_dfr(
+    spec,
+    function(RawLabel, IndentedLabel, Type, Members, Order) {
+      sub <- mydata
+      if (!is.null(Members)) {
+        sub <- sub %>% filter(as.character(B1) %in% Members)
+      }
+      sub <- sub %>%
+        filter(!is.na(.data[[v1]]), !is.na(.data[[v2]])) %>%
+        mutate(gapv = as.numeric(.data[[v1]]) - as.numeric(.data[[v2]]))
+
+      if (nrow(sub) == 0) {
+        return(tibble(
+          `Preferred species` = IndentedLabel,
+          !!lab1 := "",
+          !!lab2 := "",
+          !!ch4.lab.diffci := "",
+          N = ""
+        ))
+      }
+
+      m1 <- base.summary.means(sub, !!sym(v1)) %>% as_tibble()
+      m2 <- base.summary.means(sub, !!sym(v2)) %>% as_tibble()
+      mg <- base.summary.means(sub, gapv) %>% as_tibble()
+
+      tibble(
+        `Preferred species` = IndentedLabel,
+        !!lab1 := FmtMeanD4(m1$Value, m1$CI),
+        !!lab2 := FmtMeanD4(m2$Value, m2$CI),
+        !!ch4.lab.diffci := FmtMeanGap(mg$Value, mg$CI),
+        N = FmtCount(mg$Number)
+      )
+    }
+  )
+}
+
+# Rows are sorted by the gap, which destroys the family/species nesting, so the
+# indent is dropped and the raw N goes on the label (D104).
+Ch4DumbbellPlot <- function(
+  mydata,
+  v1,
+  v2,
+  lab1,
+  lab2,
+  titleText = NULL,
+  subtitleText = NULL
+) {
+  spec <- D4RowSpec(includeOverall = TRUE)
+  df <- purrr::pmap_dfr(
+    spec,
+    function(RawLabel, IndentedLabel, Type, Members, Order) {
+      sub <- mydata
+      if (!is.null(Members)) {
+        sub <- sub %>% filter(as.character(B1) %in% Members)
+      }
+      sub <- sub %>% filter(!is.na(.data[[v1]]), !is.na(.data[[v2]]))
+      if (nrow(sub) < 3) {
+        return(NULL)
+      }
+      tibble(
+        RawLabel = RawLabel,
+        N = nrow(sub),
+        V1 = base.summary.means(sub, !!sym(v1))$Value[1],
+        V2 = base.summary.means(sub, !!sym(v2))$Value[1]
+      )
+    }
+  )
+
+  df <- df %>%
+    mutate(
+      Label = paste0(
+        RawLabel,
+        " (n=",
+        formatC(N, format = "d", big.mark = ","),
+        ")"
+      ),
+      Label = fct_reorder(Label, V1 - V2)
+    )
+
+  cols <- set_names(
+    viridisLite::viridis(2, begin = 0.25, end = 0.7),
+    c(lab1, lab2)
+  )
+
+  p <- ggplot(df, aes(y = Label)) +
+    geom_segment(
+      aes(x = V2, xend = V1, yend = Label),
+      colour = "grey60",
+      linewidth = 0.5
+    ) +
+    geom_point(aes(x = V2, colour = lab2), size = 1.9) +
+    geom_point(aes(x = V1, colour = lab1), size = 1.9) +
+    scale_colour_manual(values = cols, breaks = c(lab1, lab2)) +
+    scale_x_continuous(breaks = 1:5) +
+    expand_limits(x = c(1, 5)) +
+    labs(x = "Weighted mean response", y = NULL, colour = NULL) +
+    theme_minimal(base_size = 9) +
+    theme(
+      axis.text.y = element_text(hjust = 0),
+      panel.grid.major.y = element_blank(),
+      legend.position = "top",
+      plot.title = element_text(size = 9.5, face = "bold"),
+      plot.subtitle = element_text(size = 7, face = "italic")
+    )
+
+  if (!is.null(titleText)) {
+    p <- p + labs(title = str_wrap(titleText, width = 70))
+  }
+  if (!is.null(subtitleText)) {
+    p <- p + labs(subtitle = subtitleText)
+  }
+  p
+}
+
+# Raw (covariance) alpha. Reported only as a descriptive footnote: the chapter
+# builds no composite score, and the sibling D4ScaleAnalysis report is the
+# authority on what this battery measures.
+Ch4Alpha <- function(mydata, fields, weighted = TRUE) {
+  x <- mydata %>% mutate(across(all_of(fields), as.numeric))
+  keep <- complete.cases(x[, fields])
+  m <- as.matrix(x[keep, fields])
+  S <- if (weighted) {
+    stats::cov.wt(m, wt = x$postWeight[keep])$cov
+  } else {
+    stats::cov(m)
+  }
+  k <- ncol(m)
+  list(k = k, n = nrow(m), alpha = k / (k - 1) * (1 - sum(diag(S)) / sum(S)))
+}
+
+# Same paired quantities as Ch4GapTable, unformatted, so the chapter's summary
+# sentences are computed at render time rather than transcribed from a table.
+Ch4GapNumbers <- function(mydata, v1, v2) {
+  spec <- D4RowSpec(includeOverall = TRUE)
+  purrr::pmap_dfr(
+    spec,
+    function(RawLabel, IndentedLabel, Type, Members, Order) {
+      sub <- mydata
+      if (!is.null(Members)) {
+        sub <- sub %>% filter(as.character(B1) %in% Members)
+      }
+      sub <- sub %>%
+        filter(!is.na(.data[[v1]]), !is.na(.data[[v2]])) %>%
+        mutate(gapv = as.numeric(.data[[v1]]) - as.numeric(.data[[v2]]))
+      if (nrow(sub) == 0) return(NULL)
+      mg <- base.summary.means(sub, gapv) %>% as_tibble()
+      tibble(
+        RawLabel = RawLabel,
+        Type = Type,
+        N = mg$Number,
+        Gap = mg$Value,
+        CI = mg$CI
+      )
+    }
+  )
+}
+
+# Comma-separated group names whose interval excludes zero in one direction,
+# for use inline in the chapter text.
+Ch4GapNames <- function(gapNumbers, direction = c("positive", "negative")) {
+  direction <- match.arg(direction)
+  sel <- gapNumbers %>% filter(Type != "Overall", abs(Gap) > CI)
+  sel <- if (direction == "positive") {
+    sel %>% filter(Gap > 0) %>% arrange(desc(Gap))
+  } else {
+    sel %>% filter(Gap < 0) %>% arrange(Gap)
+  }
+  if (nrow(sel) == 0) return("none")
+  paste(sel$RawLabel, collapse = ", ")
+}

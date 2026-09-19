@@ -1260,6 +1260,128 @@ CreateFlex(Ch3SelectOneTable(
 
 `r run_pagebreak()`
 
+# Chapter 4: Satisfaction
+
+```{r ch4Setup}
+# A9 reversed, plus the two paired differences. Additive only: no row is added,
+# dropped, or reweighted, so nothing in Chapters 1-3 changes.
+nBeforeCh4 <- nrow(d)
+d <- Ch4AddSatVars(d)
+
+ch4.nSix <- Ch4CorrComplete(d)
+ch4.alphaSat <- Ch4Alpha(d, c("D4i", "D4j", "D4k", "D4l"))
+ch4.groupMeans <- Ch4GroupMeans(d)
+ch4.gapCatch <- Ch4GapNumbers(d, "D4i", "D4k")
+ch4.gapHarvest <- Ch4GapNumbers(d, "D4j", "D4l")
+
+stopifnot(
+  nrow(d) == nBeforeCh4,
+  # The reversal has to be exact, or the reconciliation stated in the caption
+  # is false and every column in this chapter points a different way.
+  all(d$A9rev + as.numeric(d$A9) == 6, na.rm = TRUE),
+  identical(is.na(d$A9rev), is.na(d$A9)),
+  nrow(ch4.groupMeans) == 18,
+  nrow(ch4.gapCatch) == 18,
+  nrow(ch4.gapHarvest) == 18
+)
+```
+
+`r paste0("The survey measures satisfaction in two places that this report has so far kept apart. A9 asks how satisfied the angler was with fishing in Nebraska during 2025 and is reported in Chapter 3. Five items in the D4 battery ask about the one type of fish the angler prefers to fish for and are reported one at a time in Chapter 2. This chapter puts all six in one place, pointing the same direction, across the same preferred groups. No cell is computed differently here: the same summary functions, the same universe, and the same row set are used, so a value in this chapter and its counterpart in Chapter 2 or 3 are the same number.")`
+
+`r caption.ch4a9`
+
+`r caption.ch3rows`
+
+`r run_pagebreak()`
+
+## The satisfaction items
+
+`r paste0("The six items, with the question text as it appears in the instrument, the short name used in the tables that follow, and the chapter that reports the item in full. N is the raw unweighted number of respondents in the analysis sample who answered the item; the mean is weighted, with a 95 percent confidence interval. ", caption.raked)`
+
+```{r ch4items}
+CreateFlex(Ch4ItemTable(d, q))
+```
+
+`r run_pagebreak()`
+
+`r sect_portrait()`
+
+## Satisfaction by preferred group
+
+`r paste0("All six items across the preferred groups. ", caption.ch3means, " ", caption.ch3rows, " ", caption.raked)`
+
+```{r ch4matrix}
+CreateFlex(Ch3MeansTable(d, ch4.sat.items$Field, ch4.sat.items$Short))
+```
+
+`r sect_landscape()`
+
+## Consistency between the items
+
+`r paste0("Two different questions are asked here. The first table asks whether individual anglers answer the six items alike: an angler satisfied with one thing is, or is not, satisfied with the others. The second asks whether the preferred groups rank alike across items: the groups that rate the season highly are, or are not, the groups satisfied with size or with numbers. A set of items can behave one way at the respondent level and the other way at the group level, so both are shown.")`
+
+### Agreement between individual anglers' answers
+
+`r paste0("Weighted correlations between the six items, computed on the ", format(ch4.nSix, big.mark=","), " respondents who answered all six. ", caption.ch4corr)`
+
+```{r ch4corr}
+CreateFlex(Ch4CorrTable(d))
+```
+
+`r paste0("For reference, the four D4 satisfaction items form the Satisfaction sub-scale identified by the separate analysis of the D4 battery; their weighted alpha on this report's sample is ", formatC(ch4.alphaSat$alpha, format="f", digits=3), " on ", format(ch4.alphaSat$n, big.mark=","), " respondents. No composite score is built here and none is used anywhere in this report, which stays item-level. A9 asks about the season rather than about the preferred fish, and the D4 analysis places D4a with the constraint items rather than the satisfaction items, so neither is included in that coefficient. A single coefficient across all six would also conceal the structure visible in the table above.")`
+
+`r run_pagebreak()`
+
+### Agreement between the group averages
+
+`r paste0("Rank correlations between the preferred-group means shown in the previous section, one observation per group. ", caption.ch4groupcorr)`
+
+```{r ch4groupcorr}
+CreateFlex(Ch4GroupCorrTable(ch4.groupMeans))
+```
+
+`r run_pagebreak()`
+
+## Size and numbers: the fish anglers catch
+
+`r paste0("D4i and D4k ask the same question about the same fish, one about the size caught and one about the number caught, so the two can be compared within an angler rather than across anglers. ", caption.ch4gap, " ", caption.ch3rows)`
+
+```{r ch4gapCatch}
+CreateFlex(Ch4GapTable(d, "D4i", "D4k", "Size caught", "Number caught"))
+```
+
+```{r ch4gapCatchPlot, fig.width=6.5, fig.height=5}
+Ch4DumbbellPlot(
+  d, "D4i", "D4k", "Size of fish caught", "Number of fish caught",
+  titleText = "Satisfaction with the size, and with the number, of the preferred fish caught",
+  subtitleText = "1 = Strongly Disagree to 5 = Strongly Agree. Rows are sorted by the size-minus-numbers difference"
+)
+```
+
+`r paste0("Reading the difference column against its own interval, and without any adjustment for the number of groups compared: the interval lies above zero, with size rated higher than numbers, for ", Ch4GapNames(ch4.gapCatch, "positive"), "; it lies below zero, with numbers rated higher than size, for ", Ch4GapNames(ch4.gapCatch, "negative"), ". For the remaining ", sum(ch4.gapCatch$Type != "Overall" & abs(ch4.gapCatch$Gap) <= ch4.gapCatch$CI), " groups the interval includes zero. Overall the difference is ", FmtMeanGap(ch4.gapCatch$Gap[1], ch4.gapCatch$CI[1]), ".")`
+
+`r run_pagebreak()`
+
+## Size and numbers: the fish anglers may harvest
+
+`r paste0("D4j and D4l repeat the comparison for the fish an angler is allowed to keep rather than the fish caught. ", caption.ch4gap, " ", caption.ch3rows)`
+
+```{r ch4gapHarvest}
+CreateFlex(Ch4GapTable(d, "D4j", "D4l", "Size harvestable", "Number harvestable"))
+```
+
+```{r ch4gapHarvestPlot, fig.width=6.5, fig.height=5}
+Ch4DumbbellPlot(
+  d, "D4j", "D4l", "Size allowed to harvest", "Number allowed to harvest",
+  titleText = "Satisfaction with the size, and with the number, of the preferred fish that may be harvested",
+  subtitleText = "1 = Strongly Disagree to 5 = Strongly Agree. Rows are sorted by the size-minus-numbers difference"
+)
+```
+
+`r paste0("On the same reading: the interval lies above zero for ", Ch4GapNames(ch4.gapHarvest, "positive"), ", and below zero for ", Ch4GapNames(ch4.gapHarvest, "negative"), ". For the remaining ", sum(ch4.gapHarvest$Type != "Overall" & abs(ch4.gapHarvest$Gap) <= ch4.gapHarvest$CI), " groups the interval includes zero. Overall the difference is ", FmtMeanGap(ch4.gapHarvest$Gap[1], ch4.gapHarvest$CI[1]), ".")`
+
+`r run_pagebreak()`
+
 <!--
 D36: Appendix A is a deliberately blank placeholder. The paper questionnaire is
 pasted in by hand, matching 2025CrossTabReport.rmd L1545-1547, which does the
@@ -1403,9 +1525,23 @@ adjusted p-value near the conventional threshold accordingly.
 
 `r paste0("Every comparison reports the weighted difference in means with a 95% confidence interval, and Hedges' g, a standardized difference computed by pooling the two weighted standard deviations on the effective sample sizes and applying the usual small-sample correction. Both are shown because several species in this survey are represented by very few respondents, where a comparison that separates nothing is not evidence that the species behave alike -- the interval is simply too wide to distinguish the two possibilities. The difference, its interval, and g together let the reader tell those cases apart.")`
 
+## Satisfaction comparisons in Chapter 4
+
+`r paste0("Chapter 4 reports no new estimator. Its group means are the weighted means described above, with the same Kish effective-N confidence intervals, and its rows are the same preferred groups used in Chapters 2 and 3.")`
+
+`r paste0("One variable is transformed. A9 is recorded from 1, Very satisfied, to 5, Very dissatisfied, while every D4 item runs from 1, Strongly Disagree, to 5, Strongly Agree. Chapter 4 reports A9 as 6 minus the recorded response so that all six items point the same way. Subtraction from a constant shifts and reflects the scale without changing its spread, so the confidence interval is unchanged: the overall A9 mean of 2.3 plus or minus 0.06 in Chapter 3 appears as 3.7 plus or minus 0.06 in Chapter 4.")`
+
+`r paste0("The size-and-numbers comparisons are paired. For each respondent who answered both items of a pair, the difference between the two responses is computed first, and the group figure is the weighted mean of those differences with the usual interval. Restricting to respondents who answered both items means the two means printed beside the difference describe the same people, so the difference column equals the difference of the columns. Pairing removes between-angler variation in how the scale is used, which is why a difference of a few hundredths of a scale point can carry a narrower interval than either mean.")`
+
+`r paste0("No significance test is reported in Chapter 4, and no adjustment for multiple comparisons is applied. Each interval is a 95 percent interval for its own group taken alone. Seventeen groups are shown for each pair, and the groups overlap, since a family row contains the respondents in its own species rows; reading every interval at once is therefore a weaker exercise than reading any one of them, and a group whose interval just excludes zero should be read with that in mind. The correlation tables are likewise descriptive summaries with no test attached, and the group-level correlations are computed across 17 overlapping groups rather than across independent observations.")`
+
+`r paste0("The reliability coefficient quoted in Chapter 4 is a weighted raw alpha for the four D4 satisfaction items. It is reported for reference only; no composite score is constructed anywhere in this report, which is item-level throughout.")`
+
 ## Display precision
 
 `r paste0("Scale means and their confidence intervals are printed to three decimal places in Chapter 1, rather than the one decimal place used in the 2025 Crosstabs report. At one decimal place a scale-mean interval of roughly plus or minus 0.04 rounds to zero, which would make the species comparisons unreadable. This is a rounding change in presentation only; the underlying values are identical to those the inherited functions produce.")`
+
+`r paste0("For the same reason, the paired difference columns in Chapter 4 carry two decimal places rather than the one used for the means beside them. The overall difference between satisfaction with size and satisfaction with numbers is 0.07, which one decimal place would print as 0.1 next to an interval of 0.06.")`
 
 ```{r timing}
 toc()

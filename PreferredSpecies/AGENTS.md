@@ -207,7 +207,7 @@ ask**, never change the other report.
 |---|---|
 | `PreferredSpeciesReport.rmd` | The report. Renders to `PreferredSpeciesReport.docx` |
 | `PreferredSpeciesFunctions.R` | Banner definition, table builders, pairwise contrast helpers |
-| `.gitignore` | Mirrors `CrossTabTables/.gitignore` plus rendered output |
+| `.gitignore` | Ignores build artifacts and Word lock files. **The rendered `.docx` IS tracked** (D109), via a negation against the repo-root `*.docx` rule (F36) |
 
 **Source order in the setup chunk** (do not reorder — local definitions must win):
 `../BaseFunctions_2025_UPDATED.R`, then `../CrossTabTables/CrossTabTableFunctions.R`
@@ -216,11 +216,22 @@ ask**, never change the other report.
 | Step | State |
 |---|---|
 | 1 — species groupings (Chapter 1) | **Done.** 23 tables, renders clean |
-| 2 — species-linked scale questions (Chapter 2) | **Built (2026-09-18).** 13 items, each with a table and 3 figures; item-level, not composite (D63). A summary-paragraph wordsmithing pass is queued for a new conversation — see `PROGRESS.md`'s handoff prompt at the end of the file |
-| 3 — crosstabs by species (Chapter 3) | **Handoff written (prompt 56, 2026-09-18)** — use the Chapter 3 prompt at the end of `PROGRESS.md`. Q7 (question coverage) is the first thing to resolve with the user. Layout is settled → D43 (transposed, landscape where needed) |
-| 4 — visualizations | **No chapter of its own** — interspersed in Chapters 1-3 (D34) |
-| 5 — guided text development | Not started |
-| 6 — appendices | **Done.** Appendix A blank for hand-pasted instrument; Appendix B drafted |
+| 2 — species-linked scale questions (Chapter 2) | **Done.** 13 items, each with a table, 3 figures, and 2 verified summary paragraphs; item-level, not composite (D63) |
+| 3 — crosstabs by species (Chapter 3) | **Done.** 21 sections, 39 tables, coverage per D86. The age table carries a weighted mean-age column (D108) |
+| 4 — visualizations | **Done.** No chapter of its own (D34) — 39 figures in Chapter 2, 14 in Chapter 3 (D101) |
+| 5 — guided text development | Not started. **Deferred until after the new Chapter 4** (D110) |
+| 6 — appendices | **Done.** Appendix A blank for hand-pasted instrument; Appendix B drafted, wording read-through still open (Q25) |
+| **Chapter 4 — Satisfaction** | **Done 2026-09-18 (D111-D118).** Six items (`A9` reversed, `D4a`, `D4i`, `D4j`, `D4k`, `D4l`) in one place: inventory, a landscape matrix by group, respondent- and group-level correlations, and the size-vs-numbers paired comparison for the catch pair and the harvest pair. 6 tables, 2 dumbbell figures |
+
+**Render baseline: 81 tables / 55 images / 8 landscape sections / 0 leaked markup** (was 75/53/7
+before Chapter 4). Verify every increment against it. Use the F41 regex for the leaked-markup
+scan — the obvious one gives false positives.
+
+**Inference (D112/D114):** Chapter 4 was granted an exception to the no-inference rule, and it
+**goes unused** — the user declined significance testing and chose a descriptive dumbbell figure.
+Paired differences are weighted means with the standard Kish-effN interval, unadjusted, disclosed
+in Appendix B. If testing is ever added, the D5 precedent still applies: a stated multiplicity plan
+and its own Appendix B section.
 
 Three structural facts that are easy to get wrong and are already settled:
 
@@ -230,5 +241,5 @@ Three structural facts that are easy to get wrong and are already settled:
 3. **Scale scores carry the `*_AnsweredAll` listwise gate** per scale (D19), or the Overall
    column will not reproduce.
 
-Read `PROGRESS.md` for decisions D1-D39, findings F1-F11, and open questions; `ANALYSIS_PLAN.md`
-for the executable spec.
+Read `PROGRESS.md` for decisions D1-D110, findings F1-F36, and open questions; `ANALYSIS_PLAN.md`
+for the executable spec (written for steps 1-3; it does not cover the new Chapter 4).

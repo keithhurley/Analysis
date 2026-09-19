@@ -981,3 +981,232 @@ Trout 1.8 ± 0.21).
 | # | Finding |
 |---|---|
 | F36 | **D37's premise was wrong: `CrossTabTables/` does not track its rendered `.docx`.** `git ls-files CrossTabTables` returns no Word document. The repo-root `.gitignore` at `F:/Survey/Analysis` ignores `*.docx` (along with `*.pdf`, `*.png`, and `*.jpg`) for the entire repository, so no project in `Analysis/` has ever tracked rendered output. The "divergence" D37 flagged therefore never existed, and D109's tracking of this report's `.docx` is a genuine *departure* from repo practice rather than a return to it. Nothing was changed in `CrossTabTables/` or in the root `.gitignore`. |
+
+## Handoff before Chapter 4 — 2026-09-18 (prompt 70)
+
+| # | Decision | Date |
+|---|---|---|
+| D110 | **A new Chapter 4 is planned, and its content is not yet defined.** It is *not* the old "Chapter 4: Visualizations" that D34 removed — that decision stands, and figures continue to sit beside the questions they illustrate. The new chapter is a fresh analysis the user has in mind; the next conversation must elicit it rather than infer it. Step 5 (guided text development) is deferred until after Chapter 4, since new material would otherwise need wordsmithing twice. | 2026-09-18 |
+
+### State at handoff
+
+`PreferredSpeciesReport.docx`: **75 tables, 53 images, 7 landscape sections, 0 leaked markup.**
+Renders clean end to end. Everything below is built, verified, and signed off except where noted.
+
+| Part | Content |
+|---|---|
+| Chapter 1 | Species groupings — 23 tables, design-based pairwise contrasts, the decision packet behind the 17-group banner |
+| Chapter 2 | The `D4` battery — 13 items, each with a table and 3 figures (39 images), plus 26 interpretive paragraphs |
+| Chapter 3 | 21 sections, 39 tables, 14 figures. The age table gained a weighted mean-age column (D108) |
+| Appendix A | Blank placeholder; the instrument is pasted in by hand (D36) |
+| Appendix B | Statistical methodology, 12 sections. Needs a wording read-through (Q25) |
+
+**Structural facts that are settled and must not be re-derived:**
+
+1. Universe is `filter(surveyYear == 2025)` then `filter(!is.na(B1))` → **n = 1,915** (D23). The
+   Overall column deliberately does not match the 2025 Crosstabs report (D28); only the `B1`
+   distribution does.
+2. The 17-group banner **overlaps and is not a partition** (D31). Family rows contain their own
+   species rows; counts sum to 2,695 against 1,874 distinct. Never total a column or a row set.
+3. Displayed N is always the **raw, unweighted** count. CIs use Kish effective N.
+4. No significance testing anywhere except Chapter 1, which uses `svyttest()` with Bonferroni
+   across contrasts (D24, D32).
+
+### What is reusable, and what is not
+
+Everything in `PreferredSpeciesFunctions.R` (1,663 lines) is available to Chapter 4 unmodified:
+
+| Layer | Functions |
+|---|---|
+| Row set | `D4RowSpec(includeOverall)`, `banner.definition`, `AssignBannerGroup()` |
+| Table builders | `Ch3SelectOneTable()` (now with optional `meanVar`), `Ch3SelectAllTable()`, `Ch3MeansTable()`, `Ch3MediansTable()`, `Ch3IndicatorTable()`, `Ch3MeansSpecTable()` |
+| Figure layer | `Ch3RowStat()` and the `Ch3RateLong/MeanLong/MedianLong()` trio, `Ch3DotPlot()`, `Ch3RatePlot()`, `Ch3MeanPlot()`, `Ch3MedianPlot()`, `Ch3StackPlot()`, `Ch3ScaleFacetPlot()` |
+| Inference | `PairwiseContrasts()`, `ContrastTable()`, `EffortContrastTable()` — Chapter 1 only so far |
+| Formatting | `CreateFlex()`, `FmtPct/FmtMean/FmtMeanD4/FmtMeanN/FmtMedianN/FmtCount/FmtP` |
+
+`Ch3RowStat(mydata, gate, statFun)` is the general extension point: hand it any summariser that
+returns a one-row tibble and it walks the banner correctly, with the same filtering the tables
+use. A genuinely new statistic should be added there rather than in a bespoke loop.
+
+**Upstream stays read-only.** `CrossTabTables/`, `TrendTables/`, `BaseFunctions_2025_UPDATED.R`,
+and `Data/` are never edited, no matter what Chapter 4 needs.
+
+### What Chapter 4 has to settle first
+
+Work these with the user before writing code. Each has a default inherited from Chapters 1-3, so
+the question is whether Chapter 4 keeps it or departs — and a departure needs to be recorded.
+
+1. **What the analysis is.** Not inferable from anything on disk. Elicit it.
+2. **Universe.** Default is the report universe, n = 1,915 (D23). A different universe means the
+   Overall row is no longer comparable to Chapters 1-3, which has to be disclosed the way D28
+   discloses the divergence from the crosstabs.
+3. **Row set.** Default is `D4RowSpec(includeOverall = TRUE)` — Overall plus the 17 overlapping
+   preferred groups. If Chapter 4 needs a different grouping, it is a new decision, and the
+   overlap warning (D31) may or may not still apply.
+4. **Inference.** Chapters 2-3 are purely descriptive; only Chapter 1 tests anything. If Chapter 4
+   involves tests or models, the multiplicity plan must be explicit (see D14/D24/D32 and the
+   still-open Q22), and Appendix B needs a new section — that is the precedent D5 set.
+5. **Cross-year.** 2025-only unless extended. The `d2018` snapshot exists in the setup chunk and
+   was pulled in for the Chapter 2 slope figures alone (D74/D76).
+6. **Output conventions.** Transposed layout (D43), display precision (D93), the two N conventions
+   (D90), captions assembled from the `caption.ch3*` strings, `CreateFlex()` for every table.
+7. **Placement and orientation.** Chapter 4 goes after Chapter 3 and before `# Appendix A`; the
+   appendices are lettered, so nothing renumbers. The last section break in the document is the
+   landscape bracket before Days Fished, so new content inherits **portrait** — wide material
+   needs the `sect_portrait()` / `sect_landscape()` bracket idiom (D92).
+8. **Appendix B.** Decide whether the chapter introduces anything the methodology appendix must
+   describe.
+
+### Workflow gotchas that have each cost time at least once
+
+| Gotcha | Handling |
+|---|---|
+| `PreferredSpeciesFunctions.R` is auto-reformatted on write (F7) | Re-read before editing; never edit against a remembered version |
+| Large `cat >> file << EOF` heredocs silently truncate (F34) | Append in blocks of ~80 lines and check `wc -l` after each |
+| A stray code fence swallowed a whole chapter (F35) | Keep opener/closer fence counts balanced; scan after big edits |
+| Render fails with `pandoc ... error 1` | Check for `~$eferredSpeciesReport.docx` — the document is open in Word |
+| Two adjacent tables merge in Word, duplicating headers (D33, D98) | Every table gets its own lead-in paragraph, including under sub-headings |
+| `block_section()` describes the section that **ends** at that point (D92) | Bracket wide runs: portrait break before, landscape break after |
+| `git` refuses with "dubious ownership" | Use `git -c safe.directory=F:/Survey/Analysis ...`; the global config was deliberately left alone |
+| Every file warns `LF will be replaced by CRLF` | Benign today; a `.gitattributes` with `* text=auto` would settle it |
+
+**Restart R before starting.** This session accumulated scratch objects that a fresh session
+avoids: `p1`-`p5`, `figRows`, `ageTbl`, `v`, `f`, `A17Label`, and the chunk-local frames
+`dTourney`, `dDays`, `dAccess`, `dHiredGuide`, `dQ18means`.
+
+**Git state:** branch `master`, remote `keithhurley/Analysis`, clean and pushed through `cf6d6e4`.
+The rendered `.docx` is tracked now (D109), so a render should be committed alongside its source.
+
+### Still open, independent of Chapter 4
+
+| # | Item |
+|---|---|
+| Q22 | Outcome-dimension multiplicity in Chapter 1 (F8) — flagged, not implemented |
+| Q24 | Appendix A heading year — 2025 or 2026 |
+| Q25 | Appendix B wording: the inherited "roughly 9x too tight" passage reads as contradicting the newer scale-invariance note |
+| — | Step 5, guided text development, for Chapters 1-3 |
+| — | Figures deliberately excluded (D101): guided trips, the tournament-count mean, and the A4/A5/A6 select-all grids |
+
+### Prompt for the next conversation (Chapter 4) — USE THIS ONE
+
+```
+Continue the PreferredSpecies report -- a new Chapter 4. Read AGENTS.md, PROGRESS.md, and
+PROMPTS.md in f:/Survey/Analysis/PreferredSpecies first; they carry the standing directive, the
+inherited methodology, decisions D1-D110, and findings F1-F36. Do not re-derive any of it and do
+not re-run past verification checks; they passed.
+
+State of the report: Chapters 1-3 and both appendices are built, verified, and rendering -- 75
+tables, 53 images, 7 landscape sections, 0 leaked markup. Restart R before you begin. Do not
+touch Chapters 1-3, the appendices, or any existing table or figure.
+
+Chapter 4 is a new analysis I have in mind and have not described to you yet. Do NOT infer it
+from ANALYSIS_PLAN.md or from the removed "Chapter 4: Visualizations" heading -- D34 stands and
+figures continue to sit beside the question they illustrate. Ask me what the chapter is. Then
+plan before code: no code execution and no file writing until I give the go-ahead.
+
+Drive the conversation from "What Chapter 4 has to settle first" near the end of PROGRESS.md --
+universe, row set, whether any inferential statistics are involved, cross-year scope, output
+conventions, placement and orientation, and whether Appendix B needs a new section. Tell me where
+Chapter 4 would depart from what Chapters 1-3 already do, rather than quietly adopting a default.
+
+Ground rules, already settled -- do not re-litigate:
+- Technician voice. Report the numbers; I interpret them. The D77/D79 interpretation exception
+  was scoped to Chapter 2's closing paragraphs only.
+- Universe is surveyYear == 2025 with !is.na(B1), n = 1,915 (D23), unless I say otherwise.
+- Rows are Overall plus the 17 preferred groups via D4RowSpec, and they overlap (D31) -- never
+  total them. Displayed N is always raw and unweighted; CIs use Kish effective N.
+- Transposed layout, landscape only where needed (D43); block_section brackets per D92.
+- Reuse base.summary.* and the Ch3* builders unmodified. Ch3RowStat() is the extension point for
+  a new statistic.
+- Never edit anything upstream (CrossTabTables/, TrendTables/, BaseFunctions*, Data/).
+- Portrait figures are 6.5in wide (D78/D103).
+
+Render and verify after each build increment against the 75-table / 53-image / 7-landscape
+baseline, and keep PROGRESS.md and PROMPTS.md updated, logging every prompt verbatim in
+PROMPTS.md. The rendered .docx is tracked in git now (D109), so commit it alongside the source.
+Use `git -c safe.directory=F:/Survey/Analysis ...` -- plain git refuses in this repo.
+```
+
+## Chapter 4 defined — satisfaction (2026-09-18, prompt 71)
+
+### Carried into this file at the user's direction (the handoff item that was missed)
+
+> One thing I did not do: the new baseline is 75 tables / 53 images / 7 landscape, and the
+> checklist item on inference notes that any testing in Chapter 4 needs a multiplicity plan and an
+> Appendix B section — the precedent D5 set for Chapter 1. If Chapter 4 turns out to be modelling
+> work, that's the item worth settling first.
+
+**Verification baseline for every Chapter 4 increment: 75 tables / 53 images / 7 landscape
+sections / 0 leaked markup.** Any change to those counts must be attributable to Chapter 4 alone.
+
+| # | Decision | Date |
+|---|---|---|
+| D111 | **Chapter 4 is satisfaction.** It collects the satisfaction items scattered through the report into one place: the main satisfaction question (`A9`, Chapter 3) and the satisfaction items in the preferred-species battery (`D4`, Chapter 2). Three questions: (1) are the answers internally consistent, (2) which preferred groups show a gap between satisfaction with **size** and satisfaction with **numbers**, and (3) which show no gap. Chapters 1-3, both appendices, and every existing table and figure are untouched — Chapter 4 repeats material by design rather than moving it. | 2026-09-18 |
+| D112 | **Inference is permitted in Chapter 4** — the user's explicit second exception to the no-interpretation rule, after D77/D79 scoped the first one to Chapter 2's closing paragraphs. Per the D5 precedent, any test carries an explicit multiplicity plan and a matching new section in Appendix B. | 2026-09-18 |
+
+### Chapter 4 built — 2026-09-18 (prompts 72-76)
+
+| # | Decision | Date |
+|---|---|---|
+| D113 | **A9 is reversed in Chapter 4** as `6 - as.numeric(A9)`, so every column runs low to high satisfaction alongside the D4 items. Subtraction from a constant does not change the spread, so the interval is unchanged and Chapter 3's overall `2.3 +- 0.06` appears here as `3.7 +- 0.06`. The reconciliation is stated in the chapter preamble and again in Appendix B, so a reader comparing chapters is not left to infer it. Chapter 3 is untouched. | 2026-09-18 |
+| D114 | **Chapter 4 runs no significance test.** The user was offered design-based paired `svyttest` comparisons with Bonferroni across the 17 groups, and separately a two-tier interval figure carrying the same information, and declined both: *"don't care about testing....want to just show the dumbell plot."* D112's permission stands but is unused. Paired differences are reported as a weighted mean +- CI, produced by `base.summary.means` on a difference column so the interval is the same Kish-effN interval used everywhere else in the report. The no-adjustment position is disclosed in the captions and in Appendix B. | 2026-09-18 |
+| D115 | **Gap columns carry 2 dp**, against the 1 dp used for the means beside them (D93). The overall catch gap is 0.07 and would print as 0.1 next to an interval of 0.06. `FmtMeanGap()` implements it; no other precision changes. | 2026-09-18 |
+| D116 | **Six items, not more.** A9, D4a, D4i, D4j, D4k, D4l. The trade-off items (D4b, D4e, D4g) and the constraint items (D4f, D4h, D4m) were offered and declined — *"the top 6 should be used...not the other."* They stay in Chapter 2 only. | 2026-09-18 |
+| D117 | **Reliability appears as one footnote line scoped to D4i-D4l**, the four items the sibling `D4ScaleAnalysis` report validated as a Satisfaction sub-scale. Weighted raw alpha on this report's sample is **0.762** (n = 1,506) against that report's ordinal alpha of 0.806 on its own pooled, no-preference-excluded sample. **No composite score is built**, here or anywhere in the report (D40/D63 hold). A9 and D4a are explicitly excluded from the coefficient: A9 asks about the season rather than the preferred fish, and the sibling report places D4a with the constraint items, reversed. | 2026-09-18 |
+| D118 | **The dumbbell is the chapter's figure form.** Two figures, one per pair, rows sorted by the gap with the indent dropped and raw N on the label (D104), full 1-5 axis via `expand_limits` (D106), 6.5in wide (D103). The gap-forest alternative, with and without two-tier intervals, was drafted and rejected. | 2026-09-18 |
+
+#### Structure
+
+Six tables and two figures, placed after Chapter 3 and before Appendix A, plus one new Appendix B
+section ("Satisfaction comparisons in Chapter 4") and one added paragraph under Display precision.
+
+| Section | Content |
+|---|---|
+| 4.1 The satisfaction items | Inventory: verbatim question text, short name, which chapter reports it in full, N, overall mean |
+| 4.2 Satisfaction by preferred group | 18 rows x 6 items, `Ch3MeansTable()` reused unmodified. **Landscape** |
+| 4.3 Consistency between the items | Respondent-level weighted correlations (n = 1,489 complete on all six), then rank correlations between the 17 group means |
+| 4.4 Size and numbers: the fish anglers catch | `D4i` vs `D4k` gap table + dumbbell |
+| 4.5 Size and numbers: the fish anglers may harvest | `D4j` vs `D4l` gap table + dumbbell |
+
+#### New code — `PreferredSpeciesFunctions.R` (1,684 -> 2,006 lines)
+
+`ch4.sat.items`, `FmtMeanGap`, `Ch4AddSatVars`, `Ch4ItemTable`, `FormatCorrMatrix`,
+`Ch4CorrComplete`, `Ch4CorrTable`, `Ch4GroupMeans`, `Ch4GroupCorrTable`, `Ch4GapTable`,
+`Ch4DumbbellPlot`, `Ch4Alpha`, `Ch4GapNumbers`, `Ch4GapNames`. Every one loops
+`D4RowSpec(includeOverall = TRUE)` and calls `base.summary.means` unmodified, so Chapter 4 cannot
+drift from Chapters 2-3. The six-item matrix needed no new builder at all — `Ch3MeansTable()`
+already does exactly that job. Nothing upstream was touched.
+
+#### Findings
+
+| # | Finding |
+|---|---|
+| F37 | **A9 and the D4 items point in opposite directions.** A9 is 1 = Very satisfied to 5 = Very dissatisfied; every D4 item is 1 = Strongly Disagree to 5 = Strongly Agree. Tabling them together untransformed would have put two opposite meanings in one row. Handled by D113. |
+| F38 | **The six items are not one dimension.** Respondent-level correlations split into a catch block (A9 reversed, D4a, D4i, D4k) and a harvest-allowed block (D4j-D4l = 0.57), with D4l correlating 0.18 with A9 reversed and 0.18 with D4a. Raw alpha across all six is 0.798, which looks respectable and conceals the split — the reason D117 scopes the coefficient to the four validated items instead. |
+| F39 | **At group level, general satisfaction tracks numbers caught, not harvest limits.** Spearman correlations between the 17 group means: A9 reversed with D4k = 0.85 and with D4a = 0.83, but with D4j = 0.30 and D4l = 0.28. D4a with D4l is -0.03. Descriptive only — 17 overlapping groups, no standard error. |
+| F40 | **A backticked column name cannot contain a `\uXXXX` escape** — R fails at parse with "\uxxxx sequences not supported inside backticks". The plus-or-minus in a column header has to come from a string constant used as a dynamic name (`!!ch4.lab.diffci := ...`), which is what the Chapter 4 builders do. |
+| F41 | **The leaked-markup scan needs a stricter regex than the obvious one.** `<w:t[^>]*>` also matches `<w:tbl>`, and a self-closing `<w:t xml:space="preserve"/>` lets `.*?</w:t>` run on into real markup; both produce false positives (95 and 2 respectively on a clean document). The correct pattern is `<w:t(?: [^>]*[^/>])?>.*?</w:t>`. |
+
+#### Verification — Chapter 4 (run 2026-09-18, all pass)
+
+| Check | Baseline | Result |
+|---|---|---|
+| Render | clean | clean; only the pre-existing pandoc `--highlight-style` warning |
+| Tables | 75 | **81** = 75 + 6 |
+| Images | 53 | **55** = 53 + 2 |
+| Landscape sections | 7 | **8** = 7 + 1 (the 4.2 matrix) |
+| Leaked markup | 0 | **0** (with the F41 regex) |
+| A9 reversal exact | — | `all(A9rev + as.numeric(A9) == 6)` and identical missingness, asserted in `ch4Setup` |
+| A9 reconciliation | Ch 3: 2.3 +- 0.06 | Ch 4 prints 3.7 +- 0.06 (1,871); Chapter 3's cell is unchanged in the rendered file |
+| Row completeness | 18 | 18 rows in the matrix, both gap tables, and both figure datasets |
+| Gap interval vs. design-based | — | Kish-effN interval matches `svyttest` on the same difference: overall 0.07 +- 0.06 vs. [0.015, 0.126]; Flathead 0.57 +- 0.32 vs. [0.233, 0.907] |
+
+**New baseline: 81 tables / 55 images / 8 landscape sections / 0 leaked markup.**
+
+#### Result, for the user's read-through
+
+Unadjusted, reading each difference interval against zero. **Fish caught:** size rated above
+numbers for Flathead catfish, Blue catfish, Moronides, Catfish, and Walleye / Sauger; numbers rated
+above size for Largemouth bass and Bass; the other 10 groups overlap zero. **Fish that may be
+harvested:** only Muskellunge (n = 8) above and No preference below; 15 of 17 overlap zero. Overall
+the two pairs are 0.07 +- 0.06 and -0.00 +- 0.04.
