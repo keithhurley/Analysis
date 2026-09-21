@@ -25,7 +25,8 @@
       "sort *": "allow",
       "ls *": "allow",
       "cp *": "allow",
-      "uniq *": "allow"
+      "uniq *": "allow",
+      "git -c safe.directory=F:/Survey/Analysis *": "allow"
     }
   }
 }
