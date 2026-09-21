@@ -14,33 +14,45 @@ ch5.k.range <- 2:6
 ch5.min.cluster <- 15 # D124: a stated convention, not a published standard
 ch5.min.fit.n <- 60 # D123
 ch5.alpha <- 0.20 # D127: a stated permissive screen, not a 0.05 test
+ch5.gap.B <- 50 # bootstrap replicates for the gap statistic
+ch5.max.ext.plots <- 5 # D129
 
-# --- Clustering inputs (D121, uncentred) ----------------------------------
-# Fallback labels apply only where Labels.csv carries none, so a missing
-# label never blanks a row.
+ch5.nopref <- "I do not prefer any particular type of fish"
+
+# D136: the Overall fit covers everyone who named a preferred species. It is
+# still not the union of the group fits, because B1 answers that receive no
+# banner column (bullhead, drum, carp, paddlefish, other) are included here.
+Ch5OverallMembers <- function(mydata) {
+  setdiff(unique(as.character(mydata$B1)), ch5.nopref)
+}
+
+# --- Clustering inputs (D121, amended) ------------------------------------
+# Thirteen measures that already share the 1-5 agree metric, used
+# untransformed and unstandardized: when measures share a scale, z-scoring
+# inflates whichever ones happen to have the least spread. Days fished was
+# removed from the inputs (it is a behavioural count, not a cognitive
+# ordinal measure) and is reported as a profiled characteristic instead.
 ch5.input.vars <- tibble::tribble(
-  ~Field, ~Block, ~Transform, ~Fallback,
-  "attitude_catch", "Attitude", "none", "Attitude: catch",
-  "attitude_numbers", "Attitude", "none", "Attitude: numbers",
-  "attitude_size", "Attitude", "none", "Attitude: size",
-  "attitude_harvest", "Attitude", "none", "Attitude: harvest",
-  "motivation_pp", "Motivation", "none", "Motivation: personal pleasure",
-  "motivation_natural", "Motivation", "none", "Motivation: nature",
-  "motivation_social", "Motivation", "none", "Motivation: social",
-  "motivation_resource", "Motivation", "none", "Motivation: resource",
-  "reg_comprehension", "Regulations", "none", "Regulations: comprehension",
-  "reg_sitesupport", "Regulations", "none", "Regulations: site support",
-  "reg_uniform", "Regulations", "none", "Regulations: uniformity",
-  "C1Total_days", "Effort", "log1p", "Total days fished",
-  "D4j", "Preferred species (inputs)", "none", "Size allowed to harvest",
-  "D4l", "Preferred species (inputs)", "none", "Number allowed to harvest"
+  ~Field, ~Block, ~Fallback,
+  "attitude_catch", "Attitude", "Attitude: catch",
+  "attitude_numbers", "Attitude", "Attitude: numbers",
+  "attitude_size", "Attitude", "Attitude: size",
+  "attitude_harvest", "Attitude", "Attitude: harvest",
+  "motivation_pp", "Motivation", "Motivation: personal pleasure",
+  "motivation_natural", "Motivation", "Motivation: nature",
+  "motivation_social", "Motivation", "Motivation: social",
+  "motivation_resource", "Motivation", "Motivation: resource",
+  "reg_comprehension", "Regulations", "Regulations: comprehension",
+  "reg_sitesupport", "Regulations", "Regulations: site support",
+  "reg_uniform", "Regulations", "Regulations: uniformity",
+  "D4j", "Preferred species (inputs)", "Size allowed to harvest",
+  "D4l", "Preferred species (inputs)", "Number allowed to harvest"
 )
 
 ch5.input.blocks <- c(
   "Attitude",
   "Motivation",
   "Regulations",
-  "Effort",
   "Preferred species (inputs)"
 )
 
@@ -48,8 +60,7 @@ ch5.input.blocks <- c(
 ch5.d4.display <- paste0("D4", c(letters[1:9], "k", "m"))
 
 # Blocks whose rows carry an omnibus p and are subject to the screen. One
-# combined Holm family across both, at the user's direction, which supersedes
-# the earlier rule that the D4 items were always shown.
+# combined Holm family across both.
 ch5.tested.blocks <- c("Preferred-species items", "Other characteristics")
 
 ch5.block.order <- c(ch5.input.blocks, ch5.tested.blocks)
@@ -60,9 +71,8 @@ Ch5InputLabel <- function(field, fallback, labels) {
 }
 
 # --- Row specs ------------------------------------------------------------
-# The inputs, displayed on their own untransformed scale: log1p is a fitting
-# device, not a reporting one. No p, because differences on the inputs are
-# produced by the clustering itself (D127).
+# The inputs carry no p, because differences on them are produced by the
+# clustering itself (D127).
 Ch5InputSpec <- function(labels) {
   ch5.input.vars %>%
     transmute(
@@ -118,6 +128,10 @@ Ch5DroppedFields <- function(mydata) {
 Ch5ExternalSpec <- function(mydata) {
   base <- tibble::tribble(
     ~Field, ~Display, ~Test, ~Gate, ~Value, ~Label,
+    # Days fished is a profiled characteristic, not an input (D121 amended).
+    # The C1_AnsweredAll gate matches how Chapter 3 reports this total.
+    "C1Total_days", "mean1", "mean", "C1_AnsweredAll", NA,
+    "Total days fished (January-October)",
     "A11", "pct", "prop", NA, "Yes", "Fished outside Nebraska",
     "A12", "pct", "prop", "A11yes", "Yes",
     "Took a boat when fishing out of state",
@@ -175,19 +189,19 @@ Ch5Spec <- function(mydata, codebook, labels) {
 }
 
 # --- Input matrix ---------------------------------------------------------
+# No transform and no standardization: the 13 inputs already share the 1-5
+# metric (D4j and D4l are the numeric codes of the five agree levels, which
+# is how Chapters 2 and 4 treat them).
 Ch5InputFrame <- function(mydata) {
-  op <- mydata %>%
-    transmute(across(all_of(ch5.input.vars$Field), as.numeric)) %>%
-    mutate(C1Total_days = log1p(C1Total_days))
-  op[, ch5.input.vars$Field]
+  mydata %>% transmute(across(all_of(ch5.input.vars$Field), as.numeric))
 }
 
 Ch5Complete <- function(mydata) {
   rowSums(is.na(Ch5InputFrame(mydata))) == 0
 }
 
-# A zero-variance column can occur in the smaller fits; scale() would return
-# NaN and silently poison the whole distance calculation.
+# Retained for the profile figure, which standardizes for display only. A
+# zero-variance column would make scale() return NaN.
 Ch5Scale <- function(x) {
   op <- scale(as.matrix(x))
   op[, apply(as.matrix(x), 2, sd) == 0] <- 0
@@ -199,11 +213,8 @@ Ch5FitInventory <- function(mydata) {
   purrr::pmap_dfr(
     D4RowSpec(includeOverall = TRUE),
     function(RawLabel, IndentedLabel, Type, Members, Order) {
-      sub <- if (is.null(Members)) {
-        mydata
-      } else {
-        mydata %>% filter(as.character(B1) %in% Members)
-      }
+      mem <- if (is.null(Members)) Ch5OverallMembers(mydata) else Members
+      sub <- mydata %>% filter(as.character(B1) %in% mem)
       nc <- sum(Ch5Complete(sub))
       tibble(
         Order = Order,
@@ -220,10 +231,10 @@ Ch5FitInventory <- function(mydata) {
   )
 }
 
-# --- Choice of k (D124, amended) ------------------------------------------
-# Normalized elbow: both axes are rescaled to [0, 1] and the chosen k is the
-# point furthest from the chord joining the ends of the curve. Rescaling
-# matters -- an unnormalized chord distance depends on the units of WSS.
+# --- Choice of k (D124, amended to the mode of five methods) --------------
+# Normalized elbow: both axes rescaled to [0, 1], k furthest from the chord
+# joining the ends of the curve. Rescaling matters, because an unnormalized
+# chord distance depends on the units of WSS.
 Ch5Elbow <- function(wss, ks, kRange = ch5.k.range) {
   if (length(ks) < 3) {
     return(max(ks))
@@ -235,24 +246,15 @@ Ch5Elbow <- function(wss, ks, kRange = ch5.k.range) {
   ks[cand][which.max(dd[cand])]
 }
 
-# --- The fit --------------------------------------------------------------
-Ch5Fit <- function(
-  mydata,
-  groupLabel,
-  members = NULL,
-  kRange = ch5.k.range,
-  seed = ch5.seed
-) {
-  grp <- if (is.null(members)) {
-    mydata
-  } else {
-    mydata %>% filter(as.character(B1) %in% members)
-  }
-  keep <- Ch5Complete(grp)
-  X <- Ch5Scale(Ch5InputFrame(grp[keep, , drop = FALSE]))
+# Five criteria, then the mode. Ties break toward the smaller k; the
+# minimum-type-size floor overrides the mode; and because two of the five
+# criteria can favour k = 1, the mode is floored at 2 with that fact
+# recorded rather than hidden.
+Ch5KSelect <- function(X, kRange = ch5.k.range, seed = ch5.seed, gapB = ch5.gap.B) {
+  ks <- 1:max(kRange)
+  n <- nrow(X)
+  dm <- dist(X)
 
-  kCap <- min(max(kRange), floor(nrow(X) / ch5.min.cluster))
-  ks <- 1:max(2, min(max(kRange), kCap))
   kms <- purrr::map(ks, function(k) {
     set.seed(seed)
     kmeans(X, centers = k, nstart = 50, iter.max = 100)
@@ -264,15 +266,104 @@ Ch5Fit <- function(
     WSS = wss,
     WSSPct = 100 * wss / wss[1],
     MinSize = purrr::map_dbl(kms, function(m) min(m$size)),
-    MeetsFloor = purrr::map_dbl(kms, function(m) min(m$size)) >= ch5.min.cluster
+    Silhouette = c(
+      NA_real_,
+      purrr::map_dbl(ks[-1], function(k) {
+        mean(cluster::silhouette(kms[[k]]$cluster, dm)[, 3])
+      })
+    ),
+    CH = c(
+      NA_real_,
+      purrr::map_dbl(ks[-1], function(k) {
+        ((wss[1] - wss[k]) / (k - 1)) / (wss[k] / (n - k))
+      })
+    )
   )
 
-  kElbow <- Ch5Elbow(wss, ks, kRange)
-  kUse <- kElbow
-  while (kUse > min(kRange) && diagnostics$MinSize[diagnostics$k == kUse] < ch5.min.cluster) {
+  set.seed(seed)
+  gp <- cluster::clusGap(
+    X,
+    FUN = function(x, k) kmeans(x, k, nstart = 25, iter.max = 100),
+    K.max = max(kRange),
+    B = gapB,
+    verbose = FALSE
+  )
+  diagnostics$Gap <- as.numeric(gp$Tab[, "gap"])
+  kGap <- cluster::maxSE(
+    gp$Tab[, "gap"],
+    gp$Tab[, "SE.sim"],
+    method = "Tibs2001SEmax"
+  )
+
+  bic <- tryCatch(
+    suppressWarnings(mclust::mclustBIC(
+      X,
+      G = ks,
+      modelNames = c("EII", "VII", "EEI", "VVI"),
+      verbose = FALSE
+    )),
+    error = function(e) NULL
+  )
+  if (is.null(bic)) {
+    diagnostics$BIC <- NA_real_
+    kBIC <- NA_integer_
+  } else {
+    best <- apply(bic, 1, function(r) {
+      if (all(is.na(r))) NA_real_ else max(r, na.rm = TRUE)
+    })
+    diagnostics$BIC <- as.numeric(best[match(ks, as.integer(names(best)))])
+    kBIC <- ks[which.max(diagnostics$BIC)]
+  }
+
+  picks <- c(
+    Elbow = Ch5Elbow(wss, ks, kRange),
+    Silhouette = diagnostics$k[which.max(diagnostics$Silhouette)],
+    CH = diagnostics$k[which.max(diagnostics$CH)],
+    Gap = as.integer(kGap),
+    BIC = as.integer(kBIC)
+  )
+  picks <- picks[!is.na(picks)]
+
+  tb <- table(picks)
+  agree <- max(tb)
+  kMode <- min(as.integer(names(tb)[tb == agree]))
+  modeBelowRange <- kMode < min(kRange)
+  kUse <- max(kMode, min(kRange))
+  while (
+    kUse > min(kRange) &&
+      diagnostics$MinSize[diagnostics$k == kUse] < ch5.min.cluster
+  ) {
     kUse <- kUse - 1
   }
-  km <- kms[[kUse]]
+
+  list(
+    diagnostics = diagnostics,
+    picks = picks,
+    kMode = kMode,
+    agree = as.integer(agree),
+    kUse = kUse,
+    modeBelowRange = modeBelowRange,
+    steppedDown = kUse < max(kMode, min(kRange)),
+    kms = kms
+  )
+}
+
+# --- The fit --------------------------------------------------------------
+Ch5Fit <- function(
+  mydata,
+  groupLabel,
+  members = NULL,
+  kRange = ch5.k.range,
+  seed = ch5.seed
+) {
+  mem <- if (is.null(members)) Ch5OverallMembers(mydata) else members
+  grp <- mydata %>% filter(as.character(B1) %in% mem)
+  keep <- Ch5Complete(grp)
+  X <- as.matrix(Ch5InputFrame(grp[keep, , drop = FALSE]))
+
+  kCap <- min(max(kRange), floor(nrow(X) / ch5.min.cluster))
+  sel <- Ch5KSelect(X, kRange = kRange[kRange <= kCap], seed = seed)
+  km <- sel$kms[[sel$kUse]]
 
   # Types are numbered by descending weighted share, so Type 1 is always the
   # largest and the numbering is not an artefact of kmeans' internal order.
@@ -281,7 +372,7 @@ Ch5Fit <- function(
     summarise(W = sum(w), .groups = "drop") %>%
     arrange(desc(W)) %>%
     mutate(new = row_number())
-  typeLevels <- paste("Type", seq_len(kUse))
+  typeLevels <- paste("Type", seq_len(sel$kUse))
 
   grp$Ch5type <- factor(NA_character_, levels = typeLevels)
   grp$Ch5type[keep] <- typeLevels[ord$new[match(km$cluster, ord$cl)]]
@@ -299,14 +390,45 @@ Ch5Fit <- function(
     raw = grp,
     fitdata = grp[keep, , drop = FALSE],
     X = X,
-    k = kUse,
-    kElbow = kElbow,
+    k = sel$kUse,
+    kMode = sel$kMode,
+    agree = sel$agree,
+    picks = sel$picks,
     kCap = kCap,
-    steppedDown = kUse < kElbow,
-    varExplained = 100 * (1 - wss[kUse] / wss[1]),
-    diagnostics = diagnostics,
+    modeBelowRange = sel$modeBelowRange,
+    steppedDown = sel$steppedDown,
+    varExplained = 100 *
+      (1 -
+        sel$diagnostics$WSS[sel$diagnostics$k == sel$kUse] /
+          sel$diagnostics$WSS[1]),
+    diagnostics = sel$diagnostics,
     typeLevels = typeLevels
   )
+}
+
+# --- Diagnostics table ----------------------------------------------------
+# One per species section. The final column names which criteria favour each
+# k, so the mode and how thin its support is are both visible.
+Ch5DiagTable <- function(fit) {
+  fit$diagnostics %>%
+    filter(k >= min(ch5.k.range)) %>%
+    transmute(
+      k = as.character(k),
+      `WSS (% of k=1)` = formatC(WSSPct, format = "f", digits = 1),
+      `Avg. silhouette` = formatC(Silhouette, format = "f", digits = 3),
+      `Calinski-Harabasz` = formatC(CH, format = "f", digits = 1),
+      `Gap statistic` = formatC(Gap, format = "f", digits = 3),
+      `Best BIC` = if_else(
+        is.na(BIC),
+        "\u2014",
+        formatC(BIC, format = "f", digits = 0)
+      ),
+      `Smallest type (n)` = FmtCount(MinSize),
+      `Criteria favouring this k` = purrr::map_chr(k, function(kk) {
+        nm <- names(fit$picks)[fit$picks == kk]
+        if (length(nm) == 0) "\u2014" else paste(nm, collapse = ", ")
+      })
+    )
 }
 
 # --- Size table -----------------------------------------------------------
@@ -512,7 +634,10 @@ Ch5ProfileTable <- function(long, meta = Ch5Meta(long), alpha = ch5.alpha) {
 # The elbow curve behind the chosen k, as a share of the k = 1 within-cluster
 # sum of squares.
 Ch5ElbowPlot <- function(fit, titleText = NULL) {
-  p <- ggplot(fit$diagnostics, aes(x = k, y = WSSPct)) +
+  p <- ggplot(
+    fit$diagnostics %>% filter(k >= min(ch5.k.range)),
+    aes(x = k, y = WSSPct)
+  ) +
     geom_vline(
       xintercept = fit$k,
       colour = "grey60",
@@ -521,18 +646,22 @@ Ch5ElbowPlot <- function(fit, titleText = NULL) {
     ) +
     geom_line(linewidth = 0.5) +
     geom_point(size = 1.8) +
-    scale_x_continuous(breaks = fit$diagnostics$k) +
+    scale_x_continuous(breaks = min(ch5.k.range):max(ch5.k.range)) +
     labs(
       x = "Number of types (k)",
-      y = "Within-cluster sum of squares (% of k = 1)"
+      y = "Within-cluster sum of squares (% of k = 1)",
+      subtitle = paste0(
+        "Dashed line marks the k used: ",
+        fit$k,
+        ". Criteria favouring each k are listed in the diagnostics table."
+      )
     ) +
     theme_minimal(base_size = 9) +
     theme(
       panel.grid.minor = element_blank(),
       plot.title = element_text(size = 9.5, face = "bold"),
       plot.subtitle = element_text(size = 7, face = "italic")
-    ) +
-    labs(subtitle = paste0("Dashed line marks the k used: ", fit$k))
+    )
 
   if (!is.null(titleText)) {
     p <- p + labs(title = str_wrap(titleText, width = 80))
@@ -540,14 +669,14 @@ Ch5ElbowPlot <- function(fit, titleText = NULL) {
   p
 }
 
-# Standardized input profile: the shape of each type across the 14 inputs.
-# Points are weighted means of the z-scored inputs -- the fit is unweighted,
-# everything reported is weighted (D125).
+# Standardized input profile. The clustering used the untransformed 1-5
+# values; standardization here is for display only, so 13 measures with
+# different means can be read on one axis.
 Ch5ProfilePlot <- function(fit, labels, titleText = NULL) {
   lab <- ch5.input.vars %>%
     transmute(Field, Block, Label = Ch5InputLabel(Field, Fallback, labels))
 
-  df <- as_tibble(fit$X) %>%
+  df <- as_tibble(Ch5Scale(fit$X)) %>%
     mutate(Ch5type = fit$fitdata$Ch5type, w = fit$fitdata$postWeight) %>%
     pivot_longer(
       all_of(ch5.input.vars$Field),
@@ -568,7 +697,7 @@ Ch5ProfilePlot <- function(fit, labels, titleText = NULL) {
     scale_colour_viridis_d(begin = 0.15, end = 0.8) +
     facet_grid(rows = vars(Block), scales = "free_y", space = "free_y") +
     labs(
-      x = "Weighted mean, standardized within this fit (0 = group mean)",
+      x = "Weighted mean, standardized for display (0 = group mean)",
       y = NULL,
       colour = NULL
     ) +
@@ -589,10 +718,8 @@ Ch5ProfilePlot <- function(fit, labels, titleText = NULL) {
 
 # Dumbbell: each type against the group overall, for the external
 # characteristics that survived the screen. One figure per sub-section, at
-# most ch5.max.ext.plots panels, chosen by the largest relative spread across
-# types (D129).
-ch5.max.ext.plots <- 5
-
+# most ch5.max.ext.plots panels, chosen by the largest relative spread
+# across types (D129).
 Ch5ExternalPlot <- function(
   long,
   meta = Ch5Meta(long),
@@ -601,11 +728,7 @@ Ch5ExternalPlot <- function(
   titleText = NULL
 ) {
   pass <- meta %>%
-    filter(
-      Block == "Other characteristics",
-      !is.na(PAdj),
-      PAdj < alpha
-    )
+    filter(Block == "Other characteristics", !is.na(PAdj), PAdj < alpha)
   if (nrow(pass) == 0) {
     return(NULL)
   }

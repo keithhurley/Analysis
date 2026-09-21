@@ -672,3 +672,44 @@ here. The user appended the following, which is the actual definition of the cha
 > Holm at 0.20, one combined family
 
 > continue
+
+## 2026-09-21 — Prompts 92-104 (input-set exploration)
+
+> what recommendations do you have to try and improve clustering?.....do other questions seem like
+> a better choice for inputs?  should I be using an mode from elbow and silhouette and other
+> methods?  would adding questions or removing questions help?  what does it look like without days
+> fished as that's a measured characteristic and scale value rather than the other items which are
+> cognative in nature and ordinal?
+
+> I want to take your recommendation...but now I'm wondering about dropping the two "allowed to
+> harvest" items?
+
+> appendix B...text in the species section along with a table that lists all the values including
+> silhouette and jacard and including gap statistic and the rest....use the mode for selection...i
+
+> I'd like to keep them as is...but now I'm wondering after you comment if we should also include
+> the other species-specific questions
+
+> all of it but the bootstrap Jaccard - one table per species section; treat the overall by
+> dropping no preference from it's universe and only include all other species choices
+
+> we're back to the earlier 13 item spec...let's go ahead and build all species...................
+> if most groups only have 2 clusters I'll likely want to restart with an entirely different set of
+> questions
+
+> Test the behavioral input set with Gower + PAM before deciding
+
+> I don't understand rule based behavior
+
+> I want to explore some other question sets using our previous methodology of mode of values for
+> K........run just the D4 questions
+
+> not using rule based
+
+> test a different suite of questions: total days fished, fishing tournament participation, fishing
+> guide participation, distance to most visited waterbody, use of livescope, public/private access
+> use type
+
+> let's remove the rare flags...use days, distance, access, regs scales of uniform and site-specific
+
+> I'm pausing for today to think about option

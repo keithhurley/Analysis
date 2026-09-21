@@ -1506,3 +1506,86 @@ figure, profile figure, landscape profile table, dumbbell figure.
 | — | The remaining **9 sub-sections**, once the Walleye template is approved |
 | — | Step 5, guided text development, now covering Chapters 1-5 |
 | — | Unpushed commits: `15b7a17` (Ch4), `17cf703` (comment-out), and this one |
+
+---
+
+## Chapter 5 input-set exploration — 2026-09-21 (prompts 92-104)
+
+**Status: PAUSED on an open decision. Do not build report text until Q36 is answered.**
+
+⚠️ **Working-tree warning.** `Ch5Functions.R` implements the 13-input Likert spec (uncentred,
+common metric, unstandardized, no days fished, mode-of-five k rule, per-section diagnostics
+table, Overall universe excluding No preference). The **chapter text in the .rmd is stale** — it
+still describes fourteen inputs, `log1p` and within-fit standardization. **Rendering now would
+produce correct tables under incorrect prose.** Commit `1db56bb` is the last fully consistent
+state.
+
+### The question that drove this
+
+The user asked whether clustering could be improved, whether other questions would be better
+inputs, whether k should come from a mode of several methods, and what happens without days
+fished. Ten configurations were tested. **No report content was written for any of them.**
+
+### Every configuration tested, and what it gave
+
+| # | Input set | Vars | Method | Overall n | k | Silhouette | Verdict |
+|---|---|---|---|---|---|---|---|
+| A | 11 scales + log1p days + D4j/D4l, z-scored | 14 | k-means | 1,155 | 3 (elbow) / 2 (mode) | 0.096-0.114 | the `1db56bb` build |
+| B | A with respondent-centred Likert (3 variants) | 14-15 | k-means | 1,155 | 2 | 0.086-0.129 | centring buys nothing |
+| C | 11 scale scores only, z-scored | 11 | k-means | — | 2 | 0.139 | ARI 0.50 vs A |
+| D | 13 Likert, common metric, **unstandardized** | 13 | k-means | 1,124 | **2 in all 10 fits** | 0.123 | current code |
+| E | PCA to 80% of variance | 8 | k-means | — | 2 | 0.139 | ARI 0.91 vs A |
+| F | A with blocks weighted equally | 14 | k-means | — | 2 | 0.154 | ARI 0.19 vs A |
+| G | 11 scales + all 13 D4 items | 24 | k-means | 1,094 | 2 | 0.108 | Trout 59, loses a fit |
+| H | **13 D4 items only** | 13 | k-means | **1,365** | 2 in all 10 | — | best cognitive set |
+| I | A4/A5/A6 + flags + access + days + miles | 32 | Gower + PAM | 1,135 | 2 | 0.186-0.241 | split is pond + private access |
+| J | days, miles, tournament, guide, livescope, access | 7 | k-means | 1,172 | 3-6 | 0.22-0.60 | outlier isolation |
+| K | days, miles, access, reg_uniform, reg_sitesupport | 6 | k-means | 1,107 | 2-6 free, **3 fixed** | 0.209-0.301 | best behavioural set |
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F50 | **Every attitudinal configuration returns k = 2** under the mode rule, and the gap statistic favours k = 1 in most fits. The reason is structural: a unimodal cloud always admits a first split and never a second. Searching further attitudinal sets is not expected to change this |
+| F51 | ARI between configurations is near zero — **0.01** between the 13- and 11-input sets on the same respondents, **0.07** between the 13- and 24-input sets. The input decision, not the data, determines who is in which type |
+| F52 | The k = 2 solutions are **not** acquiescence splits. Mean per-input gap is 0.66-0.84 SD against an overall level gap of only 0.09-0.54 SD, and in Panfish, Crappie and Trout the inputs split roughly half-and-half in direction |
+| F53 | **Behavioural/binary sets re-derive their own inputs.** Set I split on pond use (77pt) and private access (57pt); set J produced Type = tournament (100%), Type = guide (100%), Type = no public access; set K produced access × days. High silhouette here is not evidence of emergent structure |
+| F54 | Rare binaries (tournament 3.4%, guide 6.4%) create **outlier-isolation clusters** — Catfish 167/10 and Channel catfish 110/4 — which violate the 15 floor at k = 2 with no remedy |
+| F55 | **Fixing k removes a large instability.** Under free selection set K gave Bass k = 2 and Largemouth k = 6 on 88% the same anglers; at fixed k = 3 they give 119/115/26 and 118/90/22. Agreement counts of 1-2 of 5 mean the "mode" is often just the tie-break |
+| F56 | `reg_uniform` and `reg_sitesupport` **do not differentiate** the set-K clusters (means within 0.19 across types) while costing ~250 respondents of retention |
+| F57 | `mclust` BIC picks 3-6 components on every set. It fits density shape, not separation, and it drives the mode whenever the other criteria disagree; removing it sends the tie-break to the gap statistic's k = 1. Consider excluding it from any vote |
+| F58 | `Scales.csv` in this project contains **no D4 rows**; the D4 sub-scales live in the sibling `D4ScaleAnalysis` project. Using them would cross a project boundary and reverse D40/D63 |
+| F59 | Dropping `D4j`/`D4l` raises retention by 218, of which **190 is the No preference group alone**. No species group becomes newly eligible. Under behavioural sets No preference becomes eligible and **Trout falls below 60** |
+| F60 | The set-K k = 3 solution clears the 15 floor in 9 of 10 fits; only Moronides fails (45/15/7) |
+
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D136 | The Overall fit's universe **excludes No preference**: everyone who named a preferred species. 1,576 raw, 1,124 clusterable under set D. Still not the union of the group fits, since unbannered `B1` answers are included | 2026-09-21 |
+| D137 | **Silhouette and bootstrap Jaccard are not reported**; `fpc` therefore leaves the render. A per-species-section diagnostics table carries k, WSS %, silhouette, Calinski-Harabasz, gap, BIC, smallest type size and which criteria favour each k. Superseded in part by Q36 — the user later asked for silhouette and gap in that table, so it now holds everything **except** Jaccard | 2026-09-21 |
+| D138 | k comes from the **mode of five criteria** (elbow, silhouette, Calinski-Harabasz, gap, mclust BIC), ties to the smaller k, 15-per-type floor as an override, agreement count reported. See F55/F57 before relying on it | 2026-09-21 |
+| D139 | A **rule-based typology** (waterbody × craft × access, giving 4-5 comparable types across all 17 groups with no k selection) was drafted, costed and **declined by the user** | 2026-09-21 |
+
+### Q36 — the open decision
+
+Four candidates, all one edit plus one render away. Nothing is committed under any of them.
+
+1. **days + distance + access, k = 3 fixed** (set K minus the inert regulation scales). Stable k,
+   9 of 10 fits clear the floor, silhouette 0.21-0.30, highest retention of the behavioural sets.
+   Types are access × effort and should be described as such.
+2. **Set K as tested**, keeping the regulation scales on substantive grounds despite F56.
+3. **13 D4 items, k = 2** (set H). The only family whose types are genuine multivariate patterns
+   rather than restatements of inputs. Best retention (1,365), all ten groups, gap statistic
+   supportive in three fits.
+4. A further set the user names.
+
+**Methodological note to carry forward:** ten configurations in, choosing inputs by which yields
+better separation is a specification search. Whatever is chosen needs a **substantive**
+justification in Appendix B — these measures define an angler type for management purposes — not a
+metric one, or the chapter reads as tuned.
+
+### Also still open from the previous session
+
+Q33 (Appendix B has no clustering section), Q34 (Overall fit placement), Q35 (terse `Labels.csv`
+row labels), the nine remaining sub-sections, and step 5 guided text.
