@@ -1314,9 +1314,11 @@ CreateFlex(Ch4ItemTable(d, q))
 CreateFlex(Ch3MeansTable(d, ch4.sat.items$Field, ch4.sat.items$Short))
 ```
 
+<!--
+
 `r sect_landscape()`
 
-## Consistency between the items
+ ## Consistency between the items
 
 `r paste0("Two different questions are asked here. The first table asks whether individual anglers answer the six items alike: an angler satisfied with one thing is, or is not, satisfied with the others. The second asks whether the preferred groups rank alike across items: the groups that rate the season highly are, or are not, the groups satisfied with size or with numbers. A set of items can behave one way at the respondent level and the other way at the group level, so both are shown.")`
 
@@ -1340,7 +1342,7 @@ CreateFlex(Ch4CorrTable(d))
 CreateFlex(Ch4GroupCorrTable(ch4.groupMeans))
 ```
 
-`r run_pagebreak()`
+`r run_pagebreak()` -->
 
 ## Size and numbers: the fish anglers catch
 
