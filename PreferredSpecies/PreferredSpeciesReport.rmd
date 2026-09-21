@@ -29,6 +29,10 @@ source("..\\BaseFunctions_2025_UPDATED.R") #load file of common functions
 # modified. PreferredSpeciesFunctions.R is sourced last so it wins any conflict.
 source("..\\CrossTabTables\\CrossTabTableFunctions.R")
 source("PreferredSpeciesFunctions.R") #load file of preferred species report functions
+# D130: Chapter 5's builders carry their own row set (angler types, not the 17
+# preferred groups), so they live in their own file and no D4RowSpec call site
+# in Chapters 1-4 changes.
+source("Ch5Functions.R")
 ```
 
 ```{r getData, echo=FALSE}
@@ -1381,6 +1385,149 @@ Ch4DumbbellPlot(
 ```
 
 `r paste0("On the same reading: the interval lies above zero for ", Ch4GapNames(ch4.gapHarvest, "positive"), ", and below zero for ", Ch4GapNames(ch4.gapHarvest, "negative"), ". For the remaining ", sum(ch4.gapHarvest$Type != "Overall" & abs(ch4.gapHarvest$Gap) <= ch4.gapHarvest$CI), " groups the interval includes zero. Overall the difference is ", FmtMeanGap(ch4.gapHarvest$Gap[1], ch4.gapHarvest$CI[1]), ".")`
+
+`r run_pagebreak()`
+
+# Chapter 5: Angler Type Profiles
+
+```{r ch5Setup}
+# Additive only: no row of d is added, dropped, or reweighted here, so nothing
+# in Chapters 1-4 changes.
+nBeforeCh5 <- nrow(d)
+
+ch5.spec <- Ch5Spec(d, q, l)
+ch5.inventory <- Ch5FitInventory(d)
+ch5.dropped <- Ch5DroppedFields(d)
+ch5.nClusterable <- sum(Ch5Complete(d))
+
+# One fit per eligible group. Members comes from banner.definition, so the
+# groups here are exactly the ones used everywhere else in the report.
+ch5.fitspec <- D4RowSpec(includeOverall = TRUE) %>%
+  left_join(ch5.inventory %>% select(Order, Eligible), by = "Order") %>%
+  filter(Eligible)
+
+ch5.fits <- purrr::pmap(
+  ch5.fitspec,
+  function(RawLabel, IndentedLabel, Type, Members, Order, Eligible) {
+    Ch5Fit(d, RawLabel, members = Members)
+  }
+)
+names(ch5.fits) <- ch5.fitspec$RawLabel
+
+ch5.invTable <- ch5.inventory %>%
+  left_join(
+    tibble(
+      Group = names(ch5.fits),
+      kUsed = purrr::map_int(ch5.fits, "k"),
+      VarExp = purrr::map_dbl(ch5.fits, "varExplained")
+    ),
+    by = "Group"
+  ) %>%
+  transmute(
+    `Preferred group` = IndentedLabel,
+    `Respondents (n)` = FmtCount(Raw_n),
+    `Complete on all 14 inputs (n)` = FmtCount(Clusterable_n),
+    Retention = paste0(formatC(Retention, format = "f", digits = 0), "%"),
+    `Largest k the floor allows` = if_else(kCap < 2, "\u2014", as.character(kCap)),
+    `Types fit` = if_else(is.na(kUsed), "not fit", as.character(kUsed)),
+    `Variance explained` = if_else(
+      is.na(VarExp),
+      "\u2014",
+      paste0(formatC(VarExp, format = "f", digits = 1), "%")
+    )
+  )
+
+caption.ch5size <- "Respondent counts are raw and unweighted. Percentages and population estimates are weighted, with intervals of 1.96 standard errors on the Kish effective N. The percent column is of every respondent in the group, so it sums to 100 with the Unassigned row."
+
+caption.ch5profile <- paste0("Values are weighted means unless the row names a percent or a median; intervals are 1.96 standard errors on the Kish effective N and N is the raw unweighted count. The clustering inputs are always shown and carry no p, because the clustering produces those differences by construction. Every other row is shown only where its Holm-adjusted omnibus p falls below ", ch5.alpha, ", within one combined family covering the D4 items and the other characteristics together. The two distance rows display a weighted median with bootstrap limits but are tested on log1p of the same variable. ", caption.raked)
+
+stopifnot(
+  nrow(d) == nBeforeCh5,
+  ch5.inventory$Clusterable_n[1] == ch5.nClusterable,
+  length(ch5.fits) == sum(ch5.inventory$Eligible),
+  # Every respondent in a fitted group is either assigned a type or counted as
+  # unassigned. If this ever fails, the percent column stops summing to 100
+  # and respondents have gone missing rather than being reported.
+  all(purrr::map_lgl(ch5.fits, function(f) {
+    nrow(f$raw) ==
+      nrow(f$fitdata) + sum(f$raw$Ch5typeAll == "Unassigned")
+  })),
+  all(purrr::map_lgl(ch5.fits, function(f) f$k >= 2 & f$k <= f$kCap)),
+  # The size floor is a stated rule, not an aspiration.
+  all(purrr::map_lgl(ch5.fits, function(f) {
+    min(table(f$fitdata$Ch5type)) >= ch5.min.cluster
+  }))
+)
+```
+
+`r paste0("This chapter groups anglers within each preferred species into types, using a k-means cluster analysis of fourteen measures: the four attitude scales, the four motivation scales, the three regulation scales, total days fished, and the two D4 items asking about satisfaction with the size and the number of the preferred fish an angler is allowed to harvest. Days fished enters the clustering as log1p because it is strongly right-skewed; every input is then standardized within its own fit so that no measure dominates on account of its scale. The clustering itself is unweighted. Every number reported from it is weighted, with intervals built on the Kish effective N and raw unweighted counts displayed, exactly as in Chapters 1 to 4.")`
+
+`r paste0("The clustering needs all fourteen inputs present at once, which ", FmtCount(ch5.nClusterable), " of the ", FmtCount(nrow(d)), " respondents in this report's universe satisfy (", formatC(100 * ch5.nClusterable / nrow(d), format = "f", digits = 1), "%). Respondents missing any input cannot be assigned a type; they are carried in every size table as an Unassigned row rather than dropped. A group is fit only where at least ", ch5.min.fit.n, " of its respondents are complete on all fourteen, and no reported type holds fewer than ", ch5.min.cluster, " respondents. The number of types is chosen by an elbow rule applied to the within-cluster sum of squares, rescaling both axes and taking the k furthest from the chord joining the ends of the curve; where the size floor rules that k out, k steps down until the floor is met.")`
+
+`r paste0("Three consequences are worth stating before the numbers. First, the within-cluster sum of squares declines smoothly with k in every fit and the chosen solution accounts for between ", formatC(min(purrr::map_dbl(ch5.fits, 'varExplained')), format = 'f', digits = 1), "% and ", formatC(max(purrr::map_dbl(ch5.fits, 'varExplained')), format = 'f', digits = 1), "% of the total sum of squares, so these types are reproducible partitions of a continuum that differ in degree, not naturally separated groups. Second, the preferred groups overlap, so an angler who prefers largemouth bass appears in both the Bass fit and the Largemouth bass fit and receives a type number in each, with no relationship between the two numberings; type numbers are assigned by descending weighted share within a fit and mean nothing across fits. Third, the Overall fit uses every clusterable respondent in the universe, including those whose B1 answer receives no banner column, so it is not the union of the group fits and its types are a separate solution.")`
+
+`r paste0("Two exclusions. The No preference group retains only ", ch5.inventory$Clusterable_n[ch5.inventory$Group == "No preference"], " of its ", ch5.inventory$Raw_n[ch5.inventory$Group == "No preference"], " respondents, because the two D4 inputs ask about a preferred fish and anglers without one do not answer them; it falls below the fitting floor for a structural reason rather than a chance one and is not profiled. Separately, ", nrow(ch5.dropped), " of the waterbody-type fields hold no 2025 data at all (", paste(ch5.dropped$Label, collapse = "; "), ") and are excluded from the characteristics tested below.")`
+
+## Coverage of the fourteen inputs
+
+`r paste0("The table below records, for every preferred group, how many respondents are complete on all fourteen inputs, the largest number of types the size floor would permit at that n, and the solution actually fit. Retention runs from ", formatC(min(ch5.inventory$Retention), format = "f", digits = 0), "% to ", formatC(max(ch5.inventory$Retention), format = "f", digits = 0), "%.")`
+
+```{r ch5Inventory}
+CreateFlex(ch5.invTable)
+```
+
+## Walleye / Sauger
+
+`r paste0("The Walleye / Sauger group contains ", FmtCount(nrow(ch5.fits[['Walleye / Sauger']]$raw)), " respondents, of whom ", FmtCount(nrow(ch5.fits[['Walleye / Sauger']]$fitdata)), " are complete on all fourteen inputs. The elbow rule selects ", ch5.fits[['Walleye / Sauger']]$k, " types, against a size-floor maximum of ", ch5.fits[['Walleye / Sauger']]$kCap, ".")`
+
+`r caption.ch5size`
+
+```{r ch5WalSize}
+CreateFlex(Ch5SizeTable(ch5.fits[["Walleye / Sauger"]]))
+```
+
+`r "The curve behind that choice is below. It declines smoothly, so the selected k is the output of the stated rule rather than a visible kink in the data."`
+
+```{r ch5WalElbow, fig.width=6.5, fig.height=3.2}
+Ch5ElbowPlot(
+  ch5.fits[["Walleye / Sauger"]],
+  titleText = "Within-cluster sum of squares by number of types, Walleye / Sauger"
+)
+```
+
+`r "The next figure shows the shape of each type across the fourteen inputs, in standard deviations from the group mean, so the types can be read side by side on one scale."`
+
+```{r ch5WalProfile, fig.width=6.5, fig.height=5.4}
+Ch5ProfilePlot(
+  ch5.fits[["Walleye / Sauger"]],
+  l,
+  titleText = "Standardized input profile by angler type, Walleye / Sauger"
+)
+```
+
+`r paste0("The table below gives the values behind that figure on their original scales, followed by the D4 items and the other characteristics that pass the screen.")`
+
+`r caption.ch5profile`
+
+`r sect_portrait()`
+
+```{r ch5WalTable}
+ch5.long.wal <- Ch5ProfileLong(ch5.fits[["Walleye / Sauger"]], ch5.spec, q, l)
+ch5.meta.wal <- Ch5Meta(ch5.long.wal)
+CreateFlex(Ch5ProfileTable(ch5.long.wal, ch5.meta.wal), mergeOnFirst = TRUE)
+```
+
+`r sect_landscape()`
+
+`r paste0("Of the ", sum(!is.na(ch5.meta.wal$PAdj)), " characteristics tested for this group, ", sum(!is.na(ch5.meta.wal$PAdj) & ch5.meta.wal$PAdj < ch5.alpha), " pass the screen. The figure below shows up to five of them, chosen by the largest spread across types relative to their own scale, with each type placed against the group overall.")`
+
+```{r ch5WalExternal, fig.width=6.5, fig.height=4.2}
+Ch5ExternalPlot(
+  ch5.long.wal,
+  ch5.meta.wal,
+  titleText = "Characteristics differing across angler types, Walleye / Sauger"
+)
+```
 
 `r run_pagebreak()`
 

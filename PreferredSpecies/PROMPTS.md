@@ -599,3 +599,76 @@ Tab "docx file is locked":
 
 > prepare a handoff...we're going to work on Chapter 5 - Angle Type Profiles which is an addition
 > to this analysis report and plan
+
+## 2026-09-21 — Prompt 78 (Chapter 5 defined)
+
+The opening of this prompt is the handoff block stored verbatim in `PROGRESS.md` under
+"Prompt for the next conversation (Chapter 5) — USE THIS ONE" (L1365-1392); it is not duplicated
+here. The user appended the following, which is the actual definition of the chapter:
+
+> ask me before pushing anything.do not write code or change anything until we are done iterating
+> and I say to start.....for Each species...there will be a sub-section of chapter 5 that develops
+> an angler type profile (or tapistry) for the species preferred group.....using a cluster analysis
+> for questions on the 4 attitude scales, the 4 motivation scales, the total days fished, the 3
+> regulation scales, and the two species-preferred questions about "allowed to harvest" develop the
+> clusters; provide a table with the # of respondants and percent of all particular
+> species-preferred anglers and overall estimate of angler population # for each cluster......then
+> provide a table of the characteriscs/values of the questions used for the analysis as well as
+> other characteristics from other questions (fish out of state, Park Permit Use, % that fished
+> tournament, waterbody type use, bank/motorized boat/kayak/ice methods), public and private access
+> use, distance to favorite and most visited waters, satisfaction, Livescope use, guided trip use,
+> gender, age) that significantly differ between at least two clusters, also always include values
+> for the species prefered scale questions a,b, c, d, e, f, g, h, i, k,m; include any plots or other
+> tables you would deam appropiate for this analysis
+
+## 2026-09-21 — Prompt 79 (cost)
+
+> make sure to do as much as possible to conserve credits in the process
+
+## 2026-09-21 — Prompts 80-91 (planning decisions, answered as structured choices)
+
+> separate analysis for each group or species that have at least 40 respondants
+
+> Complete cases only, with a disclosed retention table and an "unassigned" row
+
+> Fit unweighted, report everything weighted, state the gap in Appendix B
+
+> k-means on z-scored inputs; k from 2-6 by maximum average silhouette
+
+> show all rows for inputs, design-based omnibus+Holm showing only rows that pass for non-imputs
+> except show all for D4 questions
+
+> Run the feasibility diagnostic now, then finish planning with the numbers in hand
+
+> floor of 60 clusterable....but make sure to denote max num of clusters possible in output; also,
+> where does the 20-per-cluster rule come from?
+
+> just leave it out of chapter 5.....we should probably do an overall group though of all
+> respondants regardless of species choice
+
+> Fit all qualifying groups, duplication and all
+
+> Lower to 15
+
+> Landscape, keep value ± CI, add a p column for non-inputs
+
+> Input-profile figures plus dumbbell figures for passing externals
+
+> Yes — all 1,155, disclosed as not being the union of the group fits
+
+> Start — spec to file, then the Walleye template
+
+> Centre each respondent's Likert scale scores before clustering, then re-examine
+
+> treat both externals and D4 items as same and use Holm and only show those at alpha = 0.8
+
+> what would p < 0.20 do to the results?
+
+> what happes if we drop the centering and use the elbow mthod?
+
+> use the elbow rule with no centering...do no report silhouette or jacard...make sure to include
+> elbow plot
+
+> Holm at 0.20, one combined family
+
+> continue

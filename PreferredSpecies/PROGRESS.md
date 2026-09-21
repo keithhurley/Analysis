@@ -1411,3 +1411,98 @@ so commit it alongside the source; use `git -c safe.directory=F:/Survey/Analysis
 plain git refuses in this repo. Note that the Chapter 4 commit 15b7a17 is still unpushed -- ask me
 before pushing anything.
 ```
+
+---
+
+## Chapter 5 defined and templated — 2026-09-21 (prompts 78-91)
+
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D120 | **Chapter 5 is a per-group k-means angler-type profile.** One sub-section per eligible preferred group, plus an Overall fit. Not an existing variable, not a published typology — derived, so the D5 precedent applies in full | 2026-09-21 |
+| D121 | **Inputs: 14, uncentred**, z-scored within each fit; `C1Total_days` enters as `log1p`. The 4 attitude, 4 motivation and 3 regulation scale scores, days fished, and `D4j` + `D4l` (the two "allowed to harvest" items). Centring was tested and rejected (F43) | 2026-09-21 |
+| D122 | **Universe: complete on all 14 → 1,155 of 1,915 (60.3%).** Respondents missing any input are carried as an `Unassigned` row, never dropped; the percent denominator is the **raw** group, so each size table sums to 100 | 2026-09-21 |
+| D123 | **Eligibility: ≥ 60 clusterable respondents** → 9 groups + Overall = 10 fits. "No preference" is excluded (31 of 339, 9%) because `D4j`/`D4l` ask about a preferred fish — a structural exclusion, not a chance one | 2026-09-21 |
+| D124 | **k by a normalized elbow rule** on within-cluster SS (both axes rescaled to [0,1], k furthest from the end-to-end chord), candidates 2-6, **minimum 15 respondents per type**, k stepped down if the floor binds. The floor is a stated convention, not a published standard — it is mine, and the only in-house precedent is `minimumPerGroupVar = 20` in the upstream plotting code | 2026-09-21 |
+| D125 | Clustering is **unweighted**; every reported number is **weighted**, Kish effN intervals, raw displayed N. The gap is disclosed | 2026-09-21 |
+| D126 | **Superseded.** `fpc`/`clusterboot` was installed and used during planning; at the user's direction **neither silhouette nor bootstrap Jaccard is reported**, and the render no longer depends on `fpc` | 2026-09-21 |
+| D127 | **One combined Holm family** over the 11 `D4` display items and the 24 external characteristics, screened at **alpha = 0.20**. Clustering inputs are always shown and carry **no p** — the clustering produces those differences by construction. This supersedes the original "always include D4 a-i, k, m" | 2026-09-21 |
+| D128 | Profile table is **landscape**, `value ± CI` cells, with `N` and `p` columns; `Block` is the merge column | 2026-09-21 |
+| D129 | Three figures per fit: elbow curve, standardized input profile, and **one** dumbbell figure holding at most 5 panels (chosen by largest relative spread across types). Note this is one faceted figure, not five separate ones | 2026-09-21 |
+| D130 | Chapter 5's code lives in its own **`Ch5Functions.R`**, sourced after `PreferredSpeciesFunctions.R`. **No `D4RowSpec` call site in Chapters 1-4 was touched** | 2026-09-21 |
+| D131 | The Overall fit uses all 1,155 clusterable respondents, including "No preference" and unbannered `B1` answers, so it is **not** the union of the group fits | 2026-09-21 |
+| D133 | Distance rows **display** a weighted median with bootstrap limits but are **tested** on `log1p` of the same variable, because design-based rank tests do not extend cleanly past two groups. Disclosed in the table note | 2026-09-21 |
+| D134 | Six `A4` waterbody fields hold **no 2025 data at all** and are excluded from the tested characteristics, reported in the chapter text rather than silently dropped | 2026-09-21 |
+| D135 | **The render baseline is corrected to 79 tables / 55 images / 7 landscape / 0 leaked markup** (see F45). The 81/55/8/0 figure quoted throughout this file predates commit `17cf703` | 2026-09-21 |
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F42 | Scale scores are `NA` **exactly** when their `*_AnsweredAll` gate fails — `NA_n == GateFail_n` for all 11. The D19 listwise gate and `is.na()` are the same filter here, so no separate gating code is needed for Chapter 5 |
+| F43 | **Centring does not improve separation.** Across raw, respondent-centred-11, centred-13 and centred-13-plus-level, average silhouette sits between 0.086 and 0.129 and declines monotonically in k, in both fits tested. The weak separation is not an acquiescence artefact |
+| F44 | **Weak separation is intrinsic.** The chosen solutions explain 19.1% to 24.5% of total SS and the WSS curve declines smoothly with no kink. These types are reproducible partitions of a continuum that differ in degree, not naturally separated groups. Stated in the chapter intro |
+| F45 | **The 81/55/8/0 baseline was stale.** Commit `17cf703` "commenting out chapter 4 stuff" suppressed **2 tables and 1 landscape section**. Commented-out markdown still contains the literal text `CreateFlex(` and `sect_landscape()`, so a source-level grep counts them while Word never sees them — count rendered output, not call sites |
+| F46 | `base.summary.medians()` returns `CIlower`/`CIupper`, **not** `Lower`/`Upper`. Getting this wrong fails silently: the cells come back empty with only an "unknown column" warning |
+| F47 | `A7_miles`/`A8_miles` are banded (5, 15.5, 30.5, 50.5, 80.5, 175.5), so weighted medians land on band midpoints and the bootstrap limits are coarse — one limit can equal the estimate |
+| F48 | `p.adjust()`'s default `n` counts `NA` entries, which would inflate the Holm family by variables whose test could not be run. Chapter 5 passes `n = sum(!is.na(P))` explicitly |
+| F49 | Installing `fpc` pulled 8 dependencies (`modeltools`, `DEoptimR`, `mclust`, `flexmix`, `prabclus`, `diptest`, `robustbase`, `kernlab`). None are needed by the render now that stability is unreported |
+
+### Fits and their k
+
+| Fit | Clusterable n | k cap | k used | Var. explained |
+|---|---|---|---|---|
+| Overall | 1,155 | 6 | 3 | 20.8% |
+| Walleye / Sauger | 359 | 6 | 3 | 21.0% |
+| Bass | 259 | 6 | 3 | 21.5% |
+| Largemouth bass | 230 | 6 | 3 | 20.9% |
+| Panfish / Sunfish | 160 | 6 | 3 | 23.8% |
+| Catfish | 160 | 6 | 3 | 23.2% |
+| Crappie | 124 | 6 | 3 | 24.0% |
+| Channel catfish | 99 | 6 | 3 | 24.5% |
+| Moronides | 64 | 4 | 2 | 19.1% |
+| Trout | 60 | 4 | 2 | 19.8% |
+
+Not fit: Smallmouth bass (29), Bluegill / Sunfish (29), Northern pike (26), Blue catfish (21),
+Flathead catfish (40), Yellow perch (7), Muskellunge (7), No preference (31).
+
+### New code — `Ch5Functions.R` (new file, ~600 lines)
+
+`Ch5Spec()` / `Ch5InputSpec()` / `Ch5D4Spec()` / `Ch5ExternalSpec()` build the row spec;
+`Ch5InputFrame()`, `Ch5Complete()`, `Ch5Scale()` build the input matrix; `Ch5FitInventory()`,
+`Ch5Elbow()`, `Ch5Fit()` do the fitting; `Ch5SizeTable()`, `Ch5ProfileLong()`, `Ch5Meta()`,
+`Ch5ProfileTable()` build the tables; `Ch5ElbowPlot()`, `Ch5ProfilePlot()`, `Ch5ExternalPlot()`
+the figures. Every statistic routes through `base.summary.percent.selectOne()`,
+`base.summary.means()` or `base.summary.medians()` on a cluster subset, so the weighting and CI
+arithmetic are the inherited ones.
+
+### Verification — Chapter 5 template (run 2026-09-21, all pass)
+
+| Check | Result |
+|---|---|
+| Render | 3.1 min, no errors |
+| Tables | 82 = 79 baseline + 3 |
+| Images | 58 = 55 baseline + 3 |
+| Landscape sections | 8 = 7 baseline + 1 |
+| Leaked markup (F41 regex) | 0 |
+| Source-level deltas | `CreateFlex(` 81→84, `sect_landscape()` 8→9, `sect_portrait()` 6→7 |
+| Chunk `stopifnot` | `nrow(d)` unchanged; types + Unassigned = raw group in every fit; k within cap; every reported type ≥ 15 |
+| Walleye profile | 25 rows shown; 35 characteristics tested, 11 pass at 0.20 |
+
+### Status
+
+Chapter 5 intro, the "Coverage of the fourteen inputs" section, and the **Walleye / Sauger
+sub-section** are built and rendering. The sub-section pattern is: lead-in, size table, elbow
+figure, profile figure, landscape profile table, dumbbell figure.
+
+### Open for the user
+
+| # | Item |
+|---|---|
+| Q33 | **Appendix B has no clustering section yet** (D132 was intended and is not written). It needs: the 14 inputs, log1p and standardization, the elbow rule and the size floor as stated conventions, the unweighted-fit/weighted-reporting gap, complete-case retention, the circularity of input p-values, the combined Holm family at 0.20, and the continuum caveat from F44 |
+| Q34 | Placement of the Overall fit — assumed to **close** the chapter, since "place it first" was declined |
+| Q35 | Whether the terse `Labels.csv` row labels ("Catch Something", "Physical and psycological", "Total (Jan-Oct)") are acceptable in Chapter 5. They are Chapter 3's labels, so they are consistent; one contains a typo in the source data, which is upstream and not mine to change |
+| — | The remaining **9 sub-sections**, once the Walleye template is approved |
+| — | Step 5, guided text development, now covering Chapters 1-5 |
+| — | Unpushed commits: `15b7a17` (Ch4), `17cf703` (comment-out), and this one |
