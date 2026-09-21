@@ -410,3 +410,30 @@ means), V5 (collapsed % exact to 1.8e-15), and V7 (23/23 `B1` cells) all reprodu
 Re-run V4/V5/V7 as regression checks after any change to the banner definition or the universe
 rules. Any discrepancy is logged in `PROGRESS.md` and raised with the user; upstream reports are
 never modified (AGENTS.md rule 4).
+
+---
+
+## 8. Chapters added after this plan was written
+
+This plan was written for steps 1-6 as the user originally framed them, and it is authoritative
+only for Chapters 1-3 and the appendices. Two chapters have been added since, neither of them
+anticipated here. Read `PROGRESS.md` for their decisions; this section exists so nobody treats the
+plan's silence as a statement that they do not exist.
+
+| Chapter | Status | Where it is specified |
+|---|---|---|
+| 4 — Satisfaction | **Built** 2026-09-18 (D111-D118) | `PROGRESS.md`, "Chapter 4 built" |
+| 5 — Angler Type Profiles | **Planned, content not yet defined** (D119) | To be elicited; see the Chapter 5 handoff at the end of `PROGRESS.md` |
+
+Chapter 4 departs from this plan in two ways worth carrying forward. It reverses `A9` so that all
+six satisfaction items point the same direction (D113), which is the only variable transformation
+anywhere in the report. And it reports paired differences between two items within a respondent
+(D114) — a comparison form §3.5 does not cover, computed with `base.summary.means` on a difference
+column so that the interval remains the inherited Kish-effN interval rather than a new device.
+
+Chapter 5 is expected to need more of this section than Chapter 4 did. If angler types are
+**derived** rather than taken from an existing variable, the report acquires its first modelling
+step, and §6's Appendix B list must gain an entry describing how the types were built, on what
+universe, with what treatment of the survey weights, and how the solution was validated. The D5
+precedent — inference requires a stated plan, a multiplicity policy, and its own appendix section —
+applies to that work in full.

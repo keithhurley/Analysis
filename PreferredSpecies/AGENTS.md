@@ -219,9 +219,10 @@ ask**, never change the other report.
 | 2 — species-linked scale questions (Chapter 2) | **Done.** 13 items, each with a table, 3 figures, and 2 verified summary paragraphs; item-level, not composite (D63) |
 | 3 — crosstabs by species (Chapter 3) | **Done.** 21 sections, 39 tables, coverage per D86. The age table carries a weighted mean-age column (D108) |
 | 4 — visualizations | **Done.** No chapter of its own (D34) — 39 figures in Chapter 2, 14 in Chapter 3 (D101) |
-| 5 — guided text development | Not started. **Deferred until after the new Chapter 4** (D110) |
+| 5 — guided text development | Not started. **Deferred again, until after Chapter 5** (D110, D119) |
 | 6 — appendices | **Done.** Appendix A blank for hand-pasted instrument; Appendix B drafted, wording read-through still open (Q25) |
 | **Chapter 4 — Satisfaction** | **Done 2026-09-18 (D111-D118).** Six items (`A9` reversed, `D4a`, `D4i`, `D4j`, `D4k`, `D4l`) in one place: inventory, a landscape matrix by group, respondent- and group-level correlations, and the size-vs-numbers paired comparison for the catch pair and the harvest pair. 6 tables, 2 dumbbell figures |
+| **Chapter 5 — Angler Type Profiles** | **Planned 2026-09-21, content not yet defined (D119).** The title is all that exists. Elicit it — do not assume "angler type" means clustering, an existing variable, or a published typology. If the types are *derived*, this is the report's first modelling work and the D5 precedent applies in full. See the Chapter 5 handoff at the end of `PROGRESS.md` |
 
 **Render baseline: 81 tables / 55 images / 8 landscape sections / 0 leaked markup** (was 75/53/7
 before Chapter 4). Verify every increment against it. Use the F41 regex for the leaked-markup
@@ -241,5 +242,5 @@ Three structural facts that are easy to get wrong and are already settled:
 3. **Scale scores carry the `*_AnsweredAll` listwise gate** per scale (D19), or the Overall
    column will not reproduce.
 
-Read `PROGRESS.md` for decisions D1-D110, findings F1-F36, and open questions; `ANALYSIS_PLAN.md`
-for the executable spec (written for steps 1-3; it does not cover the new Chapter 4).
+Read `PROGRESS.md` for decisions D1-D119, findings F1-F41, and open questions; `ANALYSIS_PLAN.md`
+for the executable spec (written for steps 1-3; §8 records that Chapters 4 and 5 sit outside it).

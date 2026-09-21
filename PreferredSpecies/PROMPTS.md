@@ -594,3 +594,8 @@ Tab "docx file is locked":
 > If you're happy with one of these, say so and I'll build the chapter: item inventory, the
 > six-item matrix by group, a consistency section, and the two dumbbell figures with their gap
 > tables.
+
+## 2026-09-21 — Prompt 77 (handoff for Chapter 5)
+
+> prepare a handoff...we're going to work on Chapter 5 - Angle Type Profiles which is an addition
+> to this analysis report and plan

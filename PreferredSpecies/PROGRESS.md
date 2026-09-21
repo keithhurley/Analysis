@@ -1210,3 +1210,204 @@ numbers for Flathead catfish, Blue catfish, Moronides, Catfish, and Walleye / Sa
 above size for Largemouth bass and Bass; the other 10 groups overlap zero. **Fish that may be
 harvested:** only Muskellunge (n = 8) above and No preference below; 15 of 17 overlap zero. Overall
 the two pairs are 0.07 +- 0.06 and -0.00 +- 0.04.
+
+## Handoff before Chapter 5 — 2026-09-21 (prompt 77)
+
+| # | Decision | Date |
+|---|---|---|
+| D119 | **A new Chapter 5, "Angler Type Profiles", is planned, and its content is not yet defined.** The title is all that exists. As with D110 before Chapter 4, the next conversation must elicit the chapter rather than infer it — in particular it must not assume that "angler type" means a cluster analysis, an existing variable, or a published typology. Step 5 (guided text development) is deferred again, for the same reason it was deferred before Chapter 4: new material would otherwise need wordsmithing twice. | 2026-09-21 |
+
+### State at handoff
+
+`PreferredSpeciesReport.docx`: **81 tables, 55 images, 8 landscape sections, 0 leaked markup.**
+Renders clean end to end. Everything below is built and verified except where noted.
+
+| Part | Content |
+|---|---|
+| Chapter 1 | Species groupings — 23 tables, design-based pairwise contrasts, the decision packet behind the 17-group banner |
+| Chapter 2 | The `D4` battery — 13 items, each with a table and 3 figures, plus 26 interpretive paragraphs |
+| Chapter 3 | 21 sections, 39 tables, 14 figures |
+| Chapter 4 | Satisfaction — 6 tables, 2 dumbbell figures, descriptive only (D114) |
+| Appendix A | Blank placeholder; the instrument is pasted in by hand (D36) |
+| Appendix B | Statistical methodology, 14 sections. Still needs a wording read-through (Q25) |
+
+**Environment.** The R session was restarted after the Chapter 4 build and is clean — no scratch
+objects to avoid this time. `PreferredSpeciesReport.rmd` showed as modified in the editor while
+`git` saw no change, so the editor may be holding **unsaved buffer edits**; check the file on disk
+against the buffer before editing it.
+
+**Git.** Branch `master`, remote `keithhurley/Analysis`. Working tree clean apart from
+`.posit/assistant/settings.json`. ⚠️ The Chapter 4 commit `15b7a17` is **local and unpushed** — the
+user has not been asked. Do not push without asking (house rule).
+
+**Placement and orientation.** Chapter 4 ends at the `## Size and numbers: the fish anglers may
+harvest` section; `# Appendix A` follows. Chapter 5 goes between them, so nothing renumbers. The
+last `block_section()` in the document is now the `sect_landscape()` bracket closing the 4.2
+matrix, and everything after it falls to the body-level portrait section — so new content inherits
+**portrait**, and wide material needs its own `sect_portrait()` / `sect_landscape()` bracket (D92).
+Re-verify the landscape count after the first Chapter 5 render rather than assuming it.
+
+### Structural facts that are settled and must not be re-derived
+
+1. Universe is `filter(surveyYear == 2025)` then `filter(!is.na(B1))` → **n = 1,915** (D23). The
+   Overall column deliberately does not match the 2025 Crosstabs report (D28).
+2. The 17-group banner **overlaps and is not a partition** (D31). Never total a column or row set.
+3. Displayed N is always the **raw, unweighted** count. CIs use Kish effective N.
+4. Significance testing exists only in Chapter 1 (`svyttest` + Bonferroni, D24/D32). Chapter 4 was
+   granted an inference exception and **declined to use it** (D112/D114).
+
+### What is reusable
+
+`PreferredSpeciesFunctions.R` is 2,006 lines and everything in it is available unmodified:
+
+| Layer | Functions |
+|---|---|
+| Row set | `D4RowSpec(includeOverall)`, `banner.definition`, `AssignBannerGroup()` |
+| Table builders | `Ch3SelectOneTable()` (optional `meanVar`), `Ch3SelectAllTable()`, `Ch3MeansTable()`, `Ch3MediansTable()`, `Ch3IndicatorTable()`, `Ch3MeansSpecTable()` |
+| Figures | `Ch3RowStat()`, `Ch3RateLong/MeanLong/MedianLong()`, `Ch3DotPlot()`, `Ch3RatePlot()`, `Ch3MeanPlot()`, `Ch3MedianPlot()`, `Ch3StackPlot()`, `Ch3ScaleFacetPlot()`, `Ch4DumbbellPlot()` |
+| Chapter 4 layer | `ch4.sat.items`, `Ch4AddSatVars()`, `Ch4ItemTable()`, `Ch4CorrTable()`, `FormatCorrMatrix()`, `Ch4GroupMeans()`, `Ch4GroupCorrTable()`, `Ch4GapTable()`, `Ch4GapNumbers()`, `Ch4GapNames()`, `Ch4Alpha()` |
+| Inference | `PairwiseContrasts()`, `ContrastTable()`, `EffortContrastTable()` — Chapter 1 only |
+| Formatting | `CreateFlex()`, `FmtPct/FmtMean/FmtMeanD4/FmtMeanN/FmtMedianN/FmtMeanGap/FmtCount/FmtP` |
+
+Three of these generalize past their original chapter and are the natural extension points:
+`Ch3RowStat(mydata, gate, statFun)` walks the banner with any one-row summariser;
+`Ch3MeansTable(mydata, vars, colLabels)` builds any rows-by-items matrix of weighted means, which
+is what Chapter 4's six-item matrix turned out to need with no new code at all; and
+`FormatCorrMatrix()` renders any correlation matrix as a lower triangle.
+
+**Every one of them assumes the D4RowSpec row set.** If Chapter 5's rows are angler types rather
+than preferred species, they need a row-spec argument rather than a hardcoded call — a real change
+to the table layer, and the first one this report has needed. Plan it deliberately: parameterizing
+`D4RowSpec` out of the builders touches Chapters 2, 3 and 4, so the safer route is a parallel
+`Ch5RowSpec()` plus Chapter 5 builders that take a spec argument, leaving the existing call sites
+untouched. Whichever route is chosen, re-render and check the 81/55/8/0 baseline immediately.
+
+**Upstream stays read-only.** `CrossTabTables/`, `TrendTables/`, `BaseFunctions_2025_UPDATED.R`,
+and `Data/` are never edited, no matter what Chapter 5 needs.
+
+### What Chapter 5 has to settle first
+
+1. **What an "angler type" is, and where the types come from.** Nothing on disk answers this.
+   Three broad possibilities with very different consequences: types read off an existing variable
+   (residency, gear, avidity band, preferred species itself); types **derived** by segmenting
+   anglers on attitude, motivation, or behaviour measures; or types imported from a published
+   typology and operationalized here. Ask; do not pick.
+2. **If the types are derived, this is the report's first modelling work.** That is precisely the
+   case the user flagged in prompt 71, and it stops being hypothetical. Settle before any code: the
+   inputs, the universe, how survey weights enter the segmentation, how the number of types is
+   chosen, how the solution is validated, and how instability is disclosed. Appendix B gains a
+   section (the D5 precedent), and if anything is tested, a multiplicity plan comes with it.
+3. **The row set — the biggest departure yet.** Every table in Chapters 1-4 is keyed to the 17
+   overlapping preferred groups. Chapter 5 can profile types on their own, crosstab type against
+   preferred species, or add type as a second banner. Only the middle option keeps the report's
+   spine, and it is also the sparsest: 17 preferred groups against k types on n = 1,915 will leave
+   many cells in single digits, as F33 already showed for a far coarser split.
+4. **Universe.** Default is n = 1,915 (D23). A typology built on scale scores will carry listwise
+   gates (D19) and shrink it; if the chapter's Overall row stops being comparable to Chapters 1-4,
+   say so in the chapter and in Appendix B the way D28 discloses the crosstabs divergence.
+5. **Weights.** Every estimate in this report is weighted. Segmentation methods take weights
+   inconsistently, and some ignore them. Whatever is decided for the type assignment itself, the
+   profile tables that follow must still be weighted, and any gap between the two must be stated.
+6. **Cross-year.** 2025 only unless extended. `d2018` exists in the setup chunk and was pulled in
+   for the Chapter 2 slope figures alone (D74/D76).
+7. **Output conventions.** Transposed layout (D43), display precision (D93/D115), the two N
+   conventions (D90), `CreateFlex()` for every table, a lead-in paragraph before every table so no
+   two tables are adjacent (D33/D98), portrait figures 6.5in wide (D78/D103).
+
+### Candidate raw material — a menu to ask about, NOT an inference about the chapter
+
+Listed so the next conversation can put concrete options in front of the user. Which, if any, of
+these belong in Chapter 5 is entirely the user's call.
+
+| Family | Variables | Verified in use? |
+|---|---|---|
+| Attitude scale scores | `attitude_catch`, `attitude_numbers`, `attitude_size`, `attitude_harvest` (from `E1`) | Yes — Chapter 3 §3.20.5 |
+| Motivation scale scores | `motivation_natural`, `motivation_pp`, `motivation_social`, `motivation_resource` (from `C2`) | Yes — Chapter 3 §3.18.5 |
+| Regulation scale scores | `reg_comprehension`, `reg_sitesupport`, `reg_uniform` (from `Q31`) | Yes — Chapter 3 §3.19.5 |
+| Barrier scale scores | `barriers_access`, `barriers_time`, `barriers_social`, `barriers_knowledge`, `barriers_cost` | **No** — listed in `AGENTS.md` §3 but used nowhere in this report; confirm they exist before proposing them |
+| `D4` sub-scales | Satisfaction, Constraints, Regulation support — derived and held-out tested by the sibling `D4ScaleAnalysis` project | Not in this report (D40/D63 keep it item-level) |
+| Avidity and effort | `C1Total_days`, `C1Jan`…`C1Oct`, `A13_corrected` tournaments, `Q18a`/`Q18b` guide days | Yes — Chapter 3 |
+| Behaviour | `A4` waterbody types, `A5` methods, `A6` techniques, `Q16` sonar, `Q26` ice | Yes — Chapter 3 |
+| Harvest orientation | `B3*` keep/release per species | **No** — excluded from Chapter 3 outright by D86, but present in the data |
+| Species preference | `B1`, the 17 groups, `gtype`/`gtype2` | Yes — the report's spine |
+| Demographics | `Resi`, `E2`, `E3`, `Age` | Yes — Chapter 3 |
+
+All scale scores are created by `add_scale_scores(d)` at render time from `Scales.csv`; they are
+not stored in the saved data. Each carries its own `*_AnsweredAll` listwise gate (D19).
+
+### Workflow gotchas that have each cost time at least once
+
+| Gotcha | Handling |
+|---|---|
+| `PreferredSpeciesFunctions.R` is auto-reformatted on write (F7) | Re-read before editing; never edit against a remembered version |
+| Large `cat >> file << EOF` heredocs silently truncate (F34) | Append in blocks of ~80 lines and check `wc -l` after each |
+| A backticked column name cannot hold a `\uXXXX` escape (F40) | Use a string constant as a dynamic name: `!!ch4.lab.diffci := ...` |
+| The obvious leaked-markup regex gives false positives (F41) | Use `<w:t(?: [^>]*[^/>])?>.*?</w:t>`; `<w:t[^>]*>` also matches `<w:tbl>` |
+| Counting tables in `document.xml` | `<w:tbl>` never appears; match `<w:tbl[ >]` or count `<w:tblPr>` |
+| A stray code fence swallowed a whole chapter (F35) | Keep opener/closer fence counts balanced; scan after big edits |
+| Render fails with `pandoc ... error 1` | Check for `~$eferredSpeciesReport.docx` — the document is open in Word |
+| Two adjacent tables merge in Word (D33, D98) | Every table gets its own lead-in paragraph, including under sub-headings |
+| `block_section()` describes the section that **ends** at that point (D92) | Bracket wide runs: portrait break before, landscape break after |
+| `git` refuses with "dubious ownership" | Use `git -c safe.directory=F:/Survey/Analysis ...` |
+
+### Still open, independent of Chapter 5
+
+| # | Item |
+|---|---|
+| Q22 | Outcome-dimension multiplicity in Chapter 1 (F8) — flagged, not implemented |
+| Q24 | Appendix A heading year — 2025 or 2026 |
+| Q25 | Appendix B wording: the inherited "roughly 9x too tight" passage reads as contradicting the newer scale-invariance note |
+| Q32 | **Chapter 4 reliability presentation** — currently one footnote line scoped to `D4i`-`D4l` (D117); the user was offered a full reliability table and the question was not answered explicitly |
+| — | Step 5, guided text development, now covering Chapters 1-4 |
+| — | The unpushed Chapter 4 commit `15b7a17` |
+| — | Figures deliberately excluded (D101): guided trips, the tournament-count mean, the A4/A5/A6 select-all grids |
+
+### Prompt for the next conversation (Chapter 5) — USE THIS ONE
+
+```
+Continue the PreferredSpecies report -- a new Chapter 5, "Angler Type Profiles". Read AGENTS.md,
+PROGRESS.md, and PROMPTS.md in f:/Survey/Analysis/PreferredSpecies first; they carry the standing
+directive, the inherited methodology, decisions D1-D119, and findings F1-F41. Do not re-derive any
+of it and do not re-run past verification checks; they passed.
+
+State of the report: Chapters 1-4 and both appendices are built, verified, and rendering -- 81
+tables, 55 images, 8 landscape sections, 0 leaked markup. Do not touch Chapters 1-4, the
+appendices, or any existing table or figure.
+
+Chapter 5 is an analysis I have in mind and have not described to you yet. The title is all you
+have. Do NOT assume "angler type" means a cluster analysis, an existing variable, or a published
+typology -- ask me what the chapter is. Then plan before code: no code execution and no file
+writing until I give the go-ahead.
+
+Drive the conversation from "What Chapter 5 has to settle first" near the end of PROGRESS.md.
+Start with what defines an angler type and where the types come from, because everything else
+follows from it. Then the row set -- every table in Chapters 1-4 is keyed to the 17 overlapping
+preferred groups via D4RowSpec, and a type-based row set is the largest structural departure this
+report has taken; tell me what it would cost before we commit to it. Tell me where Chapter 5 would
+depart from what Chapters 1-4 already do rather than quietly adopting a default.
+
+If the types turn out to be derived rather than read off an existing variable, this is the
+report's first modelling work. Settle the inputs, the universe, how the survey weights enter, how
+the number of types is chosen, how the solution is validated, and what Appendix B must say --
+before any code. That is the D5 precedent and it is the item I flagged before Chapter 4.
+
+Ground rules, already settled -- do not re-litigate:
+- Technician voice. Report the numbers; I interpret them. The D77/D79 interpretation exception was
+  scoped to Chapter 2's closing paragraphs only.
+- Universe is surveyYear == 2025 with !is.na(B1), n = 1,915 (D23), unless I say otherwise.
+- The preferred groups overlap (D31) -- never total them. Displayed N is always raw and
+  unweighted; CIs use Kish effective N.
+- Transposed layout, landscape only where needed (D43); block_section brackets per D92. New
+  content at the end of Chapter 4 inherits portrait.
+- Reuse base.summary.* and the Ch3*/Ch4* builders. Ch3RowStat() and Ch3MeansTable() are the
+  extension points; note that all of them assume the D4RowSpec row set.
+- Never edit anything upstream (CrossTabTables/, TrendTables/, BaseFunctions*, Data/).
+- Portrait figures are 6.5in wide (D78/D103).
+
+Render and verify after each build increment against the 81-table / 55-image / 8-landscape /
+0-leaked-markup baseline, using the F41 regex for the markup scan. Keep PROGRESS.md and PROMPTS.md
+updated, logging every prompt verbatim in PROMPTS.md. The rendered .docx is tracked in git (D109),
+so commit it alongside the source; use `git -c safe.directory=F:/Survey/Analysis ...` because
+plain git refuses in this repo. Note that the Chapter 4 commit 15b7a17 is still unpushed -- ask me
+before pushing anything.
+```
