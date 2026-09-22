@@ -1589,3 +1589,166 @@ metric one, or the chapter reads as tuned.
 
 Q33 (Appendix B has no clustering section), Q34 (Overall fit placement), Q35 (terse `Labels.csv`
 row labels), the nine remaining sub-sections, and step 5 guided text.
+
+---
+
+## Handoff — Chapter 5 paused on Q36 (2026-09-22, prompt 105)
+
+**One sentence: Chapter 5's machinery is built and working, its Walleye template renders, and the
+whole chapter is blocked on a single unanswered question — which questions define an angler
+type (Q36).**
+
+### Read this before anything else
+
+⚠️ **Do not render, and do not treat the current .docx as current.** `Ch5Functions.R` implements
+the 13-input Likert spec; the chapter prose in `PreferredSpeciesReport.rmd` still describes the
+*previous* 14-input spec (fourteen measures, `log1p`, within-fit standardization, days fished as
+an input, the elbow rule). A render today produces correct tables under incorrect text. Commit
+`1db56bb` is the last fully consistent state; `600af04` is the current WIP.
+
+⚠️ **The render baseline is 79 tables / 55 images / 7 landscape / 0 leaked markup**, not the
+81/55/8/0 quoted in older sections of this file. Commit `17cf703` commented out Chapter 4 content
+and suppressed 2 tables and 1 landscape section (F45). Commented-out markdown still contains the
+literal text `CreateFlex(` and `sect_landscape()`, so **count rendered output, not call sites**.
+
+⚠️ **Do not re-run the input-set exploration.** Ten configurations are recorded in the previous
+section with retention, k, silhouette and verdict. The conclusion is stable and re-deriving it is
+pure cost.
+
+### State at handoff
+
+| Part | State |
+|---|---|
+| `Ch5Functions.R` | Complete and working. Fits, k selection, size table, profile table, diagnostics table, three figure builders |
+| Chapter 5 intro + "Coverage of the fourteen inputs" | Written, renders, **prose now stale** |
+| Walleye sub-section | Built and verified under the old spec: 25 profile rows, 11 of 35 characteristics passing |
+| Nine remaining sub-sections | Not written, deliberately — they were held back pending Q36 |
+| Appendix B clustering section | Not written (Q33) |
+| Chapters 1-4, appendices | Untouched throughout. No `D4RowSpec` call site was modified |
+
+Last verified render (old spec): 3.1 min, 82 tables / 58 images / 8 landscape / 0 leaked markup,
+i.e. +3/+3/+1/0 against the corrected baseline.
+
+**Git.** Branch `master`, remote `keithhurley/Analysis`. Three unpushed commits: `15b7a17` (Ch4),
+`17cf703` (comment-out), `1db56bb` and `600af04` (Ch5). **Never push without asking.** Use
+`git -c safe.directory=F:/Survey/Analysis ...`; plain git refuses. Only `.posit/assistant/settings.json`
+is left dirty, and it is not ours to commit.
+
+### Q36 — the decision that unblocks everything
+
+Four candidates, detailed in the previous section. In short: **days + distance + access at fixed
+k = 3** (stable, 9 of 10 fits clear the floor, silhouette 0.21-0.30, types are access × effort);
+the same plus the two regulation scales (which F56 shows are inert); **13 D4 items at k = 2** (the
+only family whose types are genuine multivariate patterns rather than restatements of the inputs);
+or a set the user names.
+
+The governing trade-off, which does not need re-deriving: **attitudinal inputs give two weakly
+separated but genuine types; behavioural inputs give more, better separated types that turn out to
+be the binary flags fed in.** Whatever is chosen needs a *substantive* justification in Appendix B,
+not a metric one — ten configurations in, a metric justification reads as tuned.
+
+### How to switch input sets — the whole recipe
+
+This is a small, localized edit. Everything downstream is input-agnostic.
+
+| To change | Edit |
+|---|---|
+| Which variables define types | `ch5.input.vars` (Field / Block / Fallback) and `ch5.input.blocks` |
+| Transforms | `Ch5InputFrame()` — currently plain `as.numeric`, no transform |
+| Standardization | `Ch5Fit()` uses `as.matrix(Ch5InputFrame(...))` raw. **Mixed-metric inputs need `Ch5Scale()` instead**, which also guards the zero-variance columns that occur in small fits |
+| Variables moving between blocks | A variable that stops being an input must be **added to `Ch5ExternalSpec()`**, and one that becomes an input must be **removed** from it, or it will be both circular and tested |
+| Fixed k instead of the mode | `Ch5Fit()` calls `Ch5KSelect()`; add a `kFixed` argument that bypasses `sel$kUse`. Keep the 15-per-type floor check |
+| Figure facets | `Ch5ProfilePlot()` facets on `ch5.input.blocks` |
+
+**Then the prose must follow.** The three inline paragraphs after the `ch5Setup` chunk name the
+input count, the transform, the standardization, the k rule, the exclusions and the
+variance-explained range. The "Coverage of the fourteen inputs" heading also names a count. None of
+it updates itself.
+
+### Order of work for the next conversation
+
+1. Get Q36 answered. Nothing else is worth doing first.
+2. Make the localized code edit above; refit and print k, sizes and floor compliance for all fits
+   **before** writing any prose. Fitting all ten takes 15-30 seconds.
+3. Rewrite the three intro paragraphs and the coverage heading to match.
+4. Rebuild the Walleye sub-section, render, verify against 79/55/7/0, and stop for a read-through.
+5. Only then generate the remaining nine sub-sections. Generate them with an R script that splices
+   into the .rmd between sentinel comments rather than hand-writing ~450 lines — the pattern is
+   lead-in, size table, elbow figure, profile figure, landscape profile table, dumbbell figure, and
+   it is identical per species.
+6. Appendix B clustering section (Q33), then step 5 guided text across Chapters 1-5.
+
+### Workflow gotchas, each of which has cost time at least once
+
+| Gotcha | Handling |
+|---|---|
+| `scale()` returns `NaN` on a zero-variance column, and `kmeans` then fails with "NA/NaN/Inf in foreign function call" | Use `Ch5Scale()`. Constant binaries do occur in the smaller fits (e.g. `tourn` in Moronides) |
+| `base.summary.medians()` returns `CIlower`/`CIupper`, **not** `Lower`/`Upper` | Getting it wrong fails silently — empty cells and only a warning |
+| `p.adjust()`'s default `n` counts `NA` entries | Pass `n = sum(!is.na(P))` explicitly, as `Ch5Meta()` does |
+| `mclust::Mclust()` errors with "could not find function mclustBIC" without the package attached | Call `mclust::mclustBIC()` directly and read the best G off the matrix. Do **not** `library(mclust)` — it masks `purrr::map` |
+| `clusGap()`'s internal k-means defaults to `iter.max = 10` and warns about non-convergence | Pass `FUN = function(x, k) kmeans(x, k, nstart = 25, iter.max = 100)` |
+| Six `A4` fields are entirely `NA` in 2025 | Already handled by `Ch5AllNAFields()`; reported via `Ch5DroppedFields()` rather than vanishing |
+| `PreferredSpeciesFunctions.R` is auto-reformatted on write (F7) | Re-read before editing. This is why the Ch5 layer is a separate file |
+| Large heredoc appends silently truncate (F34) | Use the write/edit tools, not `cat >> file << EOF` |
+| The obvious leaked-markup regex gives false positives (F41) | Use `<w:t(?: [^>]*[^/>])?>.*?</w:t>` and then search the extracted runs |
+| `block_section()` describes the section that **ends** at that point (D92) | Portrait break before a wide table, landscape break after |
+| Render fails with `pandoc ... error 1` | Check for `~$eferredSpeciesReport.docx` — the document is open in Word |
+| Two adjacent tables merge in Word (D33/D98) | Every table gets its own lead-in paragraph |
+
+### Still open, independent of Q36
+
+| # | Item |
+|---|---|
+| Q33 | Appendix B has no clustering section. Needs: inputs, transforms, standardization, the k rule as a stated convention, the size floor as a stated convention, the unweighted-fit/weighted-reporting gap, complete-case retention, the circularity of input p-values, the combined Holm family at 0.20, and the continuum caveat (F50) |
+| Q34 | Placement of the Overall fit — assumed to close the chapter, since "place it first" was declined |
+| Q35 | Terse `Labels.csv` row labels ("Catch Something", "Physical and psycological", "Total (Jan-Oct)"). They are Chapter 3's labels, so they are at least consistent; one contains an upstream typo that is not ours to fix |
+| Q22 | Outcome-dimension multiplicity in Chapter 1 (F8) — flagged, never implemented |
+| Q24 | Appendix A heading year — 2025 or 2026 |
+| Q25 | Appendix B wording: the inherited "roughly 9x too tight" passage reads as contradicting the newer scale-invariance note |
+| Q32 | Chapter 4 reliability presentation — offered as a full table, never answered explicitly |
+| — | Step 5, guided text development, now covering Chapters 1-5 |
+| — | Four unpushed commits |
+
+### Prompt for the next conversation (Chapter 5, resuming) — USE THIS ONE
+
+```
+Resume the PreferredSpecies report, Chapter 5 "Angler Type Profiles". Read AGENTS.md and the two
+most recent sections of PROGRESS.md in f:/Survey/Analysis/PreferredSpecies -- the input-set
+exploration and the handoff. They carry the standing directive, decisions D1-D139, findings
+F1-F60, and the open question Q36. Do not re-derive any of it and do not re-run the ten input-set
+configurations; they are recorded with their results.
+
+Three things to know before you touch anything. The report must NOT be rendered as it stands:
+Ch5Functions.R implements the 13-input spec while the chapter prose still describes the old
+14-input spec, so a render gives correct tables under wrong text. The render baseline is 79
+tables / 55 images / 7 landscape / 0 leaked markup, not the 81/55/8/0 quoted in older sections.
+And Chapters 1-4 and both appendices are finished and must not be touched.
+
+Chapter 5 is blocked on one decision, Q36: which questions define an angler type. Ask me for it
+first and do not assume an answer. The candidates and the trade-off behind them are in
+PROGRESS.md -- attitudinal inputs give two weakly separated but genuine types, behavioural inputs
+give more and better separated types that re-derive the flags fed in. Once I answer, follow the
+"Order of work for the next conversation" section: localized code edit, refit and show me k and
+cluster sizes BEFORE writing prose, update the three intro paragraphs, rebuild the Walleye
+sub-section, render, verify, and stop for my read-through before generating the other nine.
+
+Ground rules, settled, do not re-litigate:
+- Technician voice. Report the numbers; I interpret them.
+- Universe is surveyYear == 2025 with !is.na(B1), n = 1,915 (D23). The Overall fit excludes No
+  preference (D136).
+- The preferred groups overlap (D31) -- never total them. Displayed N is raw and unweighted; CIs
+  use Kish effective N. Clustering is unweighted, all reporting is weighted, and the gap is
+  disclosed.
+- One combined Holm family at alpha = 0.20 over the D4 items and the other characteristics;
+  clustering inputs always shown with no p because they are circular (D127).
+- Landscape profile tables with value +- CI (D128); block_section brackets per D92; portrait
+  figures 6.5in wide.
+- Reuse the Ch5* layer; it is input-agnostic apart from the handful of places listed in the
+  switch-input-sets recipe.
+- Never edit anything upstream (CrossTabTables/, TrendTables/, BaseFunctions*, Data/).
+
+Keep PROGRESS.md and PROMPTS.md current, logging every prompt verbatim. The rendered .docx is
+tracked (D109), so commit it alongside the source; use `git -c safe.directory=F:/Survey/Analysis
+...`. There are four unpushed commits -- ask me before pushing anything. Tell me when an action
+would save tokens (save to file, start a new conversation).
+```

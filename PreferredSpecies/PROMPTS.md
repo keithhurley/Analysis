@@ -713,3 +713,7 @@ here. The user appended the following, which is the actual definition of the cha
 > let's remove the rare flags...use days, distance, access, regs scales of uniform and site-specific
 
 > I'm pausing for today to think about option
+
+## 2026-09-22 — Prompt 105 (handoff)
+
+> write a handoff
