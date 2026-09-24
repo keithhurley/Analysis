@@ -2205,3 +2205,35 @@ Render **84 / 57 / 9 / 0** (+1 table). All 7 comparison paragraphs and the Appen
 | D166 | **Class 3 tournament language softened.** The picture now reads "an angler, often a bass angler, who reads the regulations…". The comparison paragraph says tournament participation is "close to the overall rate", checked as \|Class 3 − Overall\| < 2 points. **Class 4 carries the tournament language.** Paragraph 1 notes that the catch-outcomes scale, where no other profile scores as high, includes competing for prizes or money, and the picture reads "trophies and tournament competition included". Paragraph 2 opens with Class 4 as the profile most likely to fish tournaments (5.3% against 3.0%), "although tournament anglers remain a small share of it". Both claims are checked (`hi("cmpTourney") == 4`, `top("motivation_resource") == 4`) | 2026-09-24 |
 
 Render 84 / 57 / 9 / 0, unchanged. "tournament-aware" no longer appears in the docx.
+
+---
+
+## Chapter 5 — profile pictures and icons (2026-09-24, prompt 126)
+
+User supplied `angler_profile_pictures/` (6 photos, 2816×1536, ~3 MB each) and `angler_profile_icons/` (6 icons, 2048² JPG). Choices made through AskUser: key table + table-header icons; reduced copies; caption = class label only; use as-is with the two icons cleaned.
+
+| # | Decision | Date |
+|---|---|---|
+| D167 | **Derived copies only are embedded.** `Ch5Images.R` (run by hand, needs `magick`, installed this session) writes `angler_profile_images_derived/classK_photo.jpg` (1600 px, q85, 200-360 KB) and `classK_icon.png` (300² PNG). Originals untouched. All six icons get the same treatment: grey, near-white → white (75%), 40 px frame cropped, trimmed, re-centred on a square with a 6% margin. This removes the class 4 border and the class 5 paper texture | 2026-09-24 |
+| D168 | **Photo under each `### Class k` heading**, 6.5 × 3.55 in, followed by an italic caption "Class k: label". Headings, captions and the key table all read `ch5.class.labels` (new, in `Ch5LPA.R`), so the labels have one source | 2026-09-24 |
+| D169 | **Icons:** a key table (`Ch5IconKeyTable()`: icon, profile, label, weighted share, N) opens "The six profiles"; `Ch5IconHeader()` adds an icon row over the Class columns of the profile-means, class-by-species and comparison tables. Icons are not placed in headings (TOC) or in plots. `stopifnot(Ch5ImagesPresent())` guards the first use | 2026-09-24 |
+
+| # | Finding |
+|---|---|
+| F86 | In officedown, `knitr::include_graphics()` with the `out.width` chunk option fails ("non-numeric argument to binary operator"). Use `fig.width` / `fig.height` |
+| F87 | `DocxCounts()` counts **header rows** (`<w:tblHeader`), not tables. The icon rows add 3, so it now reads 88 for **85 tables** (`<w:tbl[ >]`). Images are counted per `<pic:pic>`, so every icon instance counts |
+| F88 | The repo-root `.gitignore` ignores `*.jpg` and `*.png`, so the image folders (originals and derived) are **not tracked**; a fresh clone cannot render Chapter 5 without them. Open as Q55 |
+| F89 | Incident: rewriting the rmd via `file(path, "wb")` before `readLines(path)` truncated it to empty; restored from the in-memory copy, diff against HEAD confirmed (56 +, 9 −). An empty render left an ignored `PreferredSpeciesReport.html` (16:54). Read fully before opening a write connection |
+
+Mismatches noted at the user's request, images used as-is: the class 3 photo shows a sponsor-logo tournament jersey (D166 moved tournament language to class 4) and real brand logos; the class 4 photo and icon show mountains; the class 5 photo shows a man of about 35 although class 5 is the oldest profile; the class 6 photo shows an older man with a trout, although class 6 is top-two for share of women and its largest displayed species share is Bluegill / Sunfish.
+
+### Verification
+
+Rendered 3.1 min. `DocxCounts()` **88 / 87 / 9 / 0** = **85 tables** (84 + key) / 87 images (57 + 6 photos + 6 key icons + 18 header icons) / 9 landscape / 0 leaked. All six class headings resolved from `ch5.class.labels`. Docx 0.79 → 2.5 MB. Not checked visually in Word (no LibreOffice here). **New baseline 88/87/9/0 (85 tables).**
+
+### Open for the user
+
+| # | Question |
+|---|---|
+| Q55 | ~~Track the images in git?~~ **Closed, prompt 127:** `PreferredSpecies/.gitignore` negates `*.jpg`/`*.png` for `angler_profile_images_derived/` only (~1.8 MB); originals stay untracked |
+| Q56 | ~~Delete the stray html?~~ **Closed, prompt 127:** deleted |

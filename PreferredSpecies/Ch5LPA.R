@@ -870,3 +870,74 @@ Ch5LPAProfileFacetPlot <- function(prof, titleText) {
     ) +
     theme_bw()
 }
+
+# Profile images (prompt 126, D167-D169). The report reads only the derived
+# copies written by Ch5Images.R; the originals are never embedded.
+ch5.img.dir <- "angler_profile_images_derived"
+ch5.icon.size <- 0.35 # inches, in table headers
+ch5.class.labels <- c(
+  "The harvest-minded, keep-it-simple angler",
+  "The relaxed, catch-optional angler",
+  "The regulation-savvy catch-and-release sport angler",
+  "The all-in enthusiast",
+  "The low-involvement angler",
+  "The conservation-minded purist"
+)
+
+Ch5PhotoPath <- function(k) file.path(ch5.img.dir, paste0("class", k, "_photo.jpg"))
+Ch5IconPath <- function(k) file.path(ch5.img.dir, paste0("class", k, "_icon.png"))
+
+Ch5ImagesPresent <- function(k = seq_along(ch5.class.labels)) {
+  all(file.exists(c(Ch5PhotoPath(k), Ch5IconPath(k))))
+}
+
+# Adds a header row above a CreateFlex() table with each profile's icon over
+# its "Class k" column. Other columns get an empty cell. The heavy top rule
+# moves to the new row so the icon and column name read as one header.
+Ch5IconHeader <- function(ft, size = ch5.icon.size) {
+  keys <- ft$col_keys
+  cls <- grep("^Class [0-9]+$", keys)
+  stopifnot(length(cls) > 0)
+  hdr_bg <- ft$header$styles$cells$background.color$data[1, 1]
+  none <- officer::fp_border(width = 0)
+  big <- officer::fp_border(color = "black", width = 1.5)
+
+  ft <- ft %>%
+    add_header_row(values = rep("", length(keys)), colwidths = rep(1, length(keys)), top = TRUE)
+  for (j in cls) {
+    k <- as.integer(sub("Class ", "", keys[j]))
+    ft <- ft %>%
+      compose(
+        i = 1, j = j, part = "header",
+        value = as_paragraph(as_image(src = Ch5IconPath(k), width = size, height = size))
+      )
+  }
+  ft %>%
+    bg(i = 1, bg = hdr_bg, part = "header") %>%
+    align(i = 1, align = "center", part = "header") %>%
+    border(i = 1, border.top = big, border.bottom = none, part = "header") %>%
+    border(i = 2, border.top = none, part = "header")
+}
+
+# One row per profile: icon, number, label, weighted share and n.
+Ch5IconKeyTable <- function(shares, ns, size = 0.5) {
+  k <- seq_along(ch5.class.labels)
+  tab <- tibble(
+    Icon = "",
+    Profile = paste("Class", k),
+    Label = ch5.class.labels,
+    `Share of respondents` = shares,
+    N = FmtCount(ns)
+  )
+  ft <- CreateFlex(tab) %>% set_header_labels(Icon = "")
+  for (i in k) {
+    ft <- ft %>%
+      compose(
+        i = i, j = "Icon", part = "body",
+        value = as_paragraph(as_image(src = Ch5IconPath(i), width = size, height = size))
+      )
+  }
+  ft %>%
+    width(j = "Icon", width = size + 0.15) %>%
+    valign(valign = "center", part = "body")
+}

@@ -3,7 +3,8 @@
     "external_directory": {
       "f:/Survey/Analysis/*": "allow",
       "f:/Survey/Data/DataAggregation1/*": "allow",
-      "/tmp/*": "allow"
+      "/tmp/*": "allow",
+      "C:/Users/keith.hurley/AppData/Local/Temp/*": "allow"
     },
     "edit": {
       "*.md": "allow",
