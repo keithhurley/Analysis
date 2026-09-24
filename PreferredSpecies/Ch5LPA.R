@@ -571,6 +571,277 @@ Ch5LPAProfileLinePlot <- function(prof, titleText) {
     )
 }
 
+# ---- Profile descriptions (D161) ---------------------------------------------
+# Standardized deviation of each class mean from the Overall mean, in Overall
+# weighted SD units. The prose pulls every number through these helpers, so it
+# cannot drift from the profile table.
+Ch5LPAStd <- function(prof, mydata) {
+  sdw <- vapply(
+    ch5.lpa.vars,
+    function(v) {
+      k <- !is.na(mydata[[v]])
+      WeightedSD(mydata[[v]][k], mydata$postWeight[k])
+    },
+    numeric(1)
+  )
+  ov <- prof %>% filter(Class == "Overall") %>% select(var, Overall = Value)
+  prof %>%
+    filter(Class != "Overall") %>%
+    left_join(ov, by = "var") %>%
+    mutate(
+      Class = as.character(Class),
+      Z = (Value - Overall) / unname(sdw[var])
+    )
+}
+
+Ch5Cell <- function(std, cls, v) {
+  r <- std[std$Class == paste("Class", cls) & std$var == v, ]
+  stopifnot(nrow(r) == 1)
+  r
+}
+
+Ch5M <- function(std, cls, v) {
+  formatC(Ch5Cell(std, cls, v)$Value, format = "f", digits = 1)
+}
+
+Ch5MZ <- function(std, cls, v) {
+  r <- Ch5Cell(std, cls, v)
+  paste0(
+    formatC(r$Value, format = "f", digits = 1),
+    ", ",
+    sprintf("%+.2f", r$Z),
+    " SD"
+  )
+}
+
+# Class that holds the extreme mean on one scale
+Ch5Extreme <- function(std, v, fun) {
+  x <- std[std$var == v, ]
+  as.integer(str_remove(x$Class[fun(x$Value)], "Class "))
+}
+
+Ch5Share <- function(long, cls, column, ci = TRUE) {
+  r <- long[long$Class == paste("Class", cls) & long$Column == column, ]
+  stopifnot(nrow(r) == 1)
+  out <- paste0(formatC(r$Value, format = "f", digits = 1), "%")
+  if (ci) {
+    paste0(out, " \u00b1 ", formatC(r$CI, format = "f", digits = 1))
+  } else {
+    out
+  }
+}
+
+# ---- Class comparisons on other questions (D163) ------------------------------
+# Adds the derived indicators the comparison table needs. Universes follow the
+# Chapter 3 tables: select-all items are gated on their *_Answered flag, the
+# guide indicator reproduces the Chapter 3 construction, and days fished uses
+# the C1_AnsweredAll gate.
+Ch5LPACompareData <- function(mydata) {
+  a4 <- mydata$A4_Answered %in% TRUE
+  a5 <- mydata$A5_Answered %in% TRUE
+  mydata %>%
+    mutate(
+      cmpDays = if_else(C1_AnsweredAll %in% TRUE, C1Total_days, NA_real_),
+      cmpTourney = fishedTourney,
+      cmpGuide = if_else(
+        is.na(hiredGuide),
+        NA,
+        (!is.na(Q18a) & Q18a > 0) | (!is.na(Q18b) & Q18b > 0)
+      ),
+      cmpBoat = if_else(a5, as.character(A5boat) == "Motorized boat", NA),
+      cmpKayak = if_else(a5, as.character(A5kayak) == "Kayak/Canoe", NA),
+      cmpIce = if_else(a5, as.character(A5ice) == "Ice fishing", NA),
+      cmpOutState = if_else(is.na(A11), NA, as.character(A11) == "Yes"),
+      cmpPark = if_else(is.na(A10), NA, as.character(A10) == "Yes"),
+      # User-specified combination (prompt 123): any of the three river/stream types
+      cmpStream = if_else(
+        a4,
+        as.character(A4mo) == "Missouri River" |
+          as.character(A4plat) == "Platte River" |
+          as.character(A4riv) == "Other streams, rivers, and canals",
+        NA
+      ),
+      cmpPrivate = if_else(
+        is.na(A17Priv_corrected),
+        NA,
+        as.character(A17Priv_corrected) == "Yes"
+      ),
+      cmpMiles = A8_miles,
+      cmpSatisfaction = as.numeric(A9),
+      cmpLiveScope = if_else(is.na(Q16), NA, as.character(Q16) == "Yes"),
+      cmpFemale = if_else(is.na(E2), NA, as.character(E2) == "Female"),
+      cmpAge = Age
+    )
+}
+
+ch5.compare.spec <- tribble(
+  ~var              , ~Kind    , ~Label                                                                           , ~digits ,
+  "cmpDays"         , "mean"   , "Days fished in 2025, mean"                                                      ,       1 ,
+  "cmpDays"         , "median" , "Days fished in 2025, median"                                                    ,       1 ,
+  "cmpTourney"      , "pct"    , "Fished at least one tournament, %"                                              ,       1 ,
+  "cmpGuide"        , "pct"    , "Hired a fishing guide, %"                                                       ,       1 ,
+  "cmpBoat"         , "pct"    , "Fished from a motorized boat, %"                                                ,       1 ,
+  "cmpKayak"        , "pct"    , "Fished from a kayak or canoe, %"                                                ,       1 ,
+  "cmpIce"          , "pct"    , "Ice fished, %"                                                                  ,       1 ,
+  "cmpStream"       , "pct"    , "Fished the Missouri River, Platte River, or other streams and rivers, %"        ,       1 ,
+  "cmpPark"         , "pct"    , "Fished a water requiring a Park Entry Permit, %"                                ,       1 ,
+  "cmpPrivate"      , "pct"    , "Used private areas to fish or launch, %"                                        ,       1 ,
+  "cmpOutState"     , "pct"    , "Fished outside Nebraska, %"                                                     ,       1 ,
+  "cmpMiles"        , "median" , "One-way miles to most visited water, median"                                    ,       0 ,
+  "cmpSatisfaction" , "mean"   , "Overall fishing satisfaction, mean (1 = Very satisfied, 5 = Very dissatisfied)" ,       1 ,
+  "cmpLiveScope"    , "pct"    , "Used live-imaging sonar, %"                                                     ,       1 ,
+  "cmpFemale"       , "pct"    , "Female, %"                                                                      ,       1 ,
+  "cmpAge"          , "mean"   , "Age, mean"                                                                      ,       1
+)
+
+# Overall is every respondent in the universe (the Chapter 3 Overall value);
+# Unassigned respondents appear there only, never as a column (prompt 123).
+Ch5LPACompareLong <- function(mydata, spec = ch5.compare.spec) {
+  k <- nlevels(mydata$lpa_class) - 1
+  groups <- c("Overall", paste("Class", seq_len(k)))
+  purrr::pmap_dfr(spec, function(var, Kind, Label, digits) {
+    purrr::map_dfr(groups, function(g) {
+      sub <- mydata %>% filter(!is.na(.data[[var]]))
+      if (g != "Overall") {
+        sub <- sub %>% filter(lpa_class == g)
+      }
+      out <- if (Kind == "pct") {
+        sub[[var]] <- factor(sub[[var]], levels = c(FALSE, TRUE))
+        pct <- base.summary.percent.selectOne(sub, !!sym(var)) %>% as_tibble()
+        hit <- pct %>% filter(as.character(Response) == "TRUE")
+        tibble(
+          Value = if (nrow(hit) == 0) 0 else hit$Value,
+          CI = if (nrow(hit) == 0) 0 else hit$CI,
+          Lower = NA_real_,
+          Upper = NA_real_
+        )
+      } else if (Kind == "mean") {
+        mn <- base.summary.means(sub, !!sym(var)) %>% as_tibble()
+        tibble(Value = mn$Value, CI = mn$CI, Lower = NA_real_, Upper = NA_real_)
+      } else {
+        md <- base.summary.medians(sub, !!sym(var)) %>% as_tibble()
+        tibble(
+          Value = md$Value,
+          CI = NA_real_,
+          Lower = md$CIlower,
+          Upper = md$CIupper
+        )
+      }
+      out %>%
+        mutate(
+          Class = g,
+          var = var,
+          Kind = Kind,
+          Label = Label,
+          digits = digits,
+          N = nrow(sub)
+        )
+    })
+  }) %>%
+    mutate(
+      Class = factor(Class, levels = groups),
+      Label = factor(Label, levels = unique(spec$Label))
+    )
+}
+
+Ch5LPACompareTable <- function(cmp) {
+  cmp %>%
+    mutate(
+      cell = case_when(
+        Kind == "pct" ~ paste0(FmtPct(Value, CI), " (", FmtCount(N), ")"),
+        Kind == "mean" ~ FmtMeanN(Value, CI, N),
+        TRUE ~ purrr::pmap_chr(
+          list(Lower, Value, Upper, N, digits),
+          function(lo, v, up, n, dg) FmtMedianN(lo, v, up, n, dg)
+        )
+      )
+    ) %>%
+    select(Label, Class, cell) %>%
+    pivot_wider(names_from = Class, values_from = cell) %>%
+    mutate(Label = as.character(Label)) %>%
+    rename(Measure = Label)
+}
+
+# Species mix of each class: weighted % of the class preferring each family
+# group, against the same % among all assigned respondents. Unbannered B1
+# answers are kept as their own level rather than dropped.
+Ch5LPAClassMix <- function(mydata) {
+  fit <- mydata %>%
+    filter(lpa_fitted) %>%
+    mutate(
+      Family = forcats::fct_na_value_to_level(factor(B1banner), "Other species")
+    )
+  k <- nlevels(mydata$lpa_class) - 1
+  groups <- c("All assigned", paste("Class", seq_len(k)))
+  purrr::map_dfr(groups, function(g) {
+    sub <- if (g == "All assigned") fit else fit %>% filter(lpa_class == g)
+    base.summary.percent.selectOne(sub, Family) %>%
+      as_tibble() %>%
+      transmute(Class = g, Family = as.character(Response), Number, Value, CI)
+  }) %>%
+    group_by(Family) %>%
+    mutate(Baseline = Value[Class == "All assigned"]) %>%
+    ungroup()
+}
+
+# Prose helpers for the comparison paragraphs. cls is a class number or "Overall".
+Ch5CmpRow <- function(cmp, cls, v, kind) {
+  g <- if (is.numeric(cls)) paste("Class", cls) else cls
+  r <- cmp[as.character(cmp$Class) == g & cmp$var == v & cmp$Kind == kind, ]
+  stopifnot(nrow(r) == 1)
+  r
+}
+
+Ch5CmpFmt <- function(cmp, cls, v, kind) {
+  r <- Ch5CmpRow(cmp, cls, v, kind)
+  switch(
+    kind,
+    pct = paste0(formatC(r$Value, format = "f", digits = 1), "%"),
+    mean = formatC(r$Value, format = "f", digits = 1),
+    median = formatC(r$Value, format = "f", digits = r$digits)
+  )
+}
+
+# Class holding the extreme value on one comparison row
+Ch5CmpRank <- function(cmp, v, kind, fun) {
+  x <- cmp[
+    as.character(cmp$Class) != "Overall" & cmp$var == v & cmp$Kind == kind,
+  ]
+  as.integer(str_remove(as.character(x$Class[fun(x$Value)]), "Class "))
+}
+
+# D164: a family group is named when it makes up at least this many percentage
+# points more of a class than of all assigned respondents.
+ch5.mix.gap <- 5
+
+Ch5MixCaveat <- function(mix, cls) {
+  x <- mix %>%
+    filter(Class == paste("Class", cls), Value - Baseline >= ch5.mix.gap) %>%
+    arrange(desc(Value - Baseline))
+  if (nrow(x) == 0) {
+    return("")
+  }
+  f <- function(v) formatC(v, format = "f", digits = 1)
+  parts <- paste0(
+    x$Family,
+    " (",
+    f(x$Value),
+    "% of the profile, against ",
+    f(x$Baseline),
+    "% of all assigned respondents)"
+  )
+  joined <- if (length(parts) <= 2) {
+    paste(parts, collapse = " and ")
+  } else {
+    paste0(paste(head(parts, -1), collapse = ", "), ", and ", tail(parts, 1))
+  }
+  paste0(
+    "Its species mix leans toward ",
+    joined,
+    ", so differences on questions that vary by species may partly reflect that mix rather than the profile itself."
+  )
+}
+
 Ch5LPAProfileFacetPlot <- function(prof, titleText) {
   dat <- prof %>%
     filter(Class != "Overall") %>%

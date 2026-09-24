@@ -26,7 +26,21 @@
       "ls *": "allow",
       "cp *": "allow",
       "uniq *": "allow",
-      "git -c safe.directory=F:/Survey/Analysis *": "allow"
+      "git -c safe.directory=F:/Survey/Analysis *": "allow",
+      "G=\"git *": "allow",
+      "$G *": "allow",
+      "git config --global --add safe.directory *": "allow",
+      "git status *": "allow",
+      "git log *": "allow",
+      "git diff *": "allow",
+      "git add *": "allow",
+      "git commit *": "allow",
+      "git remote *": "allow",
+      "git branch *": "allow",
+      "wc *": "allow",
+      "tail *": "allow",
+      "printf *": "allow",
+      "git push *": "allow"
     }
   }
 }

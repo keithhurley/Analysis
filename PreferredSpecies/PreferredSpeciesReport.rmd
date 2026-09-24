@@ -1501,7 +1501,193 @@ CreateFlex(Ch5LPAProfileTable(ch5.prof), mergeOnFirst = TRUE)
 CreateFlex(Ch5ClassBySpeciesTable(d, ch5.long))
 ```
 
+## Profiles on other survey questions
+
+```{r ch5CompareSetup}
+# D163: questions chosen by the user (prompt 123) before any results were seen.
+ch5.dcmp <- Ch5LPACompareData(d)
+ch5.cmp <- Ch5LPACompareLong(ch5.dcmp)
+ch5.mix <- Ch5LPAClassMix(d)
+
+# For every row, Overall N minus the six profile Ns must equal the Unassigned
+# respondents who have that measure: nobody lost, nobody double-counted.
+ch5.cmpN <- ch5.cmp %>%
+  group_by(var, Kind) %>%
+  summarise(
+    gap = N[Class == "Overall"] - sum(N[Class != "Overall"]),
+    .groups = "drop"
+  ) %>%
+  mutate(unassigned = purrr::map_int(var, function(v) {
+    sum(!is.na(ch5.dcmp[[v]]) & ch5.dcmp$lpa_class == ch5.lpa.unassigned)
+  }))
+stopifnot(
+  nrow(ch5.cmp) == nrow(ch5.compare.spec) * (ch5.k + 1),
+  !anyNA(ch5.cmp$Value),
+  all(ch5.cmpN$gap == ch5.cmpN$unassigned),
+  all(abs(tapply(ch5.mix$Value, ch5.mix$Class, sum) - 100) < 1e-6)
+)
+```
+
+`r paste0("The table below compares the profiles on other survey questions. Each question keeps the universe it has in Chapter 3, so N differs by row, and the Overall column equals the Overall row of the corresponding Chapter 3 table. Unassigned respondents are counted in Overall only and have no column of their own. The river and stream row counts a respondent who fished the Missouri River, the Platte River, or other streams, rivers, and canals; it combines three Chapter 3 waterbody types and has no single Chapter 3 counterpart. Percentage and mean cells show the weighted value with a 95 percent confidence interval, followed by N. Median cells show the lower limit, the weighted median and the upper limit, followed by N, as in Chapter 3. Satisfaction is scored from 1, Very satisfied, to 5, Very dissatisfied, as in Chapter 3.  ", caption.raked)`
+
+```{r ch5Compare}
+CreateFlex(Ch5LPACompareTable(ch5.cmp))
+```
+
 `r sect_landscape()`
+
+## The six profiles
+
+```{r ch5Describe}
+# D161: interpretive descriptions, added at the user's request (prompt 122).
+# Every comparative claim in the paragraphs below is asserted here, so a change
+# in the data or model stops the render instead of leaving the prose wrong.
+ch5.std <- Ch5LPAStd(ch5.prof, d)
+ch5.classN <- table(d$lpa_class)
+z <- function(cls, v) Ch5Cell(ch5.std, cls, v)$Z
+top <- function(v) Ch5Extreme(ch5.std, v, which.max)
+bottom <- function(v) Ch5Extreme(ch5.std, v, which.min)
+reg.vars <- c("reg_comprehension", "reg_sitesupport", "reg_uniform")
+
+stopifnot(
+  nrow(ch5.std) == ch5.k * length(ch5.lpa.vars),
+  # Class 1
+  top("attitude_harvest") == 1, bottom("reg_comprehension") == 1,
+  bottom("reg_sitesupport") == 1, top("reg_uniform") == 1,
+  z(1, "attitude_catch") > 0, z(1, "attitude_numbers") > 0,
+  abs(z(1, "attitude_size")) < 0.2, all(abs(sapply(motivation.vars, z, cls = 1)) < 0.3),
+  # Class 2
+  all(sapply(attitude.vars, z, cls = 2) < 0),
+  names(which.min(sapply(motivation.vars, z, cls = 2))) == "motivation_resource",
+  z(2, "motivation_natural") > 0, z(2, "motivation_social") > 0,
+  z(2, "reg_uniform") > 0, all(abs(sapply(reg.vars, z, cls = 2)) < 0.5),
+  # Class 3
+  z(3, "attitude_size") > 0, z(3, "attitude_catch") > 0, z(3, "attitude_harvest") < 0,
+  all(sapply(motivation.vars, z, cls = 3) < 0.05),
+  z(3, "reg_comprehension") > 0.5, z(3, "reg_sitesupport") > 0.5, z(3, "reg_uniform") < -0.5,
+  # Class 4
+  all(sapply(motivation.vars, top) == 4), top("attitude_size") == 4,
+  z(4, "attitude_numbers") > 0, abs(z(4, "attitude_catch")) < 0.2,
+  abs(z(4, "attitude_harvest")) < 0.2, z(4, "reg_sitesupport") > 0,
+  # Class 5
+  all(sapply(motivation.vars, bottom) == 5),
+  abs(z(5, "attitude_catch")) < 0.2, abs(z(5, "attitude_harvest")) < 0.2,
+  z(5, "attitude_numbers") < 0, z(5, "attitude_size") < 0,
+  all(abs(sapply(reg.vars, z, cls = 5)) < 0.35),
+  # Class 6
+  all(sapply(attitude.vars, bottom) == 6), top("reg_comprehension") == 6,
+  top("reg_sitesupport") == 6, bottom("reg_uniform") == 6,
+  z(6, "motivation_natural") > 0, z(6, "motivation_social") > 0, z(6, "motivation_resource") < 0,
+  # Species shares quoted below
+  ch5.long$Number[ch5.long$Class == "Class 6" & ch5.long$Column == "Moronides"] == 0,
+  with(
+    ch5.long[ch5.long$Class == "Class 6" & !ch5.long$Suppressed & ch5.long$Type != "Overall", ],
+    Column[which.max(Value)] == "Bluegill / Sunfish"
+  )
+)
+# Comparison claims in the second paragraphs (D163)
+cv <- function(cls, v, kind) Ch5CmpRow(ch5.cmp, cls, v, kind)$Value
+hi <- function(v, kind) Ch5CmpRank(ch5.cmp, v, kind, which.max)
+lo <- function(v, kind) Ch5CmpRank(ch5.cmp, v, kind, which.min)
+activity <- list(
+  c("cmpTourney", "pct"), c("cmpKayak", "pct"), c("cmpIce", "pct"),
+  c("cmpStream", "pct"), c("cmpPark", "pct"), c("cmpOutState", "pct"),
+  c("cmpLiveScope", "pct")
+)
+femaleTop2 <- ch5.cmp %>%
+  filter(var == "cmpFemale", Class != "Overall") %>%
+  slice_max(Value, n = 2) %>%
+  pull(Class) %>%
+  as.character()
+stopifnot(
+  # Class 1
+  abs(cv(1, "cmpDays", "mean") - cv("Overall", "cmpDays", "mean")) < 3,
+  cv(1, "cmpGuide", "pct") > cv("Overall", "cmpGuide", "pct"),
+  cv(1, "cmpIce", "pct") > cv("Overall", "cmpIce", "pct"),
+  cv(1, "cmpBoat", "pct") > cv("Overall", "cmpBoat", "pct"),
+  hi("cmpSatisfaction", "mean") == 1,
+  # Class 2
+  cv(2, "cmpDays", "median") < cv("Overall", "cmpDays", "median"),
+  cv(2, "cmpTourney", "pct") < cv("Overall", "cmpTourney", "pct"),
+  cv(2, "cmpIce", "pct") < cv("Overall", "cmpIce", "pct"),
+  cv(2, "cmpSatisfaction", "mean") < cv("Overall", "cmpSatisfaction", "mean"),
+  setequal(femaleTop2, c("Class 2", "Class 6")),
+  # Class 3
+  cv(3, "cmpDays", "mean") > cv("Overall", "cmpDays", "mean"),
+  cv(3, "cmpDays", "median") > cv("Overall", "cmpDays", "median"),
+  hi("cmpGuide", "pct") == 3, hi("cmpPrivate", "pct") == 3,
+  abs(cv(3, "cmpTourney", "pct") - cv("Overall", "cmpTourney", "pct")) < 2,
+  # Class 4 is the profile most associated with tournaments (prompt 124)
+  hi("cmpTourney", "pct") == 4, top("motivation_resource") == 4,
+  cv(3, "cmpMiles", "median") < cv("Overall", "cmpMiles", "median"),
+  lo("cmpFemale", "pct") == 3,
+  # Class 4
+  hi("cmpDays", "mean") == 4, hi("cmpDays", "median") == 4,
+  all(vapply(activity, function(a) hi(a[1], a[2]), integer(1)) == 4),
+  lo("cmpAge", "mean") == 4,
+  # Class 5
+  lo("cmpDays", "mean") == 5, lo("cmpDays", "median") == 5,
+  all(vapply(activity[-1], function(a) lo(a[1], a[2]), integer(1)) == 5),
+  hi("cmpAge", "mean") == 5,
+  # Class 6
+  cv(6, "cmpDays", "median") < cv("Overall", "cmpDays", "median"),
+  lo("cmpGuide", "pct") == 6, lo("cmpBoat", "pct") == 6, lo("cmpTourney", "pct") == 6,
+  cv(6, "cmpMiles", "median") < cv("Overall", "cmpMiles", "median"),
+  lo("cmpSatisfaction", "mean") == 6
+)
+A <- function(cls, v, kind) {
+  paste0(Ch5CmpFmt(ch5.cmp, cls, v, kind), ", against ", Ch5CmpFmt(ch5.cmp, "Overall", v, kind), " overall")
+}
+V <- function(cls, v, kind) Ch5CmpFmt(ch5.cmp, cls, v, kind)
+MIX <- function(cls) Ch5MixCaveat(ch5.mix, cls)
+
+M <- function(cls, v) Ch5M(ch5.std, cls, v)
+MZ <- function(cls, v) Ch5MZ(ch5.std, cls, v)
+S <- function(cls, col) Ch5Share(ch5.long, cls, col)
+Sov <- function(cls) Ch5Share(ch5.long, cls, "Overall", ci = FALSE)
+```
+
+`r paste0("The paragraphs below describe each profile by the scales on which it differs most from the Overall mean. Means are the weighted means in the profile means table; the figure after each mean is its distance from the Overall mean in standard deviations of the Overall weighted distribution (SD). Two scale names need a note: the Fishery resource motivation scale is made up of catch outcomes (competing for prizes, obtaining fish to eat, catching a trophy, the fun of catching), and the Simplification regulation scale measures agreement with uniform statewide regulations. Species shares are the row percentages from the table above, with their confidence intervals. The label and the closing picture in each paragraph are an interpretive summary of the eleven scale scores. They are not measured directly, and traits beyond those scales, such as how often or how an angler fishes, are not established by these data.")`
+
+`r paste0("The second paragraph for each profile compares it with the Overall column on the other survey questions in the table above; the values quoted are from that table, and its confidence intervals show that several of the differences described are small relative to their precision. Where a family group makes up at least ", ch5.mix.gap, " percentage points more of a profile than of all assigned respondents, the paragraph names it, because questions that vary by species may partly reflect that mix rather than the profile itself.")`
+
+### Class 1: The harvest-minded, keep-it-simple angler
+
+`r paste0("Class 1 holds ", Sov(1), " of respondents (n = ", FmtCount(ch5.classN[['Class 1']]), "). It has the highest harvest score of any profile (", MZ(1, 'attitude_harvest'), ") and is above average on needing to catch something (", M(1, 'attitude_catch'), ") and on catching many fish (", M(1, 'attitude_numbers'), "). Size matters no more than average (", M(1, 'attitude_size'), "), and its motivations sit near the Overall means. What sets it apart is regulations: it reports the least comprehension of the rules (", MZ(1, 'reg_comprehension'), "), the least support for site-specific rules (", M(1, 'reg_sitesupport'), "), and the strongest preference for uniform statewide rules (", MZ(1, 'reg_uniform'), "). Picture someone who fishes for a meal, measures a trip by what goes in the cooler, and finds a patchwork of lake-specific rules confusing. Class 1 makes up ", S(1, 'Walleye / Sauger'), " of Walleye / Sauger, ", S(1, 'Crappie'), " of Crappie and ", S(1, 'Panfish / Sunfish'), " of Panfish / Sunfish anglers, against ", Sov(1), " overall.")`
+
+`r paste0("On the other survey questions, Class 1 fishes about as often as anglers overall (mean days ", A(1, 'cmpDays', 'mean'), "). It is more likely than average to have hired a guide (", A(1, 'cmpGuide', 'pct'), "), to have ice fished (", A(1, 'cmpIce', 'pct'), ") and to have fished from a motorized boat (", A(1, 'cmpBoat', 'pct'), "). It reports the lowest overall satisfaction of any profile (mean ", A(1, 'cmpSatisfaction', 'mean'), ", where higher means less satisfied). ", MIX(1))`
+
+### Class 2: The relaxed, catch-optional angler
+
+`r paste0("Class 2 holds ", Sov(2), " of respondents (n = ", FmtCount(ch5.classN[['Class 2']]), "). It is below average on all four catch attitudes: catch something ", M(2, 'attitude_catch'), ", numbers ", M(2, 'attitude_numbers'), ", size ", M(2, 'attitude_size'), ", harvest ", M(2, 'attitude_harvest'), ". Its lowest motivation is catch outcomes (", MZ(2, 'motivation_resource'), "), while the outdoors (", M(2, 'motivation_natural'), ") and social (", M(2, 'motivation_social'), ") motivations run slightly above average. Its regulation scores are middling, with a slight lean toward uniform rules (", M(2, 'reg_uniform'), "). Picture someone who goes for the day out, the company and the water, and for whom a fishless trip is not a failed trip. Class 2 makes up ", S(2, 'No preference'), " of No preference and ", S(2, 'Trout'), " of Trout anglers, against ", Sov(2), " overall.")`
+
+`r paste0("On the other survey questions, Class 2 fishes less often than average (median days ", A(2, 'cmpDays', 'median'), ") and seldom fishes tournaments (", A(2, 'cmpTourney', 'pct'), "). It ice fishes less often than average (", A(2, 'cmpIce', 'pct'), ") and is more satisfied than average (mean ", A(2, 'cmpSatisfaction', 'mean'), "). Together with Class 6 it has the highest share of women of any profile (", V(2, 'cmpFemale', 'pct'), ", and ", V(6, 'cmpFemale', 'pct'), " in Class 6, against ", V('Overall', 'cmpFemale', 'pct'), " overall). ", MIX(2))`
+
+### Class 3: The regulation-savvy catch-and-release sport angler
+
+`r paste0("Class 3 holds ", Sov(3), " of respondents (n = ", FmtCount(ch5.classN[['Class 3']]), "). It is above average on size (", MZ(3, 'attitude_size'), ") and on needing a catch (", M(3, 'attitude_catch'), "), but below average on harvest (", M(3, 'attitude_harvest'), "): it wants a fish on the line, preferably a good one, and then lets it go. Its motivations are at or slightly below average (social ", MZ(3, 'motivation_social'), "). It is strongly engaged with regulations, with high comprehension (", MZ(3, 'reg_comprehension'), "), high support for site-specific rules (", MZ(3, 'reg_sitesupport'), "), and a low preference for uniform rules (", MZ(3, 'reg_uniform'), "). Picture an angler, often a bass angler, who reads the regulations and values rules tailored to each lake. Class 3 makes up ", S(3, 'Bass'), " of Bass, ", S(3, 'Largemouth bass'), " of Largemouth bass and ", S(3, 'Flathead catfish'), " of Flathead catfish anglers, against ", Sov(3), " overall.")`
+
+`r paste0("On the other survey questions, Class 3 fishes more often than average (mean days ", A(3, 'cmpDays', 'mean'), "; median ", A(3, 'cmpDays', 'median'), "). It has the highest rate of hiring a guide of any profile (", A(3, 'cmpGuide', 'pct'), ") and the highest use of private areas (", A(3, 'cmpPrivate', 'pct'), "); its tournament participation is close to the overall rate (", A(3, 'cmpTourney', 'pct'), "). Its median distance to its most visited water is ", V(3, 'cmpMiles', 'median'), " miles, against ", V('Overall', 'cmpMiles', 'median'), " overall, and it has the lowest share of women of any profile (", A(3, 'cmpFemale', 'pct'), "). ", MIX(3))`
+
+### Class 4: The all-in enthusiast
+
+`r paste0("Class 4 holds ", Sov(4), " of respondents (n = ", FmtCount(ch5.classN[['Class 4']]), "). It has the highest score of any profile on all four motivations: challenge and relaxation (", MZ(4, 'motivation_pp'), "), outdoors (", MZ(4, 'motivation_natural'), "), social (", MZ(4, 'motivation_social'), "), and catch outcomes (", MZ(4, 'motivation_resource'), "). It is also the most size-oriented profile (", MZ(4, 'attitude_size'), ") and is above average on numbers (", M(4, 'attitude_numbers'), "), with average scores on needing a catch (", M(4, 'attitude_catch'), ") and on harvest (", M(4, 'attitude_harvest'), "). Its support for site-specific rules is above average (", M(4, 'reg_sitesupport'), "). The catch-outcomes scale, on which no other profile scores as high, includes competing for prizes or money. Picture the angler for whom fishing is a central hobby: every reason to go matters, trophies and tournament competition included. Class 4 makes up ", S(4, 'Moronides'), " of Moronides and ", S(4, 'Smallmouth bass'), " of Smallmouth bass anglers, against ", Sov(4), " overall.")`
+
+`r paste0("On the other survey questions, Class 4 is the most active profile and the one most likely to fish tournaments (", A(4, 'cmpTourney', 'pct'), "), although tournament anglers remain a small share of it. It has the highest mean days fished (", A(4, 'cmpDays', 'mean'), ") and median days fished (", A(4, 'cmpDays', 'median'), "), and the highest rates of any profile for using a kayak or canoe (", A(4, 'cmpKayak', 'pct'), "), ice fishing (", A(4, 'cmpIce', 'pct'), "), fishing rivers and streams (", A(4, 'cmpStream', 'pct'), "), fishing waters that require a Park Entry Permit (", A(4, 'cmpPark', 'pct'), "), fishing outside Nebraska (", A(4, 'cmpOutState', 'pct'), ") and using live-imaging sonar (", A(4, 'cmpLiveScope', 'pct'), "). It is also the youngest profile (mean age ", A(4, 'cmpAge', 'mean'), "). ", MIX(4))`
+
+### Class 5: The low-involvement angler
+
+`r paste0("Class 5 holds ", Sov(5), " of respondents (n = ", FmtCount(ch5.classN[['Class 5']]), "). It has the lowest score of any profile on all four motivations: challenge and relaxation (", MZ(5, 'motivation_pp'), "), outdoors (", MZ(5, 'motivation_natural'), "), social (", MZ(5, 'motivation_social'), "), and catch outcomes (", MZ(5, 'motivation_resource'), "). It is near average on needing a catch (", M(5, 'attitude_catch'), ") and on harvest (", M(5, 'attitude_harvest'), "), below average on numbers (", MZ(5, 'attitude_numbers'), ") and size (", MZ(5, 'attitude_size'), "), and close to average on the three regulation scales. Picture a licence holder for whom fishing is incidental rather than a pursuit in its own right. Uniformly low importance ratings can also reflect how a respondent uses the rating scale. Class 5 makes up ", S(5, 'No preference'), " of No preference anglers, against ", Sov(5), " overall.")`
+
+`r paste0("On the other survey questions, Class 5 is the least active profile. It has the lowest mean days fished (", A(5, 'cmpDays', 'mean'), ") and median days fished (", A(5, 'cmpDays', 'median'), "), and the lowest rates of any profile for using a kayak or canoe (", A(5, 'cmpKayak', 'pct'), "), ice fishing (", A(5, 'cmpIce', 'pct'), "), fishing rivers and streams (", A(5, 'cmpStream', 'pct'), "), fishing waters that require a Park Entry Permit (", A(5, 'cmpPark', 'pct'), "), fishing outside Nebraska (", A(5, 'cmpOutState', 'pct'), ") and using live-imaging sonar (", A(5, 'cmpLiveScope', 'pct'), "). It is the oldest profile (mean age ", A(5, 'cmpAge', 'mean'), "). ", MIX(5))`
+
+### Class 6: The conservation-minded purist
+
+`r paste0("Class 6 holds ", Sov(6), " of respondents (n = ", FmtCount(ch5.classN[['Class 6']]), "), the smallest profile. It has the lowest score of any profile on all four catch attitudes: catch something ", M(6, 'attitude_catch'), ", numbers ", M(6, 'attitude_numbers'), " (", sprintf("%+.2f", z(6, 'attitude_numbers')), " SD), size ", M(6, 'attitude_size'), ", harvest ", M(6, 'attitude_harvest'), "; catching and keeping fish are close to irrelevant to it. It is motivated by the outdoors (", M(6, 'motivation_natural'), ") and by social reasons (", M(6, 'motivation_social'), ") but not by catch outcomes (", M(6, 'motivation_resource'), "). It has the highest comprehension of the rules (", M(6, 'reg_comprehension'), ") and support for site-specific rules (", M(6, 'reg_sitesupport'), ") of any profile, and the lowest preference for uniform rules (", M(6, 'reg_uniform'), "). Picture someone who values the experience and well-managed waters over the catch. Class 6 makes up ", S(6, 'Walleye / Sauger'), " of Walleye / Sauger anglers and none of the ", FmtCount(ch5.long$ColumnN[ch5.long$Column == 'Moronides'][1]), " Moronides respondents; its largest share of any displayed row is ", S(6, 'Bluegill / Sunfish'), " of Bluegill / Sunfish anglers.")`
+
+`r paste0("On the other survey questions, Class 6 fishes less often than average (median days ", A(6, 'cmpDays', 'median'), ") and has the lowest rates of any profile for fishing tournaments (", A(6, 'cmpTourney', 'pct'), "), hiring a guide (", A(6, 'cmpGuide', 'pct'), ") and fishing from a motorized boat (", A(6, 'cmpBoat', 'pct'), "). Its median distance to its most visited water is ", V(6, 'cmpMiles', 'median'), " miles, against ", V('Overall', 'cmpMiles', 'median'), " overall. It reports the highest overall satisfaction of any profile (mean ", A(6, 'cmpSatisfaction', 'mean'), ", where lower means more satisfied), and, with Class 2, the highest share of women (", A(6, 'cmpFemale', 'pct'), "). With ", FmtCount(ch5.classN[['Class 6']]), " respondents it is the smallest profile, and most of its intervals in the table are correspondingly wide. ", MIX(6))`
+
+`r run_pagebreak()`
 
 <!--
 D36: Appendix A is a deliberately blank placeholder. The paper questionnaire is
@@ -1739,6 +1925,12 @@ $$E = 1 - \frac{\sum_i \sum_j -\hat{p}_{ij} \ln \hat{p}_{ij}}{n \ln k}$$
 `r paste0("Chapter 5 is the only chapter of this report that withholds rows. Before the model was fitted, a floor of ", ch5.effn.floor, " on the Kish effective sample size was set for species rows, adopting the effective-sample-size element of the National Center for Health Statistics data presentation standards for proportions (Parker JD, Talih M, Malec DJ, et al. National Center for Health Statistics Data Presentation Standards for Proportions. Vital and Health Statistics, Series 2, No. 175. 2017). Only that element is adopted: the NCHS standard also calls for a raw sample size of at least 30 and for Korn-Graubard confidence intervals with width criteria, while this report's intervals are Wald intervals on the Kish effective N, as described above, and no width criterion is applied.")`
 
 `r paste0("Four rows fall below the floor and are not shown in the Chapter 5 tables: ", paste0(ch5.appb.supp$Column, " (", FmtCount(ch5.appb.supp$ColumnN), " respondents, effective N ", formatC(ch5.appb.supp$ColumnEffN, format = "f", digits = 1), ")", collapse = "; "), ". The floor applies to reporting only; these respondents are included in the model fit and in the Overall row. ", paste(ch5.appb.inFamily, collapse = " and "), " respondents are also contained in the ", paste(ch5.appb.family, collapse = " and "), " family rows", if (length(ch5.appb.family) > 1) ", respectively" else "", ". ", paste(ch5.appb.split, collapse = " and "), " have no family row, so their respondents appear in no displayed Chapter 5 species row. Where a profile has no respondents in a displayed row, the percentage is 0 and the Wald interval has zero width; this is a property of the interval formula, not a measurement of certainty.")`
+
+### Comparisons on other survey questions
+
+`r paste0("The Chapter 5 table of profiles on other survey questions uses the same estimators as Chapter 3: weighted percentages and means with Kish effective-N intervals, and weighted medians with the bootstrap interval described above. Each question keeps its Chapter 3 universe, and the Overall column reproduces the Overall row of the corresponding Chapter 3 table. Unassigned respondents are counted in Overall only. One row is constructed for this chapter: a respondent counts as fishing rivers and streams if they reported the Missouri River, the Platte River, or other streams, rivers, and canals, among respondents who answered the waterbody question.")`
+
+`r paste0("These comparisons treat each respondent's assigned profile as known. Because assignment is uncertain, some respondents are counted in a profile they may not belong to, which tends to make the profiles look more alike on these questions than they are; the differences shown are therefore more likely understated than overstated. The profile paragraphs name a family group when it makes up at least ", ch5.mix.gap, " percentage points more of a profile than of all assigned respondents, as a reminder that species preference and profile membership are related. No adjustment for species mix is made.")`
 
 ### What is not reported
 

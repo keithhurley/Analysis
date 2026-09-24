@@ -817,3 +817,23 @@ here. The user appended the following, which is the actual definition of the cha
 > Commit the Chapter 5 report build (rmd, Ch5LPA.R, docx, tracking files)
 >
 > Delete the obsolete Ch5Functions.R
+
+## 2026-09-24 — Prompt 121
+
+> should we include significance tests of some sort for chapter 5?  I'd like you to do a paragraph of textual description of each class in chapter 5 describing the charachteristics of the 11 modeled scales that make it different than the others and to help create a mental image of what each class represents in reality
+
+## 2026-09-24 — Prompt 122
+
+> Ok, we will not test significance and only be descriptive; insert these class names and descriptions into chapter 5; I want to further describe these classes with comparisons against other questions - but before we do will you give me pros and cons and recommendations to doing that on the overall basis (as a second paragraph in the description) or doing it within each species group?
+
+## 2026-09-24 — Prompt 123
+
+> unassigned get left out....; build the overall comparisons as you recommended (second paragraph with table) and name the species-mix caveat where a class is concentrated in a species.......let's use these questions: total days fished, tournaments (boolean), guides (boolean), motorboat usage, kayak/canoe usage, ice fishing from methods question, fish out-of-state, park permits, stream usage (Missouri River or Platte River or Other streams and rivers combined),  private land usage, miles traveled to most visited, satisfaction, livescope, gender, and age
+
+## 2026-09-24 — Prompt 124
+
+> soften it a bunch and make sure that class 4 also includes tournament language
+
+## 2026-09-24 — Prompt 125
+
+> start this new conversation by reading the project files.....the committ the git both locally and push to remote

@@ -2097,3 +2097,111 @@ Rendered three times (insertion, then two wording fixes: "between 1 and 6", "fam
 ### Housekeeping
 
 `Ch5Functions.R` deleted with `git rm` (user-requested; recoverable from history). Its mentions in the rmd setup comment and the `Ch5LPA.R` header were updated. The `.posit/assistant/settings.json` change still isn't committed (not part of Chapter 5).
+
+---
+
+## Chapter 5 — testing question and class descriptions (2026-09-24, prompt 121)
+
+Console only. Class descriptions were drafted **in chat** from the weighted class means and from standardized deviations, (class mean − Overall mean) / Overall weighted SD. They haven't gone into the report.
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F81 | **What a high score means** (from the codebook wording and `Scales.csv`). `attitude_catch`: a trip needs a catch to count (E1a/E1k reversed). `attitude_numbers`: more fish, limits, full stringer. `attitude_size`: big, challenging, trophy fish. `attitude_harvest`: keep and eat fish (E1f/E1l reversed). `motivation_pp`: challenge/sport, relaxation, adventure, exercise. `motivation_natural`: outdoors, nature, new things, near water. `motivation_social`: friends, family, getting away from people and routine. **`motivation_resource` ("Fishery resource") is catch outcomes**: prizes, fish to eat, trophy, fun of catching. `reg_comprehension`: finds the rules clear and is confident. `reg_sitesupport`: trusts and supports site-specific rules. **`reg_uniform` ("Simplification"): prefers uniform statewide rules** (the codebook marks these items reversed, but `Scales.csv` doesn't reverse them for this sub-scale, so a high score means agreeing with uniform rules; this matches the Ch3 text) |
+
+### Open for the user
+
+| # | Question |
+|---|---|
+| Q51 | Significance tests for Chapter 5? Advice given: **none on the 11 scales** (the classes are built to differ on them, so it's circular). For class × species, either stay descriptive (consistent with Ch 1-4 practice, D112/D114), or run **one** design-based Rao-Scott chi-square on a non-overlapping partition, disclosing that classify-then-analyze ignores assignment uncertainty (entropy 0.747). Any testing needs a D5-style multiplicity plan and an Appendix B section |
+| Q52 | The class descriptions are **interpretation**, which departs from the technician-voice rule (§1 rule 2) at the user's explicit request. Insert into Chapter 5? Name the classes? Which wording changes? |
+
+---
+
+## Chapter 5 — class descriptions inserted (2026-09-24, prompt 122)
+
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D160 | **Q51 closed: no significance testing in Chapter 5**, descriptive only (user) | 2026-09-24 |
+| D161 | **Q52 closed: the six class names and interpretive descriptions are inserted** as `## The six profiles` (portrait, after the class-by-species table), with one `###` per class. This is a **user-approved exception to the technician-voice rule, limited to this section**. The intro paragraph states that the labels and "picture" sentences are interpretive and that traits beyond the 11 scales aren't established. Every number comes from `Ch5LPAStd()` / `Ch5M()` / `Ch5MZ()` / `Ch5Share()`; the `ch5Describe` chunk asserts **every comparative claim** (highest/lowest of any profile, above/below average, the Moronides zero, and Bluegill as Class 6's largest displayed share), so a model or data change stops the render. Class names are used in headings only; tables and figures still say Class 1-6 | 2026-09-24 |
+| D162 | Wording corrected from the chat draft: **Class 5 is below average on size (−0.50 SD) and numbers (−0.27 SD)**, not "near average"; Class 3 motivations are "at or slightly below" average (resource is 0.00 SD). Means are shown at 1 dp to match the profile table; distances at 2 dp in SD units of the Overall weighted distribution | 2026-09-24 |
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F82 | `Ch5LPAStd()` must `unname()` the SD lookup; otherwise `Z` carries names, `sapply()` returns doubled names, and a name-based check fails even though the values are right |
+
+### Verification
+
+Render 83 / 57 / 9 / 0 (unchanged; the section adds text only). Descriptions read back from the docx.
+
+### Open for the user
+
+| # | Question |
+|---|---|
+| Q53 | Describing classes against other questions: overall basis (a second paragraph per class) or within species groups? Pros and cons given in chat (prompt 122); **a recommendation is pending the user's choice**, along with the list of questions |
+| Q54 | Class 3's "tournament-aware" is not supported by the 11 scales. Keep, or check against A13 before keeping? |
+
+---
+
+## Chapter 5 — profiles on other survey questions (2026-09-24, prompt 123)
+
+User answered Q53: **overall basis** (a second paragraph per class plus one table), **Unassigned left out** of the class columns, species-mix caveat named where a class is concentrated, and 15 questions chosen before any results were seen.
+
+### Mapping of the user's list to variables (all Chapter 3 universes)
+
+| Requested | Row(s) | Variable / universe |
+|---|---|---|
+| Total days fished | mean and median | `C1Total_days`, `C1_AnsweredAll` gate |
+| Tournaments (boolean) | % | `fishedTourney` (= A13 > 0) |
+| Guides (boolean) | % | Ch3 `hiredAny`: Q18a > 0 or Q18b > 0, NA when `hiredGuide` is NA |
+| Motorboat / kayak-canoe / ice | 3 × % | `A5boat`, `A5kayak`, `A5ice`, gated on `A5_Answered` (ice comes from the methods question, not Q26, as the user asked) |
+| Out of state | % | `A11 == "Yes"` |
+| Park permits | % | `A10 == "Yes"` |
+| Streams combined | % | **new derivation**: `A4mo` or `A4plat` or `A4riv`, gated on `A4_Answered`. No single Ch3 counterpart |
+| Private land | % | `A17Priv_corrected == "Yes"` (Ch3 A17 table). **`A4priv` holds no 2025 data**, so A17 is the only 2025 private-land item |
+| Miles to most visited | median, 0 dp | `A8_miles` (A8 = most visited; A7 = favorite) |
+| Satisfaction | mean | `A9` scored 1 = Very satisfied … 5, **as in Chapter 3** (not the Chapter 4 reversal) |
+| LiveScope | % | `Q16 == "Yes"` |
+| Gender | % female | `E2 == "Female"` |
+| Age | mean | `Age` (the D108 mean-age variable) |
+
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D163 | **One comparison table** (16 rows × Overall + Class 1-6), placed as `## Profiles on other survey questions` in the existing landscape section after the class-by-species table, so no new section break. Overall = all respondents in each Ch3 universe; Unassigned counted there only. Builders: `Ch5LPACompareData()`, `ch5.compare.spec`, `Ch5LPACompareLong()`, `Ch5LPACompareTable()`, with inherited estimators only (`base.summary.percent.selectOne` / `means` / `medians`, seed 7361) | 2026-09-24 |
+| D164 | **Species-mix rule:** a family group (`B1banner`, with unbannered answers kept as "Other species") is named when its weighted share of a class is **≥ 5 percentage points** above its share among all assigned respondents (`ch5.mix.gap`, `Ch5LPAClassMix()`, `Ch5MixCaveat()`). It names Walleye (C1), No preference (C2, C5, C6), Bass (C3, C6), Moronides (C4), and Panfish (C6). Text only; no adjustment | 2026-09-24 |
+| D165 | Second paragraph per class, every value inline; the `ch5Describe` chunk asserts **every comparative claim** (above/below Overall, highest/lowest of any profile, women top-two = Classes 2 and 6). `ch5CompareSetup` checks, for each row, that Overall N − Σ class N equals the Unassigned respondents with that measure. Appendix B gains `### Comparisons on other survey questions` (estimators, universes, the stream derivation, assignment treated as known, which tends to **understate** differences, and the mix rule) | 2026-09-24 |
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F83 | **The Overall column matches the rendered Chapter 3 tables on every row that has a counterpart**: tournaments 3.0 ± 0.86, boat 51.1, kayak 17.7, ice 17.7, private 28.6 (1,553), A8 miles 30/30/30 (1,877), satisfaction 2.3 ± 0.06, guide 8.1 (1,891), days 30.2 ± 1.78 and 16/17/19, female 19.5, age 46.0, A11 44.1, A10 69.0, Q16 14.5 |
+| F84 | `Ch5LPA.R` is **auto-reformatted on save** (like F7 for `PreferredSpeciesFunctions.R`). An edit written against the pre-save layout fails with "string not found". Re-read before editing |
+| F85 | "Widest intervals" isn't a safe claim for the smallest class: percentage intervals shrink near 0%, so Class 6's tournament interval (±1.5) is narrower than Class 4's (±2.9). The text now says "most of its intervals … correspondingly wide" |
+
+### Verification
+
+Render **84 / 57 / 9 / 0** (+1 table). All 7 comparison paragraphs and the Appendix B paragraph were read back from the docx. **New baseline 84/57/9/0.**
+
+### Open for the user
+
+| # | Question |
+|---|---|
+| Q54 | ~~Class 3's "tournament-aware" picture~~ **Closed, prompt 124 → D166** |
+
+---
+
+## Chapter 5 — tournament wording (2026-09-24, prompt 124)
+
+| # | Decision | Date |
+|---|---|---|
+| D166 | **Class 3 tournament language softened.** The picture now reads "an angler, often a bass angler, who reads the regulations…". The comparison paragraph says tournament participation is "close to the overall rate", checked as \|Class 3 − Overall\| < 2 points. **Class 4 carries the tournament language.** Paragraph 1 notes that the catch-outcomes scale, where no other profile scores as high, includes competing for prizes or money, and the picture reads "trophies and tournament competition included". Paragraph 2 opens with Class 4 as the profile most likely to fish tournaments (5.3% against 3.0%), "although tournament anglers remain a small share of it". Both claims are checked (`hi("cmpTourney") == 4`, `top("motivation_resource") == 4`) | 2026-09-24 |
+
+Render 84 / 57 / 9 / 0, unchanged. "tournament-aware" no longer appears in the docx.
