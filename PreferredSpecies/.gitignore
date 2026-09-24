@@ -20,7 +20,7 @@ Thumbs.db
 
 # Chapter 5 LPA (D152, D154). Ch5LPA_fits/ and Ch5LPA_results.rds are both
 # tracked (user, prompt 113) so the ~100-minute grid never has to be rerun.
-Ch5LPA_job.out
+Ch5LPA_job*.out
 
 # Generated artifact from the abandoned Appendix A pour (D36). No longer
 # produced by the report; the copy left on disk can be deleted.

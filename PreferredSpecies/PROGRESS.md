@@ -1950,5 +1950,45 @@ Grid finished 2026-09-23 23:27; results built 23:27:44. Wall time per model (par
 
 | # | Question |
 |---|---|
-| Q46 | BIC minimum at the grid edge (F74): accept `equal_6` as the D143 result, or extend the grid to k = 7+ (each extra model ~1.5-2 h wall time in parallel)? |
+| Q46 | ~~BIC minimum at the grid edge (F74): accept `equal_6` or extend to k = 7+?~~ **Answered prompt 114 → D155** |
 | Q47 | Status-6 fits (F75): keep excluded, or attempt a rescue refit (e.g., `mxTryHard` from the saved estimates) before selection? |
+
+---
+
+## Chapter 5 step 3b — grid extended to equal_7, equal_8 (2026-09-24, prompt 114)
+
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D155 | **Grid extended under `equal` variances only, to k = 7 and 8** (answers Q46). `varying` stays at 1-6. `Ch5LPA.R`: new constant `ch5.lpa.extend.equal <- 7:8`; new `Ch5LPAGridSpec()` returns the explicit 14-model list; `Ch5LPAModelNames()` and `Ch5LPAFitGrid()` read it (the `classes` argument is gone). Same seed (5813), estimator, frame and D143 selection rule. The 12 saved fits have a matching fingerprint and were skipped (dry run checked 12 saved, 2 to fit) | 2026-09-24 |
+
+### Status
+
+Detached job launched **2026-09-24 10:54** (D153 command, stdout to `Ch5LPA_job_k78.out`; `.gitignore` pattern widened to `Ch5LPA_job*.out`). Fitting `equal_7`, `equal_8` on 2 workers. When `Ch5LPA_fit.log` ends in a new "Results built" line, `Ch5LPA_results.rds` holds 14 models. Then: `Ch5LPADiagnostics(Ch5LPALoadResults(lpa_frame))`, `Ch5LPASelect()`, show the grid, **stop for the user**. If BIC is still falling at `equal_8`, the edge issue (F74) recurs, so flag it and don't extend again unasked. Q47 (status-6 `varying_5/6`) is still open, and the selection is conditional on it. *(Done — job finished 11:54 in 60 min, both status 0; see prompt 115.)*
+
+---
+
+## Chapter 5 step 3c — extended grid results and Q47 diagnosis (2026-09-24, prompt 115)
+
+| Model | p | BIC | Entropy | Smallest % | Min mean post. | Status | Admissible |
+|---|---|---|---|---|---|---|---|
+| equal_6 | 82 | 40,969 | 0.747 | 7.0 | 0.759 | 0 | **yes — still selected** |
+| equal_7 | 94 | 40,775 | 0.766 | 4.1 | 0.776 | 0 | no (5% floor) |
+| equal_8 | 106 | 40,717 | 0.769 | 3.3 | 0.788 | 0 | no (5% floor) |
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F76 | **The D143 5% floor binds at k = 7 and 8** (it did not bind anywhere in the 1-6 grid, F74). BIC keeps falling through `equal_8`; `equal_6` is the largest admissible `equal` model, so the selection no longer depends on where the grid ends |
+| F77 | **`varying_5` and `varying_6` are degenerate (boundary) solutions, not just unconverged.** In each, one class's variance on `reg_sitesupport` (indicator 10) has collapsed: `v510` = 5.5e-6, `v610` = 3.6e-7, gradient ≈ 1.5e8 on that parameter. Variances are unbounded below. The class (`varying_5` class 5, n = 271; `varying_6` class 6, n = 277) has **every non-missing member at exactly 5** on `reg_sitesupport` (267/267, 273/273), the scale ceiling. The likelihood has no upper bound as that variance goes to 0, so their lower BIC (F75) comes from the singularity |
+| F78 | The saved fits' compute plan is plain SLSQP gradient descent (tidySEM runs `mxComputeSimAnnealing()` first, then sets `x@compute <- NULL` before `mxRun`), so any `mxTryHard` rescue starts from the saved estimates without re-annealing |
+
+### Q47 — no refit run; decision needed
+
+A plain `mxTryHard` rescue (the request) would jitter around the same singularity. If it returned status 0 it would pass `Admissible` and win selection on an artifact, so it was **not run** until the user chooses: keep excluded (documented as degenerate), plain `mxTryHard` anyway, or refit `varying` with a variance lower bound (a spec change that needs Appendix B disclosure).
+
+### Git
+
+`safe.directory` exception added for `F:/Survey/Analysis` (global config, user-requested). Ch5 changes committed; `.posit/assistant/settings.json` left out of the commit (not Ch5).

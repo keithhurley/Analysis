@@ -775,3 +775,13 @@ here. The user appended the following, which is the actual definition of the cha
 > Track the full Ch5LPA_fits/ models in git as well
 >
 > Delete the obsolete empty Ch5LPA_fits.rds
+
+## 2026-09-24 — Prompt 114
+
+> please read the project files as this is a restart...then I want to "Extend the grid to k = 7-8 under equal variances"
+
+## 2026-09-24 — Prompt 115
+
+> Resolve Q47: attempt an mxTryHard rescue of varying_5 and varying_6
+>
+> Add the safe.directory exception for F:/Survey/Analysis and commit the Ch5 changes

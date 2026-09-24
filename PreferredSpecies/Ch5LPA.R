@@ -17,6 +17,8 @@ ch5.lpa.vars <- c(
 ch5.lpa.min.scales <- 7 # D145
 ch5.lpa.classes <- 1:6 # D144
 ch5.lpa.variances <- c("equal", "varying") # D144; covariances always "zero"
+# D155 (Q46): BIC was still falling at the k = 6 edge, so extend equal only
+ch5.lpa.extend.equal <- 7:8
 ch5.lpa.min.class.prop <- 0.05 # D143
 ch5.lpa.min.entropy <- 0.60 # D143
 ch5.lpa.seed <- 5813 # k-means starting values inside mixture_starts() are random
@@ -49,8 +51,24 @@ Ch5LPAFrame <- function(mydata) {
 ch5.lpa.fit.dir <- "Ch5LPA_fits"
 ch5.lpa.log <- "Ch5LPA_fit.log"
 
-Ch5LPAModelNames <- function(classes = ch5.lpa.classes) {
-  as.vector(outer(ch5.lpa.variances, classes, paste, sep = "_"))
+# The full model list: D144's 1-6 x both structures, plus D155's equal-only
+# extension. Not a full cross, so it is listed explicitly.
+Ch5LPAGridSpec <- function() {
+  grid <- rbind(
+    expand.grid(
+      variances = ch5.lpa.variances,
+      classes = ch5.lpa.classes,
+      stringsAsFactors = FALSE
+    ),
+    data.frame(variances = "equal", classes = ch5.lpa.extend.equal)
+  )
+  grid$name <- paste0(grid$variances, "_", grid$classes)
+  stopifnot(!anyDuplicated(grid$name))
+  grid
+}
+
+Ch5LPAModelNames <- function() {
+  Ch5LPAGridSpec()$name
 }
 
 Ch5LPAFitPath <- function(name) {
@@ -95,19 +113,14 @@ Ch5LPAFitOne <- function(frame, variances, classes, seed, key, path, logFile) {
   status
 }
 
-# Fits whichever of the 1-6 x 2 grid is not already saved for this frame.
+# Fits whichever model in Ch5LPAGridSpec() is not already saved for this frame.
 # tidySEM runs simulated annealing on every mixture (~11 min for equal_2
 # alone, single-threaded, F68), so models are spread across workers; the
 # estimator itself is unchanged (D151).
-Ch5LPAFitGrid <- function(frame, classes = ch5.lpa.classes) {
+Ch5LPAFitGrid <- function(frame) {
   key <- digest_frame(frame)
   dir.create(ch5.lpa.fit.dir, showWarnings = FALSE)
-  grid <- expand.grid(
-    variances = ch5.lpa.variances,
-    classes = classes,
-    stringsAsFactors = FALSE
-  )
-  grid$name <- paste0(grid$variances, "_", grid$classes)
+  grid <- Ch5LPAGridSpec()
   grid <- grid[!vapply(grid$name, Ch5LPAHasFit, logical(1), key = key), ]
 
   cat(
