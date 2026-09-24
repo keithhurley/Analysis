@@ -4,3 +4,15 @@ varying_1 done in 0.1 min, status 0
 21:50 equal_1 done in 0.1 min, status 0
 21:50 varying_1 done in 0.0 min, status 0
 Grid started 2026-09-23 21:50:40 - fitting 10 models: equal_2, varying_2, equal_3, varying_3, equal_4, varying_4, equal_5, varying_5, equal_6, varying_6 
+22:20 equal_2 done in 29.9 min, status 0
+22:24 varying_2 done in 33.5 min, status 0
+22:31 equal_3 done in 40.9 min, status 0
+22:42 varying_3 done in 51.8 min, status 0
+22:46 equal_4 done in 55.8 min, status 0
+22:55 equal_5 done in 65.2 min, status 0
+22:57 varying_4 done in 66.9 min, status 0
+23:05 equal_6 done in 74.4 min, status 0
+23:10 varying_5 done in 79.8 min, status 6
+23:27 varying_6 done in 96.7 min, status 6
+Grid finished 2026-09-23 23:27:25 
+Results built 2026-09-23 23:27:44 

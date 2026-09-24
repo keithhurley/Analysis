@@ -1907,4 +1907,48 @@ sensitivity (F70) deferred.
 Detached grid started **2026-09-23 21:50**, fitting the 10 models k = 2-6 × 2 structures (k = 1 already
 saved). Progress: `readLines("Ch5LPA_fit.log")`; the last line reads "Results built" when done. Then:
 `models <- Ch5LPALoadResults(Ch5LPAFrame(d)); lpa_diag <- Ch5LPADiagnostics(models); Ch5LPASelect(lpa_diag)`,
-show the grid, **stop for the user**, commit `Ch5LPA_results.rds`.
+show the grid, **stop for the user**, commit `Ch5LPA_results.rds`. *(Done — see prompt 113.)*
+
+---
+
+## Chapter 5 step 3 — diagnostics grid (2026-09-24, prompt 113)
+
+Grid finished 2026-09-23 23:27; results built 23:27:44. Wall time per model (parallel): 30 min
+(`equal_2`) to 97 min (`varying_6`).
+
+| Model | p | LL | BIC | Entropy | Smallest n | Smallest % | Min mean post. | Status | Admissible |
+|---|---|---|---|---|---|---|---|---|---|
+| equal_1 | 22 | −22,120 | 44,404 | — | 1,718 | 100.0 | — | 0 | yes |
+| equal_2 | 34 | −21,292 | 42,838 | 0.707 | 805 | 46.9 | 0.912 | 0 | yes |
+| equal_3 | 46 | −20,881 | 42,105 | 0.724 | 394 | 22.9 | 0.851 | 0 | yes |
+| equal_4 | 58 | −20,507 | 41,446 | 0.761 | 303 | 17.6 | 0.853 | 0 | yes |
+| equal_5 | 70 | −20,286 | 41,092 | 0.750 | 262 | 15.3 | 0.799 | 0 | yes |
+| **equal_6** | 82 | −20,179 | **40,969** | 0.747 | 120 | 7.0 | 0.759 | 0 | **yes — selected** |
+| varying_1 | 22 | −22,120 | 44,404 | — | 1,718 | 100.0 | — | 0 | yes |
+| varying_2 | 45 | −21,223 | 42,781 | 0.723 | 754 | 43.9 | 0.908 | 0 | yes |
+| varying_3 | 68 | −20,775 | 42,056 | 0.746 | 436 | 25.4 | 0.867 | 0 | yes |
+| varying_4 | 91 | −20,430 | 41,538 | 0.771 | 297 | 17.3 | 0.848 | 0 | yes |
+| varying_5 | 114 | −19,229 | 39,308 | 0.836 | 244 | 14.2 | 0.859 | **6** | no |
+| varying_6 | 137 | −18,863 | 38,747 | 0.822 | 228 | 13.3 | 0.800 | **6** | no |
+
+`equal_6` class sizes (modal): 362 / 347 / 292 / 286 / 311 / 120.
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F74 | **D143 selects `equal_6`.** BIC decreases monotonically with k in both structures through k = 6, so the selected model sits at the **upper edge of the D144 grid**; the D143 floors (5%, 0.60) do not bind anywhere in the grid |
+| F75 | `varying_5` and `varying_6` return **OpenMx status 6** (first-order optimality conditions not met) and are excluded by `Admissible` (status 0/1 only). Both have lower BIC than every admissible fit; had they counted, `varying_6` would be selected |
+
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D154 | `Ch5LPA_fits/` (12 files, 6.0 MB) and `Ch5LPA_results.rds` (0.77 MB) **both tracked** (user, prompt 113), reversing the D152 exclusion. The repo now holds respondent-level scale scores (no identifiers) inside the saved models. Empty `Ch5LPA_fits.rds` deleted (user-approved) | 2026-09-24 |
+
+### Open for the user
+
+| # | Question |
+|---|---|
+| Q46 | BIC minimum at the grid edge (F74): accept `equal_6` as the D143 result, or extend the grid to k = 7+ (each extra model ~1.5-2 h wall time in parallel)? |
+| Q47 | Status-6 fits (F75): keep excluded, or attempt a rescue refit (e.g., `mxTryHard` from the saved estimates) before selection? |

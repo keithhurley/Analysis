@@ -767,3 +767,11 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-09-23 — Prompt 112
 
 > please track it and save whatever is necessisary so we don't have to run fit again if we don't need to....don't worry about seed sensitivity at the moment...go ahead
+
+## 2026-09-24 — Prompt 113
+
+> Show the diagnostics grid and selected model once the log reads "Results built"
+>
+> Track the full Ch5LPA_fits/ models in git as well
+>
+> Delete the obsolete empty Ch5LPA_fits.rds
