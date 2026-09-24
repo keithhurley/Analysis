@@ -18,6 +18,14 @@ Thumbs.db
 # actually re-includes it; the root rule is left alone for every other project.
 !PreferredSpeciesReport.docx
 
+# Chapter 5 LPA (D152). Full MxModels embed respondent-level scale scores, so
+# they stay local; Ch5LPA_results.rds (slim: diagnostics, posteriors,
+# estimates) IS tracked and is all the report reads. Ch5LPA_fits.rds is the
+# empty cache from the failed first run (F67) and can be deleted.
+Ch5LPA_fits/
+Ch5LPA_fits.rds
+Ch5LPA_job.out
+
 # Generated artifact from the abandoned Appendix A pour (D36). No longer
 # produced by the report; the copy left on disk can be deleted.
 SurveyInstrument_2025.docx

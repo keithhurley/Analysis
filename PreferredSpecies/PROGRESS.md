@@ -1709,7 +1709,7 @@ it updates itself.
 | — | Step 5, guided text development, now covering Chapters 1-5 |
 | — | Four unpushed commits |
 
-### Prompt for the next conversation (Chapter 5, resuming) — USE THIS ONE
+### Prompt for the next conversation (Chapter 5, resuming) — SUPERSEDED by the LPA section below
 
 ```
 Resume the PreferredSpecies report, Chapter 5 "Angler Type Profiles". Read AGENTS.md and the two
@@ -1752,3 +1752,159 @@ tracked (D109), so commit it alongside the source; use `git -c safe.directory=F:
 ...`. There are four unpushed commits -- ask me before pushing anything. Tell me when an action
 would save tokens (save to file, start a new conversation).
 ```
+
+---
+
+## Chapter 5 redesigned — latent profile analysis (2026-09-22, prompts 106-108)
+
+**One sentence: k-means clustering is abandoned for Chapter 5 (Q36 never resolved); it is replaced
+by ONE latent profile analysis on the whole universe, with class membership crosstabbed by the 17
+preferred-species columns. All design questions Q37-Q45 are answered below. No code has been written
+yet; the console was used read-only.**
+
+⚠️ **Context-loss incident.** Prompts 106-107 were a console-only discussion and the questions
+Q37-Q45 were never written to this file — only the user's answers reached `PROMPTS.md`. The next
+conversation had to ask the user to re-paste the transcript. **Rule from now on: record design
+questions here at the moment they are posed, not at handoff.**
+
+### Design (replaces D120's per-species fits)
+
+One mixture model on all 1,915 respondents (subject to D145). Types are therefore defined once and
+are directly comparable across species. Chapter 5 output per species column becomes: share of each
+latent class (weighted %, Kish CI, raw N), plus an Unassigned share. Profile/characteristic tables
+describe the classes for the whole universe, not per species.
+
+### Questions posed and answered
+
+| # | Question | Answer (prompts 107-108) |
+|---|---|---|
+| Q37 | Adopt the one-fit design in place of D120? | **Yes** |
+| Q38 | Indicators: 13 D4 items, behavioural, or mixed? | **11 scale scores**: `attitude_catch/numbers/size/harvest`, `motivation_natural/pp/social/resource`, `reg_comprehension/sitesupport/uniform` |
+| Q39 | 5 categories or collapsed to 3? | "Do not collapse" — **moot**: the indicators are continuous means, so the model is LPA, not LCA |
+| Q40 | Install `poLCA`? | `poLCA` OK but `tidySEM` preferred. **Only `tidySEM` installed** — `poLCA` cannot take continuous indicators |
+| Q41 | Universe 1,576 or all 1,915 with No preference as a column? | **All 1,915; No preference is a column** |
+| Q42 | Enumeration rule: BIC subject to 5% smallest-class floor and 0.60 entropy, labelled a convention? | **Yes.** (User wrote "Q24 agreed"; confirmed in prompt 108 to mean Q42) |
+| Q43 | Reporting floor for species columns? | **30 on Kish effective N**, cite NCHS after confirming (confirmed, F65). **Suppress** columns below it (prompt 110, D146) |
+| Q44 | Within-class variance/covariance structure? | **Assistant's recommendation adopted** (D144) |
+| Q45 | Minimum scales answered to be fitted? | **At least 7 of 11** |
+
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D140 | **D120 is replaced**: one fit on the whole universe, class membership crosstabbed by species. D136 (Overall fit excludes No preference) is superseded — there is no separate Overall fit and No preference is a banner column | 2026-09-22 |
+| D141 | **Indicators are the 11 derived scale scores** (Q38). Because they are continuous, the model is a **Gaussian mixture / latent profile analysis** fitted with `tidySEM::mx_profiles()` on `OpenMx`. `tidySEM` 0.2.12 and `OpenMx` 2.22.11 installed 2026-09-22 (`OpenMx` did not arrive as a dependency and was installed separately). `poLCA` not installed | 2026-09-22 |
+| D142 | **Universe: all 1,915** (`surveyYear == 2025`, `!is.na(B1)`), No preference included as a column (Q41) | 2026-09-22 |
+| D143 | **Enumeration convention (Q42):** among candidate fits, choose the minimum BIC **subject to** smallest class ≥ 5% of fitted cases and entropy ≥ 0.60. Stated in Appendix B as a convention, not a test | 2026-09-22 |
+| D144 | **Variance structure (Q44):** fit 1-6 classes under two structures — `variances = "equal", covariances = "zero"` and `variances = "varying", covariances = "zero"`. Apply D143 across both; report both in the diagnostics table. Free covariances rejected (77 extra parameters per class; 462 at k = 6) | 2026-09-22 |
+| D145 | **Inclusion (Q45): fitted cases must have ≥ 7 of the 11 scales answered → 1,718 fitted.** The 197 others (78 with 1-6 scales, 119 with 0) are reported as **Unassigned**, never dropped from the species columns. Within the 1,718, partial missingness is handled by FIML in `OpenMx` | 2026-09-22 |
+| D146 | **Reporting floor (Q43): 30 on Kish effective N**, decided **before** fitting so it cannot be tuned to the results. Affected columns: Northern pike (26.9), Blue catfish (22.6), Yellow perch (11.1), Muskellunge / Tiger musky (7.3). **Option C — SUPPRESS those four columns in Chapter 5 tables and figures (user, prompt 110); 13 species columns shown.** Suppression is reporting-only: those respondents stay in the LPA fit. Blue catfish and Yellow perch respondents remain visible inside the Catfish and Panfish / Sunfish family columns; Northern pike and Muskellunge are "Species (family split)" with no family column in the 17, so their respondents appear in no displayed Chapter 5 species column (they still count in the overall class sizes). This departs from Chapters 1-4 (which suppress nothing) and must be disclosed in Appendix B and in a Chapter 5 table note naming the suppressed columns and their effN. Assistant had recommended B (flag). Citation: Parker JD, Talih M, Malec DJ, et al. *National Center for Health Statistics Data Presentation Standards for Proportions.* Vital Health Stat 2(175), 2017. Appendix B must disclose that only the effective-sample-size element is adopted; this report's intervals are Wald on Kish effN, not Korn-Graubard, and the CI-width criteria are not applied | 2026-09-22 |
+| D147 | **Weights:** D125 stands — fit unweighted, report weighted, disclose the gap. `OpenMx::mxData()` has a `weight` argument; whether `mx_profiles()` passes it through is unverified (F63). Revisit only if verified cheaply | 2026-09-22 |
+| D148 | **Assignment:** modal posterior class. Report entropy, mean posterior of the assigned class, and assignment certainty by scales-answered band (11 / 10 / 7-9) | 2026-09-22 |
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F61 | **Scale-score completeness (of 11):** 11 → 1,373; 10 → 209; 7-9 → 136; 1-6 → 78; 0 → 119. Cumulative at ≥ 7: **1,718** (89.7% of 1,915) |
+| F62 | **Banner raw n / Kish effN:** Walleye 499/402.3; Bass 357/296.1; No preference 339/272.3; Largemouth 316/261.5; Panfish 236/189.1; Catfish 228/180.7; Crappie 181/144.2; Channel cat 151/118.9; Trout 90/70.2; Moronides 85/66.1; Flathead 50/40.7; Bluegill 43/34.5; Smallmouth 41/34.8; Northern pike 32/26.9; Blue cat 27/22.6; Yellow perch 12/11.1; Muskellunge 8/7.3. From `BannerSizeTable(d)` |
+| F63 | `mx_profiles()` weight passthrough to `mxData(weight = )` **unverified** |
+| F64 | The 11 scale scores are **configuration C** of the input-set exploration (k-means k = 2, silhouette 0.139). LPA is a different model, not a re-run; F57 (mclust BIC chose 3-6 components on earlier sets) is the closer precedent |
+| F65 | NCHS citation confirmed (web, 2026-09-22): standard requires sample size **and** effective sample size ≥ 30, plus Korn-Graubard CI-width criteria (absolute ≥ 0.30 suppress; relative > 130% suppress when absolute width is 0.05-0.30) |
+| F66 | `Ch5Functions.R` (k-means, 13 D4 inputs) is **obsolete** under D140-D141. Its table/figure builders may still be reusable for size, profile, diagnostics and dumbbell output once fed LPA class assignments; its fitting layer is not |
+
+### Console recipe used (read-only, reproduces F61/F62)
+
+```r
+source("../BaseFunctions_2025_UPDATED.R"); source("../CrossTabTables/CrossTabTableFunctions.R")
+source("PreferredSpeciesFunctions.R")
+load("../../Data/DataAggregation1/aggregateData_20260624.rData")
+d <- d |> filter(surveyYear == 2025) |> filter(!is.na(B1)) |> add_scale_scores()
+d$B1banner <- AssignBannerGroup(d$B1); stopifnot(nrow(d) == 1915)
+lpa_vars <- c(attitude.vars, motivation.vars, "reg_comprehension", "reg_sitesupport", "reg_uniform")
+d$n_scales <- rowSums(!is.na(d[, lpa_vars]))
+```
+
+### Order of work for the next conversation
+
+1. ~~Confirm D146 flag-vs-suppress~~ — **done: suppress** (prompt 110). All Q37-Q45 closed; start at step 2.
+2. New file `Ch5LPA.R` (leave `Ch5Functions.R` in place until the replacement renders): input frame
+   with the ≥ 7 gate, `mx_profiles()` grid 1-6 × 2 structures, D143 selection, posterior
+   assignment, class-by-species table via `base.summary.percent.selectOne(d, class, B1banner)`.
+3. **Print the diagnostics grid (BIC, entropy, smallest class %) and the selected k to the console
+   and stop for the user before any prose.** Fitting 12 mixtures on 1,718 × 11 should take under a
+   few minutes; if `OpenMx` is slow, reduce `nstart`-equivalents rather than the grid.
+4. Rewrite Chapter 5 intro prose (still describes the 14-input k-means spec — see the previous
+   handoff warning), build the tables/figures, render, verify against **79/55/7/0** plus the
+   Chapter 5 increment. *(This line was found truncated at "79/5" on 2026-09-22, prompt 111 —
+   the F34 heredoc truncation; completed here from the handoff baseline above.)*
+
+---
+
+## Chapter 5 step 2 — `Ch5LPA.R` built, grid fitting (2026-09-22, prompt 111)
+
+### New file `Ch5LPA.R` (sourced after `PreferredSpeciesFunctions.R`)
+
+| Function | Role |
+|---|---|
+| `ch5.lpa.*` constants | 11 indicators, ≥ 7 gate, classes 1-6, `equal`/`varying` variances, 5% / 0.60 thresholds, seed **5813**, effN floor 30, cache path |
+| `Ch5LPAGate()` | adds `lpa_n_scales`, `lpa_fitted`; row order preserved |
+| `Ch5LPAFrame()` | 11 numeric columns, gated rows, NAs left for FIML |
+| `Ch5LPAFitOne()` / `Ch5LPAFitGrid()` | one `mx_profiles()` call per structure × k, seed set per model, run on a PSOCK cluster (one worker per model); stops if any fit is `NULL`; progress to `Ch5LPA_fit.log` |
+| `Ch5LPARunOrLoad()` | caches fits to `Ch5LPA_fits.rds`, keyed on a fingerprint of the fitted frame, so the render never refits |
+| `Ch5LPADiagnostics()` | per fit: parameters, LL, **BIC = −2LL + p·ln(n)**, relative entropy, smallest class n and %, min mean posterior, status, D143 pass flags |
+| `Ch5LPASelect()` | D143: min BIC among admissible fits across both structures |
+| `Ch5LPAAssign()` | modal class → `lpa_class` factor (`Class 1..k`, `Unassigned`), `lpa_maxpost` |
+| `Ch5LPACertainty()` | D148 bands 11 / 10 / 7-9 |
+| `Ch5ClassBySpeciesLong()` | numeric class × 17 overlapping columns + Overall via `D4RowSpec()` and `base.summary.percent.selectOne()`, with column N, Kish effN, D146 `Suppressed` flag. `Ch3SelectOneTable(d, "lpa_class")` gives the formatted version unchanged |
+
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D149 | Class-by-species uses the 17-column `D4RowSpec()` walk, **not** `base.summary.percent.selectOne(d, class, B1banner)` as the previous order-of-work said: `B1banner` is the 8-level non-overlapping factor and would not produce the species columns | 2026-09-22 |
+| D150 | Column % in the class-by-species table are of **all** respondents in the column, with `Unassigned` as a level (D145: never dropped) | 2026-09-22 |
+| D151 | The 12 fits run **in parallel** (one PSOCK worker per model). The estimator is unchanged — tidySEM's own `mx_profiles()` → `run_mx()` with its hard-coded simulated annealing — so the plan's fallback (reduce starts) was not needed | 2026-09-22 |
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F67 | **`tidySEM::run_mx()` returns `NULL` with only a message unless `OpenMx` is attached** (`library(OpenMx)`, not `requireNamespace`). The first grid ran 72 min, produced 12 `NULL`s and a 351-byte cache. `Ch5LPA.R` now attaches `OpenMx` (masks `Matrix::%&%`, `expm`) and `Ch5LPAFitGrid()` stops on any `NULL` |
+| F68 | `run_mx()` wraps every mixture in `mxComputeSimAnnealing()` before `mxRun()`. **`equal_2` alone took 11.4 min** single-threaded, status 0, −2LL ≈ 42,584.6. OpenMx reports 1 thread on this machine; 28 cores detected |
+| F69 | `summary(fit)$BIC.Mx` is OpenMx's df-adjusted BIC (−93,320.9 for `equal_2`), **not** −2LL + p·ln(n). Diagnostics compute the conventional form explicitly |
+| F70 | `mixture_starts()` initializes k ≥ 2 from a **single** `kmeans()` run on kNN-imputed data (no `nstart`), so starts depend on the seed; local-optimum sensitivity is untested |
+
+### Status (superseded — see prompt 112 below)
+
+Grid launched 18:33 as a background `callr` job. It died ~18:38 when the console session was
+restarted (F71); only the two k = 1 fits completed.
+
+---
+
+## Chapter 5 step 2 — persistence and detached rerun (2026-09-23, prompt 112)
+
+User: track the fits and save whatever is needed so the grid never has to be rerun; seed
+sensitivity (F70) deferred.
+
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D152 | **Storage.** Each model is saved on completion to `Ch5LPA_fits/<variances>_<k>.rds` (`list(key, fit, fitted_at)`); a rerun skips any model already saved for the same frame fingerprint, so the grid is resumable. `Ch5LPABuildResults()` distils them into **`Ch5LPA_results.rds`** (per model: −2LL, parameters, N, status, posterior matrix, modal class, `omxGetParameters()`, `table_results()`). **The report reads only the results file via `Ch5LPALoadResults()`, which never fits.** Tracked in git: `Ch5LPA.R`, `Ch5LPA_run.R`, `Ch5LPA_results.rds`, `Ch5LPA_fit.log`. **Ignored: `Ch5LPA_fits/`** because every `MxModel` embeds the 1,718 × 11 respondent-level data and the repo currently holds no respondent-level data — pending user confirmation. Also ignored: `Ch5LPA_job.out`, and the empty `Ch5LPA_fits.rds` from F67 (can be deleted; not deleted without asking) | 2026-09-23 |
+| D153 | **Fitting is launched only through `Ch5LPA_run.R`, detached:** `system2(file.path(R.home("bin"), "Rscript.exe"), "Ch5LPA_run.R", stdout = "Ch5LPA_job.out", stderr = "Ch5LPA_job.out", wait = FALSE)`. Survives console restarts. Rerunning the same command resumes | 2026-09-23 |
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F71 | A `callr::r_bg()` job is killed when the parent R session ends; the restart overnight killed the first parallel grid after k = 1 |
+| F72 | `class_prob(fit, type = "individual")$individual` posterior columns are **not** named `CPROB*`; for k = 1 the column name is blank. `Ch5LPAPosterior()` now takes every column except `predicted` and names them `class1..k` |
+| F73 | k = 1 under both structures: 22 parameters, −2LL 44,240, BIC 44,404, identical as expected |
+
+### Status
+
+Detached grid started **2026-09-23 21:50**, fitting the 10 models k = 2-6 × 2 structures (k = 1 already
+saved). Progress: `readLines("Ch5LPA_fit.log")`; the last line reads "Results built" when done. Then:
+`models <- Ch5LPALoadResults(Ch5LPAFrame(d)); lpa_diag <- Ch5LPADiagnostics(models); Ch5LPASelect(lpa_diag)`,
+show the grid, **stop for the user**, commit `Ch5LPA_results.rds`.
