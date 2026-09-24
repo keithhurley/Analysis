@@ -1998,3 +1998,102 @@ A plain `mxTryHard` rescue (the request) would jitter around the same singularit
 ### Git
 
 `safe.directory` exception added for `F:/Survey/Analysis` (global config, user-requested). Ch5 changes committed; `.posit/assistant/settings.json` left out of the commit (not Ch5).
+
+---
+
+## Chapter 5 step 4 — assignment, class-by-species, profile figure, Appendix B draft (2026-09-24, prompt 116)
+
+Console only; nothing added to the report yet.
+
+- **Assignment:** `d <- Ch5LPAAssign(d, models$equal_6)`. Checks passed: 1,915 rows, no NA class, 197 Unassigned, class counts equal the fit's modal counts (362 / 347 / 292 / 286 / 311 / 120).
+- **Certainty (D148):** mean max posterior 0.839 (11 scales, n 1,373), 0.799 (10, n 209), 0.722 (7-9, n 136); share < 0.70: 23.5 / 32.1 / 44.9 %.
+- **Class-by-species:** `Ch5ClassBySpeciesLong(d)`; four columns suppressed per D146 (Yellow perch 11.1, Blue catfish 22.6, Northern pike 26.9, Muskellunge 7.3), leaving 13 species columns + Overall. Moronides has 0 respondents in Class 6, so that cell prints 0.0±0.0.
+- **Profile figure:** weighted means ± Kish CI from `base.summary.means()` per class × scale (D147: report weighted), faceted Attitudes / Motivations / Regulations, labels from `ScaleLabel(v, l)`. Class Ns per scale 111-358.
+
+### Findings
+
+| # | Finding |
+|---|---|
+| F79 | The 11 scale scores in `d` already carry the D19 gate: for every scale among fitted respondents, non-missing score n equals `*_AnsweredAll` n. The LPA inputs and the report's scale means therefore use the same respondents |
+| F80 | `Labels.csv` spells the motivation label "Physical and psycological". It's upstream, so it was **not changed**; it will show in any figure built with `ScaleLabel()` |
+
+### Files
+
+`Ch5_AppendixB_draft.md` (new): the Appendix B draft for Chapter 5, covering model, inclusion, enumeration convention, F76/F77 exclusions, assignment, weights gap, D146 floor and NCHS scope, and no tests. Numbers are hard-coded; they become inline `r` when inserted.
+
+### Open for the user
+
+| # | Question |
+|---|---|
+| Q48 | Review `Ch5_AppendixB_draft.md` wording before it goes into the report |
+| Q49 | Profile figure: keep the weighted assigned-respondent means (current), or plot the model's unweighted class means instead or as well? |
+
+---
+
+## Chapter 5 step 5 — report sections built and rendered (2026-09-24, prompts 117-119)
+
+### Overall check against Chapter 3 (prompt 119)
+
+The 11 Overall scale means (all 1,915, D19 gate) were compared with the Overall row of the rendered Chapter 3 scale tables (docx tables 62 motivation, 68 regulation, 73 attitude) at display precision: **11/11 match on mean, CI and N.**
+
+### What changed
+
+| File | Change |
+|---|---|
+| `PreferredSpeciesReport.rmd` | Setup: `source("Ch5Functions.R")` replaced by `source("Ch5LPA.R")`; `Ch5Functions.R` stays on disk, unsourced. **Chapter 5 replaced wholesale**: the k-means template (old L1391-1532) is gone. New chapter: intro (2 paras) → landscape [diagnostics table (14 models, Eligible column gives the D143 reason), exclusion paragraph (F76/F77 figures computed inline via `Ch5LPASpike()`), assignment-certainty table] → portrait [line profile figure, faceted profile figure with Overall dashed line] → landscape [profile means table (scale rows × Overall + 6 classes, `FmtMeanN`), class-by-species table (Ch3 select-one layout, 4 D146 rows removed, suppression note inline)] |
+| `Ch5LPA.R` | Report builders added: `Ch5LPADomain`, `Ch5LPAEligibility`, `Ch5LPADiagnosticsTable`, `Ch5LPASpike`, `Ch5LPACertaintyTable`, `Ch5ClassBySpeciesTable`, `Ch5SuppressedNote`, `Ch5LPAProfileLong`, `Ch5LPAProfileTable`, `Ch5LPAProfileLinePlot`, `Ch5LPAProfileFacetPlot` |
+
+The setup chunk `stopifnot` covers: nrow unchanged; selected == `equal_6` (D156); 14 models; fitted/Unassigned counts; class counts equal to the modal counts; each species row sums to 100; profile table complete; exactly 2 floor failures and 2 spike fits, and each spike class sits entirely at the maximum; equal-variance BIC strictly decreasing (the text depends on it).
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Render | 2.9 min, no errors (rendered twice; the second picks up two wording fixes) |
+| Counts | **83 tables / 57 images / 9 landscape / 0 leaked** = 79/55/7/0 (D135) + 4/2/2. Previous docx was 82/58/8/0 (old k-means template) |
+| Chapter 5 tables | row counts 15 / 4 / 12 / 15 (header + 14 models, 3 bands, 11 scales, 14 species rows) |
+| Figures | both extracted from the docx and inspected |
+| Diff | only the setup `source()` lines and the Chapter 5 region changed |
+
+**New render baseline: 83 / 57 / 9 / 0.**
+
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D157 | Profile means table is **scale rows × class columns** (Overall + Class 1-6), transposed from the console version (prompt 118), so it fits 7 value columns, not 11. Cells use `FmtMeanN` (Ch3 precision: mean 1 dp, CI 2 dp) | 2026-09-24 |
+| D158 | The assignment-certainty table (D148) is included even though prompt 119 did not list it, because D148 requires it | 2026-09-24 |
+| D159 | Appendix B **not yet** updated — `Ch5_AppendixB_draft.md` awaits review (Q48). Chapter 5 text doesn't reference Appendix B, so nothing dangles | 2026-09-24 |
+
+### Open for the user
+
+| # | Question |
+|---|---|
+| Q48 | (still open) Review `Ch5_AppendixB_draft.md`, then insert it |
+| Q49 | (still open) Model-estimated unweighted means in addition to the weighted ones? |
+| Q50 | ~~Delete obsolete `Ch5Functions.R`?~~ **Deleted, prompt 120** |
+
+---
+
+## Chapter 5 step 6 — Appendix B inserted, Ch5Functions.R deleted, committed (2026-09-24, prompt 120)
+
+### Review of `Ch5_AppendixB_draft.md` before insertion (Q48 closed)
+
+| Change | Why |
+|---|---|
+| Every number computed inline: new chunk `ch5AppendixB` plus `ch5Setup` objects (`ch5.sel`, `ch5.floorFail`, `ch5.spikes`, `Ch5LPACertainty()`, `ch5.long`), and package versions from `packageVersion()` | So the appendix can't drift from the chapter |
+| "the profile figure" → "the Chapter 5 profile figures and profile means table" | The chapter now has two figures and a table |
+| Family rows for suppressed species looked up from `D4RowSpec()` (the nearest `Family` row above a `Species` row); `Split` rows get the "no family row" sentence | Replaces hard-coded names |
+| Added: diagnostics and certainty tables are unweighted model quantities | Matches the chapter captions |
+| NCHS citation given **inline** in full | The report has no reference list (Hurley 2026 is cited inline too) |
+| Bracketed D/F references removed; "columns" → "rows" | Chapter 5 tables show species as rows |
+
+Placement: `## Angler type profiles in Chapter 5`, with `###` subsections (model, who was fitted, choosing k, ineligible fits, assignment, weights, reporting floor, not reported), between "Satisfaction comparisons in Chapter 4" and "Display precision". The chunk's `stopifnot` checks that the Unassigned split (78 + 119) sums to the Unassigned count, that there are 3 certainty bands, and that the suppressed-row types are `Species`/`Split`. `Ch5_AppendixB_draft.md` has a SUPERSEDED header; the rmd is authoritative.
+
+### Verification
+
+Rendered three times (insertion, then two wording fixes: "between 1 and 6", "family rows, respectively"). Final: **83 / 57 / 9 / 0**, unchanged, since the appendix adds text and 2 equations only (`<m:oMath>` count 2 in the new section, 12 in the document). Text read back from the docx.
+
+### Housekeeping
+
+`Ch5Functions.R` deleted with `git rm` (user-requested; recoverable from history). Its mentions in the rmd setup comment and the `Ch5LPA.R` header were updated. The `.posit/assistant/settings.json` change still isn't committed (not part of Chapter 5).

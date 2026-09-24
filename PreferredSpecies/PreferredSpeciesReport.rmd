@@ -29,10 +29,9 @@ source("..\\BaseFunctions_2025_UPDATED.R") #load file of common functions
 # modified. PreferredSpeciesFunctions.R is sourced last so it wins any conflict.
 source("..\\CrossTabTables\\CrossTabTableFunctions.R")
 source("PreferredSpeciesFunctions.R") #load file of preferred species report functions
-# D130: Chapter 5's builders carry their own row set (angler types, not the 17
-# preferred groups), so they live in their own file and no D4RowSpec call site
-# in Chapters 1-4 changes.
-source("Ch5Functions.R")
+# Chapter 5 is the latent profile analysis (D140-D156). Ch5LPA.R replaced
+# Ch5Functions.R (k-means, D120), which was deleted and is in git history.
+source("Ch5LPA.R")
 ```
 
 ```{r getData, echo=FALSE}
@@ -1391,145 +1390,118 @@ Ch4DumbbellPlot(
 # Chapter 5: Angler Type Profiles
 
 ```{r ch5Setup}
-# Additive only: no row of d is added, dropped, or reweighted here, so nothing
-# in Chapters 1-4 changes.
+# Additive only: columns are added to d, but no row is added, dropped, or
+# reweighted, so nothing in Chapters 1-4 changes. The model is never fitted
+# here; Ch5LPALoadResults() reads the saved results (D152) and errors if they
+# were fitted to different data.
 nBeforeCh5 <- nrow(d)
+d <- Ch5LPAGate(d)
+ch5.frame <- Ch5LPAFrame(d)
+ch5.models <- Ch5LPALoadResults(ch5.frame)
+ch5.diag <- Ch5LPADiagnostics(ch5.models)
+ch5.selected <- Ch5LPASelect(ch5.diag)
+ch5.sel <- ch5.diag %>% filter(Model == ch5.selected)
+ch5.k <- ch5.sel$Classes
+d <- Ch5LPAAssign(d, ch5.models[[ch5.selected]])
 
-ch5.spec <- Ch5Spec(d, q, l)
-ch5.inventory <- Ch5FitInventory(d)
-ch5.dropped <- Ch5DroppedFields(d)
-ch5.nClusterable <- sum(Ch5Complete(d))
+ch5.nFitted <- sum(d$lpa_fitted)
+ch5.nUnassigned <- sum(d$lpa_class == ch5.lpa.unassigned)
+ch5.long <- Ch5ClassBySpeciesLong(d)
+ch5.prof <- Ch5LPAProfileLong(d, l)
 
-# One fit per eligible group. Members comes from banner.definition, so the
-# groups here are exactly the ones used everywhere else in the report.
-ch5.fitspec <- D4RowSpec(includeOverall = TRUE) %>%
-  left_join(ch5.inventory %>% select(Order, Eligible), by = "Order") %>%
-  filter(Eligible)
+ch5.floorFail <- ch5.diag %>%
+  filter(StatusCode %in% c(0, 1), !PassSize) %>%
+  arrange(Classes)
+ch5.spikes <- purrr::map_dfr(
+  ch5.diag$Model[!ch5.diag$StatusCode %in% c(0, 1)],
+  function(m) Ch5LPASpike(ch5.models[[m]], ch5.frame)
+) %>%
+  left_join(ch5.diag %>% select(Model, Profiles = Classes), by = "Model") %>%
+  arrange(Profiles)
+ch5.equalBIC <- ch5.diag %>% filter(Variances == "equal") %>% arrange(Classes) %>% pull(BIC)
 
-ch5.fits <- purrr::pmap(
-  ch5.fitspec,
-  function(RawLabel, IndentedLabel, Type, Members, Order, Eligible) {
-    Ch5Fit(d, RawLabel, members = Members)
-  }
-)
-names(ch5.fits) <- ch5.fitspec$RawLabel
-
-ch5.invTable <- ch5.inventory %>%
-  left_join(
-    tibble(
-      Group = names(ch5.fits),
-      kUsed = purrr::map_int(ch5.fits, "k"),
-      VarExp = purrr::map_dbl(ch5.fits, "varExplained")
-    ),
-    by = "Group"
-  ) %>%
-  transmute(
-    `Preferred group` = IndentedLabel,
-    `Respondents (n)` = FmtCount(Raw_n),
-    `Complete on all 14 inputs (n)` = FmtCount(Clusterable_n),
-    Retention = paste0(formatC(Retention, format = "f", digits = 0), "%"),
-    `Largest k the floor allows` = if_else(kCap < 2, "\u2014", as.character(kCap)),
-    `Types fit` = if_else(is.na(kUsed), "not fit", as.character(kUsed)),
-    `Variance explained` = if_else(
-      is.na(VarExp),
-      "\u2014",
-      paste0(formatC(VarExp, format = "f", digits = 1), "%")
-    )
-  )
-
-caption.ch5size <- "Respondent counts are raw and unweighted. Percentages and population estimates are weighted, with intervals of 1.96 standard errors on the Kish effective N. The percent column is of every respondent in the group, so it sums to 100 with the Unassigned row."
-
-caption.ch5profile <- paste0("Values are weighted means unless the row names a percent or a median; intervals are 1.96 standard errors on the Kish effective N and N is the raw unweighted count. The clustering inputs are always shown and carry no p, because the clustering produces those differences by construction. Every other row is shown only where its Holm-adjusted omnibus p falls below ", ch5.alpha, ", within one combined family covering the D4 items and the other characteristics together. The two distance rows display a weighted median with bootstrap limits but are tested on log1p of the same variable. ", caption.raked)
+caption.ch5diag <- "BIC is minus twice the log-likelihood plus the number of estimated parameters times the natural log of the number of fitted respondents; lower values indicate better fit. Relative entropy runs from 0 to 1, with 1 meaning every respondent is assigned with certainty. The lowest mean assigned probability is the average membership probability among the respondents assigned to a profile, for the profile where that average is smallest. OpenMx status 0 or 1 indicates the estimation converged. All values in this table are unweighted model quantities."
 
 stopifnot(
   nrow(d) == nBeforeCh5,
-  ch5.inventory$Clusterable_n[1] == ch5.nClusterable,
-  length(ch5.fits) == sum(ch5.inventory$Eligible),
-  # Every respondent in a fitted group is either assigned a type or counted as
-  # unassigned. If this ever fails, the percent column stops summing to 100
-  # and respondents have gone missing rather than being reported.
-  all(purrr::map_lgl(ch5.fits, function(f) {
-    nrow(f$raw) ==
-      nrow(f$fitdata) + sum(f$raw$Ch5typeAll == "Unassigned")
-  })),
-  all(purrr::map_lgl(ch5.fits, function(f) f$k >= 2 & f$k <= f$kCap)),
-  # The size floor is a stated rule, not an aspiration.
-  all(purrr::map_lgl(ch5.fits, function(f) {
-    min(table(f$fitdata$Ch5type)) >= ch5.min.cluster
-  }))
+  # D156: the final selection. A different result means the data or the rule changed.
+  ch5.selected == "equal_6",
+  length(ch5.models) == length(Ch5LPAModelNames()),
+  ch5.nFitted == nrow(ch5.frame),
+  ch5.nUnassigned == sum(!d$lpa_fitted),
+  !anyNA(d$lpa_class),
+  all(as.vector(table(d$lpa_class))[seq_len(ch5.k)] ==
+    tabulate(ch5.models[[ch5.selected]]$modal, ch5.k)),
+  # Unassigned is a level, so every row's shares sum to 100
+  all(abs(tapply(ch5.long$Value, ch5.long$Column, sum) - 100) < 1e-6),
+  nrow(ch5.prof) == (ch5.k + 1) * length(ch5.lpa.vars),
+  !anyNA(ch5.prof$Value),
+  # The exclusion text describes exactly these cases (F76, F77)
+  nrow(ch5.floorFail) == 2,
+  nrow(ch5.spikes) == 2,
+  all(ch5.spikes$AtMax == ch5.spikes$Answered),
+  length(unique(ch5.spikes$Variable)) == 1,
+  all(diff(ch5.equalBIC) < 0)
 )
 ```
 
-`r paste0("This chapter groups anglers within each preferred species into types, using a k-means cluster analysis of fourteen measures: the four attitude scales, the four motivation scales, the three regulation scales, total days fished, and the two D4 items asking about satisfaction with the size and the number of the preferred fish an angler is allowed to harvest. Days fished enters the clustering as log1p because it is strongly right-skewed; every input is then standardized within its own fit so that no measure dominates on account of its scale. The clustering itself is unweighted. Every number reported from it is weighted, with intervals built on the Kish effective N and raw unweighted counts displayed, exactly as in Chapters 1 to 4.")`
+`r paste0("This chapter groups anglers into profiles using a latent profile analysis of eleven scale scores reported in Chapter 3: the four angler-attitude scales, the four motivation scales, and the three regulation scales. One model is fitted to the whole report universe, so the profiles are defined once and are the same in every preferred-species row; the tables below report how each row's respondents are distributed across them. The model is fitted without the survey weights. Every percentage and mean reported from it is weighted, with intervals built on the Kish effective N and raw unweighted counts displayed, as in Chapters 1 to 4.")`
 
-`r paste0("The clustering needs all fourteen inputs present at once, which ", FmtCount(ch5.nClusterable), " of the ", FmtCount(nrow(d)), " respondents in this report's universe satisfy (", formatC(100 * ch5.nClusterable / nrow(d), format = "f", digits = 1), "%). Respondents missing any input cannot be assigned a type; they are carried in every size table as an Unassigned row rather than dropped. A group is fit only where at least ", ch5.min.fit.n, " of its respondents are complete on all fourteen, and no reported type holds fewer than ", ch5.min.cluster, " respondents. The number of types is chosen by an elbow rule applied to the within-cluster sum of squares, rescaling both axes and taking the k furthest from the chord joining the ends of the curve; where the size floor rules that k out, k steps down until the floor is met.")`
-
-`r paste0("Three consequences are worth stating before the numbers. First, the within-cluster sum of squares declines smoothly with k in every fit and the chosen solution accounts for between ", formatC(min(purrr::map_dbl(ch5.fits, 'varExplained')), format = 'f', digits = 1), "% and ", formatC(max(purrr::map_dbl(ch5.fits, 'varExplained')), format = 'f', digits = 1), "% of the total sum of squares, so these types are reproducible partitions of a continuum that differ in degree, not naturally separated groups. Second, the preferred groups overlap, so an angler who prefers largemouth bass appears in both the Bass fit and the Largemouth bass fit and receives a type number in each, with no relationship between the two numberings; type numbers are assigned by descending weighted share within a fit and mean nothing across fits. Third, the Overall fit uses every clusterable respondent in the universe, including those whose B1 answer receives no banner column, so it is not the union of the group fits and its types are a separate solution.")`
-
-`r paste0("Two exclusions. The No preference group retains only ", ch5.inventory$Clusterable_n[ch5.inventory$Group == "No preference"], " of its ", ch5.inventory$Raw_n[ch5.inventory$Group == "No preference"], " respondents, because the two D4 inputs ask about a preferred fish and anglers without one do not answer them; it falls below the fitting floor for a structural reason rather than a chance one and is not profiled. Separately, ", nrow(ch5.dropped), " of the waterbody-type fields hold no 2025 data at all (", paste(ch5.dropped$Label, collapse = "; "), ") and are excluded from the characteristics tested below.")`
-
-## Coverage of the fourteen inputs
-
-`r paste0("The table below records, for every preferred group, how many respondents are complete on all fourteen inputs, the largest number of types the size floor would permit at that n, and the solution actually fit. Retention runs from ", formatC(min(ch5.inventory$Retention), format = "f", digits = 0), "% to ", formatC(max(ch5.inventory$Retention), format = "f", digits = 0), "%.")`
-
-```{r ch5Inventory}
-CreateFlex(ch5.invTable)
-```
-
-## Walleye / Sauger
-
-`r paste0("The Walleye / Sauger group contains ", FmtCount(nrow(ch5.fits[['Walleye / Sauger']]$raw)), " respondents, of whom ", FmtCount(nrow(ch5.fits[['Walleye / Sauger']]$fitdata)), " are complete on all fourteen inputs. The elbow rule selects ", ch5.fits[['Walleye / Sauger']]$k, " types, against a size-floor maximum of ", ch5.fits[['Walleye / Sauger']]$kCap, ".")`
-
-`r caption.ch5size`
-
-```{r ch5WalSize}
-CreateFlex(Ch5SizeTable(ch5.fits[["Walleye / Sauger"]]))
-```
-
-`r "The curve behind that choice is below. It declines smoothly, so the selected k is the output of the stated rule rather than a visible kink in the data."`
-
-```{r ch5WalElbow, fig.width=6.5, fig.height=3.2}
-Ch5ElbowPlot(
-  ch5.fits[["Walleye / Sauger"]],
-  titleText = "Within-cluster sum of squares by number of types, Walleye / Sauger"
-)
-```
-
-`r "The next figure shows the shape of each type across the fourteen inputs, in standard deviations from the group mean, so the types can be read side by side on one scale."`
-
-```{r ch5WalProfile, fig.width=6.5, fig.height=5.4}
-Ch5ProfilePlot(
-  ch5.fits[["Walleye / Sauger"]],
-  l,
-  titleText = "Standardized input profile by angler type, Walleye / Sauger"
-)
-```
-
-`r paste0("The table below gives the values behind that figure on their original scales, followed by the D4 items and the other characteristics that pass the screen.")`
-
-`r caption.ch5profile`
+`r paste0(FmtCount(ch5.nFitted), " of the ", FmtCount(nrow(d)), " respondents in this report's universe (", formatC(100 * ch5.nFitted / nrow(d), format = "f", digits = 1), "%) answered at least ", ch5.lpa.min.scales, " of the eleven scales and were included in the fit. Scales that a fitted respondent left blank are handled within the model rather than imputed. The other ", FmtCount(ch5.nUnassigned), " respondents are reported as Unassigned rather than dropped. Profiles are numbered 1 to ", ch5.k, " in the order the estimation produced them; the numbers are labels and carry no order.")`
 
 `r sect_portrait()`
 
-```{r ch5WalTable}
-ch5.long.wal <- Ch5ProfileLong(ch5.fits[["Walleye / Sauger"]], ch5.spec, q, l)
-ch5.meta.wal <- Ch5Meta(ch5.long.wal)
-CreateFlex(Ch5ProfileTable(ch5.long.wal, ch5.meta.wal), mergeOnFirst = TRUE)
+## Choosing the number of profiles
+
+`r paste0("Models with 1 to ", max(ch5.lpa.classes), " profiles were fitted under two within-profile variance structures: equal, in which every profile shares one variance per scale, and varying, in which each profile has its own. The equal structure was extended to ", max(ch5.lpa.extend.equal), " profiles. The model used in the rest of this chapter is the one with the lowest BIC among models that converged, whose smallest profile holds at least ", 100 * ch5.lpa.min.class.prop, " percent of fitted respondents, and whose relative entropy is at least ", formatC(ch5.lpa.min.entropy, format = "f", digits = 2), ". That is the ", ch5.k, "-profile ", ch5.sel$Variances, "-variance model.  ", caption.ch5diag)`
+
+```{r ch5Diagnostics}
+CreateFlex(Ch5LPADiagnosticsTable(ch5.diag, ch5.selected))
+```
+
+`r paste0("Four models with a lower BIC than the selected model are not eligible. The ", paste(ch5.floorFail$Classes, collapse = "- and "), "-profile equal-variance models converged, but their smallest profiles hold ", paste(formatC(100 * ch5.floorFail$SmallestClassProp, format = "f", digits = 1), collapse = " and "), " percent of fitted respondents. BIC is lower at every larger equal-variance model fitted, so the selected model is the largest eligible equal-variance model rather than the point at which BIC stops decreasing. The ", paste(ch5.spikes$Profiles, collapse = "- and "), "-profile varying-variance models did not converge (OpenMx status ", paste(unique(ch5.diag$StatusCode[ch5.diag$Model %in% ch5.spikes$Model]), collapse = ", "), "). In each, one profile (", paste(FmtCount(ch5.spikes$ClassN), collapse = " and "), " respondents) contains only respondents at the scale maximum of ", ch5.spikes$Max[1], " on the ", ScaleLabel(ch5.spikes$Variable[1], l), " regulation scale among those who answered it (", paste0(ch5.spikes$AtMax, " of ", ch5.spikes$Answered, collapse = " and "), "), and that profile's estimated variance on the scale is effectively zero (", paste(formatC(ch5.spikes$Variance, format = "e", digits = 1), collapse = " and "), ").")`
+
+## Assignment certainty
+
+`r paste0("Each fitted respondent is assigned to the profile with the highest estimated membership probability. The table below shows how certain those assignments are, by the number of scales the respondent answered. The values are unweighted model quantities for the ", FmtCount(ch5.nFitted), " fitted respondents.")`
+
+```{r ch5Certainty}
+CreateFlex(Ch5LPACertaintyTable(d))
 ```
 
 `r sect_landscape()`
 
-`r paste0("Of the ", sum(!is.na(ch5.meta.wal$PAdj)), " characteristics tested for this group, ", sum(!is.na(ch5.meta.wal$PAdj) & ch5.meta.wal$PAdj < ch5.alpha), " pass the screen. The figure below shows up to five of them, chosen by the largest spread across types relative to their own scale, with each type placed against the group overall.")`
+## Profile means
 
-```{r ch5WalExternal, fig.width=6.5, fig.height=4.2}
-Ch5ExternalPlot(
-  ch5.long.wal,
-  ch5.meta.wal,
-  titleText = "Characteristics differing across angler types, Walleye / Sauger"
-)
+`r paste0("The two figures below show the weighted mean of each scale for the respondents assigned to each profile, with 95 percent confidence intervals. These are weighted means of the assigned respondents, not the unweighted means the model estimated for each profile. The first figure places the profiles side by side across the eleven scales.")`
+
+```{r ch5ProfileLines, fig.width=6.5, fig.height=5.5}
+Ch5LPAProfileLinePlot(ch5.prof, "Scale means by profile")
 ```
 
-`r run_pagebreak()`
+`r paste0("The second figure shows one panel per scale, with the profiles along the horizontal axis and the Overall weighted mean for every respondent who answered that scale as a dashed line.")`
+
+```{r ch5ProfileFacets, fig.width=6.5, fig.height=7}
+Ch5LPAProfileFacetPlot(ch5.prof, "Scale means by profile, one panel per scale")
+```
+
+`r sect_portrait()`
+
+`r paste0("The values behind both figures are below. The Overall column is computed on every respondent in the universe who answered the scale, including Unassigned respondents, and equals the Overall row of the Chapter 3 scale tables.  ", caption.ch3means, "  ", caption.raked)`
+
+```{r ch5ProfileTable}
+CreateFlex(Ch5LPAProfileTable(ch5.prof), mergeOnFirst = TRUE)
+```
+
+## Profiles by preferred species
+
+`r paste0("The table below gives, for each preferred-species row, the weighted percentage of its respondents assigned to each profile, with Unassigned as a column so that each row sums to 100. The rows overlap, as elsewhere in this report, and must not be totalled. Where a row has no respondents in a profile, the percentage is 0.0 and the interval has zero width. ", Ch5SuppressedNote(ch5.long), " This is the only chapter of the report that withholds rows; the effective-N floor was set before the model was fitted.  ", caption.ch3selectone, "  ", caption.raked)`
+
+```{r ch5ClassBySpecies}
+CreateFlex(Ch5ClassBySpeciesTable(d, ch5.long))
+```
+
+`r sect_landscape()`
 
 <!--
 D36: Appendix A is a deliberately blank placeholder. The paper questionnaire is
@@ -1685,6 +1657,92 @@ adjusted p-value near the conventional threshold accordingly.
 `r paste0("No significance test is reported in Chapter 4, and no adjustment for multiple comparisons is applied. Each interval is a 95 percent interval for its own group taken alone. Seventeen groups are shown for each pair, and the groups overlap, since a family row contains the respondents in its own species rows; reading every interval at once is therefore a weaker exercise than reading any one of them, and a group whose interval just excludes zero should be read with that in mind. The correlation tables are likewise descriptive summaries with no test attached, and the group-level correlations are computed across 17 overlapping groups rather than across independent observations.")`
 
 `r paste0("The reliability coefficient quoted in Chapter 4 is a weighted raw alpha for the four D4 satisfaction items. It is reported for reference only; no composite score is constructed anywhere in this report, which is item-level throughout.")`
+
+## Angler type profiles in Chapter 5
+
+```{r ch5AppendixB}
+# Every figure quoted below is computed here or in ch5Setup, so this section
+# cannot drift from the chapter.
+ch5.appb.n0 <- sum(d$lpa_n_scales == 0)
+ch5.appb.n16 <- sum(d$lpa_n_scales >= 1 & !d$lpa_fitted)
+ch5.appb.cert <- Ch5LPACertainty(d) %>% arrange(desc(Band))
+ch5.appb.spec <- D4RowSpec(includeOverall = TRUE)
+ch5.appb.supp <- ch5.long %>%
+  filter(Suppressed) %>%
+  distinct(Order, Column, ColumnN, ColumnEffN, Type) %>%
+  arrange(Order)
+# A Species row's family is the nearest Family row above it in the row order.
+ch5.appb.family <- vapply(
+  ch5.appb.supp$Order[ch5.appb.supp$Type == "Species"],
+  function(o) {
+    fam <- ch5.appb.spec %>% filter(Type == "Family", Order < o)
+    fam$RawLabel[which.max(fam$Order)]
+  },
+  character(1)
+)
+ch5.appb.inFamily <- ch5.appb.supp$Column[ch5.appb.supp$Type == "Species"]
+ch5.appb.split <- ch5.appb.supp$Column[ch5.appb.supp$Type == "Split"]
+
+stopifnot(
+  ch5.appb.n0 + ch5.appb.n16 == ch5.nUnassigned,
+  nrow(ch5.appb.cert) == 3,
+  all(ch5.appb.supp$Type %in% c("Species", "Split")),
+  length(ch5.appb.inFamily) > 0,
+  length(ch5.appb.split) > 0
+)
+```
+
+### The model
+
+`r paste0("Chapter 5 groups anglers using a latent profile analysis, a finite mixture model in which each respondent is assumed to belong to one of a number of unobserved profiles and, within a profile, each indicator is normally distributed. The indicators are the eleven scale scores reported in Chapter 3: the four angler-attitude scales, the four motivation scales, and the three regulation scales. Within each profile the eleven indicators are treated as uncorrelated, so each profile is described by eleven means and a set of variances.")`
+
+`r paste0("Models were fitted with the tidySEM package (version ", packageVersion("tidySEM"), "), function mx_profiles(), which estimates by maximum likelihood in OpenMx (version ", packageVersion("OpenMx"), "). tidySEM obtains starting values from a k-means partition, refines them by simulated annealing, and then runs gradient-based optimization. A fixed random seed (", ch5.lpa.seed, ") is set before each model so the fits are reproducible. Starting values come from a single k-means run, and the sensitivity of the solution to other starting values has not been examined.")`
+
+### Who was fitted
+
+`r paste0("Of the ", FmtCount(nrow(d)), " respondents in the analysis sample, ", FmtCount(ch5.nFitted), " (", formatC(100 * ch5.nFitted / nrow(d), format = "f", digits = 1), " percent) answered at least ", ch5.lpa.min.scales, " of the eleven scales and were included in the fit. The threshold was set before fitting. Where a fitted respondent is missing some scales, the model uses the scales that were answered (full-information maximum likelihood); no values are imputed. The remaining ", FmtCount(ch5.nUnassigned), " respondents (", FmtCount(ch5.appb.n16), " who answered between 1 and ", ch5.lpa.min.scales - 1, " scales and ", FmtCount(ch5.appb.n0), " who answered none) are reported as Unassigned. They are not dropped: they remain in every Chapter 5 row, and Unassigned appears as its own column, so each row's percentages are of all respondents in that row.")`
+
+`r paste0("Each scale score carries the completeness gate described under Scale scores and the completeness gate above, so the scores entering the model are the same values summarized in the Chapter 5 profile figures and profile means table.")`
+
+### Choosing the number of profiles
+
+`r paste0("Two within-profile variance structures were fitted: one in which every profile shares the same variance for a given indicator (equal), and one in which each profile has its own variances (varying). Under both structures, models with 1 to ", max(ch5.lpa.classes), " profiles were fitted. The equal structure was then extended to ", paste(ch5.lpa.extend.equal, collapse = " and "), " profiles because the Bayesian information criterion (BIC) was still decreasing at ", max(ch5.lpa.classes), ".")`
+
+`r paste0("The number of profiles was chosen by a stated convention rather than a statistical test: among all fitted models, the one with the lowest BIC, restricted to models in which the smallest profile holds at least ", 100 * ch5.lpa.min.class.prop, " percent of fitted respondents and the relative entropy is at least ", formatC(ch5.lpa.min.entropy, format = "f", digits = 2), ". Only fits that OpenMx reports as converged (status code 0 or 1) are eligible. BIC is computed as")`
+
+$$BIC = -2\log L + p \ln(n)$$
+
+`r paste0("with p the number of estimated parameters and n = ", FmtCount(ch5.nFitted), ". OpenMx's default summary reports a different, degrees-of-freedom-adjusted BIC; it was not used. Relative entropy summarizes how distinctly respondents are assigned:")`
+
+$$E = 1 - \frac{\sum_i \sum_j -\hat{p}_{ij} \ln \hat{p}_{ij}}{n \ln k}$$
+
+`r paste0("where p-hat(ij) is respondent i's estimated probability of belonging to profile j and k is the number of profiles. It runs from 0 to 1, with 1 indicating that every respondent is assigned with certainty.")`
+
+`r paste0("The selected model has ", ch5.k, " profiles with ", ch5.sel$Variances, " variances: BIC ", formatC(ch5.sel$BIC, format = "f", digits = 1, big.mark = ","), ", relative entropy ", formatC(ch5.sel$Entropy, format = "f", digits = 3), ", smallest profile ", FmtCount(ch5.sel$SmallestClassN), " respondents (", formatC(100 * ch5.sel$SmallestClassProp, format = "f", digits = 1), " percent of those fitted). The full table of fitted models is given in Chapter 5.")`
+
+### Models that were fitted but not eligible
+
+`r paste0("Four fits had a lower BIC than the selected model and were excluded under the convention above. The ", paste(ch5.floorFail$Classes, collapse = "- and "), "-profile equal-variance models (BIC ", paste(formatC(ch5.floorFail$BIC, format = "f", digits = 1, big.mark = ","), collapse = " and "), ") converged, but their smallest profiles hold ", paste(formatC(100 * ch5.floorFail$SmallestClassProp, format = "f", digits = 1), collapse = " and "), " percent of fitted respondents, below the ", 100 * ch5.lpa.min.class.prop, " percent floor. Because BIC continued to decrease through ", max(ch5.floorFail$Classes), " profiles, the selected model is the largest equal-variance model that satisfies the floor rather than the point at which BIC stops improving.")`
+
+`r paste0("The ", paste(ch5.spikes$Profiles, collapse = "- and "), "-profile varying-variance models (BIC ", paste(formatC(ch5.diag$BIC[match(ch5.spikes$Model, ch5.diag$Model)], format = "f", digits = 1, big.mark = ","), collapse = " and "), ") did not converge (OpenMx status code ", paste(unique(ch5.diag$StatusCode[ch5.diag$Model %in% ch5.spikes$Model]), collapse = ", "), ": first-order optimality conditions not met). Inspection showed the cause. In each, one profile (", paste(FmtCount(ch5.spikes$ClassN), collapse = " and "), " respondents) contains only respondents whose ", ScaleLabel(ch5.spikes$Variable[1], l), " regulation score is exactly ", ch5.spikes$Max[1], ", the top of the scale, among those who answered it (", paste0(ch5.spikes$AtMax, " of ", ch5.spikes$Answered, collapse = " and "), "). That profile's variance on the indicator shrinks toward zero (estimates of ", paste(formatC(ch5.spikes$Variance, format = "e", digits = 1), collapse = " and "), "). Because the normal likelihood increases without limit as a variance approaches zero, the lower BIC of these two models reflects that collapse rather than a better description of the data. A further optimization attempt was not made, since it would search the same unbounded region. Placing a lower bound on the variances was considered and not adopted, because it would change the model specification. Both fits are excluded.")`
+
+### Assigning respondents to profiles
+
+`r paste0("Each fitted respondent is assigned to the profile with the highest estimated membership probability. Assignment is not certain: the average probability of the assigned profile among its members is at least ", formatC(ch5.sel$MinMeanPosterior, format = "f", digits = 3), " for every profile. Certainty also depends on how many scales a respondent answered. Mean assigned-profile probability is ", paste0(formatC(ch5.appb.cert$MeanMaxPosterior, format = "f", digits = 3), " for respondents who answered ", c("all eleven scales", "ten", "seven to nine"), " (", FmtCount(ch5.appb.cert$N), " respondents)", collapse = ", "), "; the share assigned with probability below 0.70 is ", paste(formatC(100 * ch5.appb.cert$ShareBelow70, format = "f", digits = 1), collapse = ", "), " percent respectively. The profile numbers are arbitrary labels produced by the estimation and carry no order.")`
+
+### Weights
+
+`r paste0("The model is fitted without the survey weights: each fitted respondent contributes equally to the estimated profiles. Everything reported from the model is then weighted in the same way as the rest of this report. The share of each profile in each row is a weighted percentage with the Kish effective-N confidence interval, and the profile means in the Chapter 5 figures and profile means table are weighted means with the Kish effective-N confidence interval, computed from the assigned respondents. These weighted means are therefore not the same quantities as the unweighted means the model estimated for each profile. Whether the fitting software can carry survey weights into the estimation was not verified. The model diagnostics and the assignment-certainty table are unweighted model quantities.")`
+
+### Reporting floor for species rows
+
+`r paste0("Chapter 5 is the only chapter of this report that withholds rows. Before the model was fitted, a floor of ", ch5.effn.floor, " on the Kish effective sample size was set for species rows, adopting the effective-sample-size element of the National Center for Health Statistics data presentation standards for proportions (Parker JD, Talih M, Malec DJ, et al. National Center for Health Statistics Data Presentation Standards for Proportions. Vital and Health Statistics, Series 2, No. 175. 2017). Only that element is adopted: the NCHS standard also calls for a raw sample size of at least 30 and for Korn-Graubard confidence intervals with width criteria, while this report's intervals are Wald intervals on the Kish effective N, as described above, and no width criterion is applied.")`
+
+`r paste0("Four rows fall below the floor and are not shown in the Chapter 5 tables: ", paste0(ch5.appb.supp$Column, " (", FmtCount(ch5.appb.supp$ColumnN), " respondents, effective N ", formatC(ch5.appb.supp$ColumnEffN, format = "f", digits = 1), ")", collapse = "; "), ". The floor applies to reporting only; these respondents are included in the model fit and in the Overall row. ", paste(ch5.appb.inFamily, collapse = " and "), " respondents are also contained in the ", paste(ch5.appb.family, collapse = " and "), " family rows", if (length(ch5.appb.family) > 1) ", respectively" else "", ". ", paste(ch5.appb.split, collapse = " and "), " have no family row, so their respondents appear in no displayed Chapter 5 species row. Where a profile has no respondents in a displayed row, the percentage is 0 and the Wald interval has zero width; this is a property of the interval formula, not a measurement of certainty.")`
+
+### What is not reported
+
+`r paste0("No significance test is reported in Chapter 5, and the profile shares in different rows are not formally compared. As in other chapters, the species rows overlap and must not be totalled.")`
 
 ## Display precision
 

@@ -1,6 +1,6 @@
 # Chapter 5 — latent profile analysis layer (D140-D148).
-# Sourced after PreferredSpeciesFunctions.R. Replaces the fitting layer of
-# Ch5Functions.R (k-means, D120), which stays on disk until this renders (F66).
+# Sourced after PreferredSpeciesFunctions.R. Replaces Ch5Functions.R (k-means,
+# D120), deleted 2026-09-24 (prompt 120); recoverable from git history.
 
 # tidySEM's run_mx() silently returns NULL unless OpenMx is on the search path
 # (F67): 72 minutes of starting-value work, no estimates, no error.
@@ -370,4 +370,232 @@ Ch5ClassBySpeciesLong <- function(mydata, var = "lpa_class") {
         )
     }
   )
+}
+
+# ---- Report builders (prompt 117) ------------------------------------------
+
+ch5.domain.levels <- c("Attitudes", "Motivations", "Regulations")
+
+Ch5LPADomain <- function(var) {
+  factor(
+    case_when(
+      str_starts(var, "attitude") ~ "Attitudes",
+      str_starts(var, "motivation") ~ "Motivations",
+      str_starts(var, "reg_") ~ "Regulations"
+    ),
+    levels = ch5.domain.levels
+  )
+}
+
+# The D143 reason for each exclusion is printed in the table itself, so the
+# reader does not need Appendix B to see why a lower-BIC model was passed over.
+Ch5LPAEligibility <- function(diag, selected) {
+  case_when(
+    diag$Model == selected ~ "Yes (selected)",
+    diag$Admissible ~ "Yes",
+    !diag$StatusCode %in% c(0, 1) ~ paste0(
+      "No: not converged (status ",
+      diag$StatusCode,
+      ")"
+    ),
+    !diag$PassSize ~ "No: smallest profile below 5%",
+    !diag$PassEntropy ~ "No: entropy below 0.60"
+  )
+}
+
+Ch5LPADiagnosticsTable <- function(diag, selected) {
+  diag$Eligible <- Ch5LPAEligibility(diag, selected)
+  diag %>%
+    arrange(Variances, Classes) %>%
+    transmute(
+      Variances = str_to_sentence(Variances),
+      Profiles = as.character(Classes),
+      Parameters = as.character(Parameters),
+      `Log-likelihood` = formatC(LL, format = "f", digits = 1, big.mark = ","),
+      BIC = formatC(BIC, format = "f", digits = 1, big.mark = ","),
+      `Relative entropy` = if_else(
+        is.na(Entropy),
+        "\u2014",
+        formatC(Entropy, format = "f", digits = 3)
+      ),
+      `Smallest profile n (%)` = paste0(
+        FmtCount(SmallestClassN),
+        " (",
+        formatC(100 * SmallestClassProp, format = "f", digits = 1),
+        "%)"
+      ),
+      `Lowest mean assigned probability` = if_else(
+        is.na(MinMeanPosterior),
+        "\u2014",
+        formatC(MinMeanPosterior, format = "f", digits = 3)
+      ),
+      `OpenMx status` = as.character(StatusCode),
+      Eligible
+    )
+}
+
+# F77: locates the collapsed variance in a varying-variance fit. OpenMx names
+# class-j variances v<j><indicator>, which parses unambiguously while k <= 9.
+Ch5LPASpike <- function(model, frame) {
+  p <- model$parameters
+  v <- p[grepl("^v[0-9]+$", names(p))]
+  nm <- names(which.min(v))
+  stopifnot(model$Classes <= 9)
+  cls <- as.integer(substr(nm, 2, 2))
+  ind <- as.integer(substring(nm, 3))
+  x <- frame[[ind]][model$modal == cls]
+  top <- max(frame[[ind]], na.rm = TRUE)
+  tibble(
+    Model = model$Model,
+    Class = cls,
+    Variable = names(frame)[ind],
+    Variance = min(v),
+    ClassN = length(x),
+    Answered = sum(!is.na(x)),
+    AtMax = sum(x == top, na.rm = TRUE),
+    Max = top
+  )
+}
+
+Ch5LPACertaintyTable <- function(mydata) {
+  Ch5LPACertainty(mydata) %>%
+    arrange(desc(Band)) %>%
+    transmute(
+      `Scales answered (of 11)` = as.character(Band),
+      `Respondents (n)` = FmtCount(N),
+      `Mean probability of assigned profile` = formatC(
+        MeanMaxPosterior,
+        format = "f",
+        digits = 3
+      ),
+      `Assigned with probability below 0.70` = paste0(
+        formatC(100 * ShareBelow70, format = "f", digits = 1),
+        "%"
+      )
+    )
+}
+
+# D146: the formatted table is the Chapter 3 select-one layout, unchanged,
+# with the below-floor rows removed.
+Ch5ClassBySpeciesTable <- function(mydata, long) {
+  hidden <- D4RowSpec(includeOverall = TRUE) %>%
+    filter(RawLabel %in% long$Column[long$Suppressed]) %>%
+    pull(IndentedLabel)
+  Ch3SelectOneTable(mydata, "lpa_class") %>%
+    filter(!`Preferred species` %in% hidden)
+}
+
+Ch5SuppressedNote <- function(long) {
+  s <- long %>%
+    filter(Suppressed) %>%
+    distinct(Order, Column, ColumnN, ColumnEffN) %>%
+    arrange(Order)
+  paste0(
+    "Preferred-species rows below the effective-N floor of ",
+    ch5.effn.floor,
+    " are not shown (",
+    nrow(s),
+    " rows): ",
+    paste0(
+      s$Column,
+      " (",
+      FmtCount(s$ColumnN),
+      " respondents, effective N ",
+      formatC(s$ColumnEffN, format = "f", digits = 1),
+      ")",
+      collapse = "; "
+    ),
+    ". Their respondents are included in the model fit and in the Overall row."
+  )
+}
+
+# Weighted means by assigned profile (D147: fit unweighted, report weighted).
+# Overall is every respondent in the universe who has the scale, so it is the
+# Chapter 3 Overall value; Unassigned respondents count there only.
+Ch5LPAProfileLong <- function(mydata, labels) {
+  k <- nlevels(mydata$lpa_class) - 1
+  groups <- c("Overall", paste("Class", seq_len(k)))
+  expand_grid(Class = groups, var = ch5.lpa.vars) %>%
+    purrr::pmap_dfr(function(Class, var) {
+      sub <- mydata %>% filter(!is.na(.data[[var]]))
+      if (Class != "Overall") {
+        sub <- sub %>% filter(lpa_class == Class)
+      }
+      base.summary.means(sub, !!sym(var)) %>%
+        as_tibble() %>%
+        transmute(Class = Class, var = var, N = Number, Value, CI)
+    }) %>%
+    mutate(
+      Class = factor(Class, levels = groups),
+      Scale = factor(
+        ScaleLabel(var, labels),
+        levels = ScaleLabel(ch5.lpa.vars, labels)
+      ),
+      Domain = Ch5LPADomain(var)
+    )
+}
+
+Ch5LPAProfileTable <- function(prof) {
+  prof %>%
+    arrange(Domain, Scale) %>%
+    mutate(cell = FmtMeanN(Value, CI, N)) %>%
+    select(Domain, Scale, Class, cell) %>%
+    pivot_wider(names_from = Class, values_from = cell) %>%
+    mutate(Domain = as.character(Domain), Scale = as.character(Scale))
+}
+
+Ch5LPAProfileLinePlot <- function(prof, titleText) {
+  dat <- prof %>%
+    filter(Class != "Overall") %>%
+    mutate(Class = droplevels(Class))
+  dodge <- position_dodge(width = 0.5)
+  ggplot(dat, aes(Scale, Value, colour = Class, group = Class)) +
+    geom_line(position = dodge) +
+    geom_pointrange(
+      aes(ymin = Value - CI, ymax = Value + CI),
+      position = dodge,
+      size = 0.2
+    ) +
+    facet_grid(~Domain, scales = "free_x", space = "free_x") +
+    scale_y_continuous(limits = c(1, 5)) +
+    labs(
+      title = titleText,
+      x = NULL,
+      y = "Weighted mean (1-5) \u00b1 95% CI",
+      colour = NULL
+    ) +
+    theme_bw() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      legend.position = "bottom"
+    )
+}
+
+Ch5LPAProfileFacetPlot <- function(prof, titleText) {
+  dat <- prof %>%
+    filter(Class != "Overall") %>%
+    mutate(Class = droplevels(Class))
+  ref <- prof %>% filter(Class == "Overall")
+  ggplot(dat, aes(Class, Value)) +
+    geom_hline(
+      data = ref,
+      aes(yintercept = Value),
+      linetype = "dashed",
+      colour = "grey50"
+    ) +
+    geom_pointrange(aes(ymin = Value - CI, ymax = Value + CI), size = 0.2) +
+    facet_wrap(
+      ~ Domain + Scale,
+      ncol = 4,
+      labeller = label_wrap_gen(width = 25, multi_line = FALSE)
+    ) +
+    scale_x_discrete(labels = function(x) str_remove(x, "Class ")) +
+    scale_y_continuous(limits = c(1, 5)) +
+    labs(
+      title = titleText,
+      x = "Profile",
+      y = "Weighted mean (1-5) \u00b1 95% CI",
+      caption = "Dashed line: Overall weighted mean"
+    ) +
+    theme_bw()
 }
