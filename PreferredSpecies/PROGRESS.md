@@ -1989,6 +1989,12 @@ Detached job launched **2026-09-24 10:54** (D153 command, stdout to `Ch5LPA_job_
 
 A plain `mxTryHard` rescue (the request) would jitter around the same singularity. If it returned status 0 it would pass `Admissible` and win selection on an artifact, so it was **not run** until the user chooses: keep excluded (documented as degenerate), plain `mxTryHard` anyway, or refit `varying` with a variance lower bound (a spec change that needs Appendix B disclosure).
 
+### Decisions
+
+| # | Decision | Date |
+|---|---|---|
+| D156 | **Q47 closed: `varying_5` and `varying_6` stay excluded, with no rescue refit** (user, prompt 115). The documented reason is F77: a degenerate boundary solution, one class at the `reg_sitesupport` ceiling with variance → 0. That's more than failed convergence. **`equal_6` is the final D143 selection.** When Chapter 5's Appendix B text is written, it must state the exclusion and its reason alongside the 5% floor binding at `equal_7`/`equal_8` (F76) | 2026-09-24 |
+
 ### Git
 
 `safe.directory` exception added for `F:/Survey/Analysis` (global config, user-requested). Ch5 changes committed; `.posit/assistant/settings.json` left out of the commit (not Ch5).
