@@ -931,3 +931,7 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-09-29 — Prompt 147
 
 > Re-render the report and verify DocxCounts() plus all of today's changes. Commit today's changes (D177–D182) after the render checks out.
+
+## 2026-09-29 — Prompt 148
+
+> I've closed Word: copy the verified render into the project and commit the docx.
