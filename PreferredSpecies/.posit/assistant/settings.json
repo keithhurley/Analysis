@@ -4,7 +4,8 @@
       "f:/Survey/Analysis/*": "allow",
       "f:/Survey/Data/DataAggregation1/*": "allow",
       "/tmp/*": "allow",
-      "C:/Users/keith.hurley/AppData/Local/Temp/*": "allow"
+      "C:/Users/keith.hurley/AppData/Local/Temp/*": "allow",
+      "C:/Users/KEITH~1.HUR/AppData/Local/Temp/RtmpiQzpIG/*": "allow"
     },
     "edit": {
       "*.md": "allow",

@@ -2237,3 +2237,46 @@ Rendered 3.1 min. `DocxCounts()` **88 / 87 / 9 / 0** = **85 tables** (84 + key) 
 |---|---|
 | Q55 | ~~Track the images in git?~~ **Closed, prompt 127:** `PreferredSpecies/.gitignore` negates `*.jpg`/`*.png` for `angler_profile_images_derived/` only (~1.8 MB); originals stay untracked |
 | Q56 | ~~Delete the stray html?~~ **Closed, prompt 127:** deleted |
+
+---
+
+## Chapter 5 — species table moved, family makeup text and figure, icon overlay (2026-09-25, prompts 129-130)
+
+| # | Decision | Date |
+|---|---|---|
+| D170 | **Icon overlaid on each photo at render time** (prompt 130: "don't alter the images used in the report"). `Ch5PhotoWithIcon(k)` draws the derived photo, then the derived icon on a white rounded tile (22% of the short side, grey hairline) in the lower-left corner; chunks use `dev="jpeg", dpi=250`. No image file is changed; `Ch5Images.R` is unchanged from D167 (a badge-baking rewrite was declined) | 2026-09-25 |
+| D171 | **"Profiles by preferred species" moved after the class descriptions** into its own landscape section (`sect_portrait()` closes the descriptions, `sect_landscape()` closes the new section before Appendix A). The class-description intro now points to "the table at the end of this chapter". New `## Profile makeup of family-group anglers`: three interpretive paragraphs **including management implications**, written at the user's explicit request (an exception to the technician-voice rule, like D161), plus a caveats paragraph. Every comparative claim is asserted in `ch5FamilyMixSetup`, using the D164 5-point threshold | 2026-09-25 |
+| D172 | **Figure `Ch5FamilyMixPlot()`**: one panel per family group + Overall (8 panels, 4 columns, 9 × 5.5 in), bars = weighted row % by class with 95% CI, dashed mark = Overall share of that class. Family rows only (user choice), so no plotted rows overlap; Unassigned not shown (noted in caption and text); northern pike and muskellunge are species rows, not families, and are not in the figure | 2026-09-25 |
+
+| # | Finding |
+|---|---|
+| F90 | `DocxCounts()` was never saved to a file; it existed only in the console. Recreated from its printed definition (same four counts, F41 regex) |
+
+### Verification
+
+Rendered 3.2 min. `DocxCounts()` **88 / 88 / 10 / 0** (85 tables): +1 image (family figure), +1 landscape section; photos are now device-drawn JPEGs (docx 2.0 MB). Heading order checked: Class 6 → Profiles by preferred species → Profile makeup of family-group anglers → Appendix A. Class 6 photo and family figure viewed from the docx media. **New baseline 88/88/10/0.**
+
+---
+
+## Chapter 5 — family-group cards (2026-09-25, prompt 131)
+
+| # | Decision | Date |
+|---|---|---|
+| D173 | **Faceted family figure moved directly after the class-by-species table**, with its Unassigned / pike-musky paragraph. `## Profile makeup of family-group anglers` is now: intro paragraph (all six profiles in every family, emphasis not kind, how to read a card), **seven cards** in table order, caveats paragraph. The D171 text was split per family into `fam.text` (keyed by family name, `setequal` with the displayed families); the Catfish sentence moved from the intro into its card; Bass now says "opposite regulatory lean to Walleye / Sauger anglers". All D171 `stopifnot` claims kept | 2026-09-25 |
+| D174 | **Card = `Ch5FamilyCard()`**: 2-column flextable, title row = family name (grey, 12 pt, spans both columns), body = `gg_chunk()` plot (4.0 × 2.8 in) and 10 pt text; the plot is on the left for odd cards and on the right for even cards; heavy outer border, `paginate()` keeps each card on one page. **`Ch5FamilyCardPlot()`**: bars = weighted row % with 95% CI, dashed = Overall share, **profile icons plus the number as x tick labels** via `ggtext::element_markdown()` (ggtext 0.2.0 installed this session), y axis common to all cards | 2026-09-25 |
+
+| # | Finding |
+|---|---|
+| F91 | "pandoc document conversion failed with error 1" was **Word holding `PreferredSpeciesReport.docx` open** (`~$eferredSpeciesReport.docx`). Running pandoc by hand on the `.knit.md` succeeded. Close Word before rendering, or render with `output_dir = tempdir()` to verify |
+
+### Verification
+
+Rendered to a temp folder (Word lock), 6.5 min. `DocxCounts()` **95 / 95 / 10 / 0** = **92 tables** (85 + 7 cards) / 95 images (88 + 7 card plots) / 10 landscape / 0 leaked. Order checked: table → faceted figure → makeup heading → Walleye card … No preference card → caveats → Appendix A. One card plot viewed from the docx media; icons render as tick labels. The project docx is **not yet replaced** (Word open). **New baseline 95/95/10/0.**
+
+| # | Decision | Date |
+|---|---|---|
+| D175 | **Profile icons as x tick labels on the faceted family figure too** (prompt 132), icon + number via `ggtext::element_markdown()`, 13 px icons, 7 pt numbers. Rendered into the project (Word closed), 3.6 min, `DocxCounts()` **95 / 95 / 10 / 0** unchanged (92 tables). Figure viewed from the docx: icons render but are small at the report's default figure dpi (864 × 528 px); raising the chunk `dpi` is the fix if needed (Q57) | 2026-09-29 |
+
+| # | Question |
+|---|---|
+| Q57 | Faceted-figure icons are small; raise `dpi` for `ch5FamilyMix` and enlarge icons, or keep numbers-only? |

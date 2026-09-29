@@ -884,8 +884,12 @@ ch5.class.labels <- c(
   "The conservation-minded purist"
 )
 
-Ch5PhotoPath <- function(k) file.path(ch5.img.dir, paste0("class", k, "_photo.jpg"))
-Ch5IconPath <- function(k) file.path(ch5.img.dir, paste0("class", k, "_icon.png"))
+Ch5PhotoPath <- function(k) {
+  file.path(ch5.img.dir, paste0("class", k, "_photo.jpg"))
+}
+Ch5IconPath <- function(k) {
+  file.path(ch5.img.dir, paste0("class", k, "_icon.png"))
+}
 
 Ch5ImagesPresent <- function(k = seq_along(ch5.class.labels)) {
   all(file.exists(c(Ch5PhotoPath(k), Ch5IconPath(k))))
@@ -903,13 +907,23 @@ Ch5IconHeader <- function(ft, size = ch5.icon.size) {
   big <- officer::fp_border(color = "black", width = 1.5)
 
   ft <- ft %>%
-    add_header_row(values = rep("", length(keys)), colwidths = rep(1, length(keys)), top = TRUE)
+    add_header_row(
+      values = rep("", length(keys)),
+      colwidths = rep(1, length(keys)),
+      top = TRUE
+    )
   for (j in cls) {
     k <- as.integer(sub("Class ", "", keys[j]))
     ft <- ft %>%
       compose(
-        i = 1, j = j, part = "header",
-        value = as_paragraph(as_image(src = Ch5IconPath(k), width = size, height = size))
+        i = 1,
+        j = j,
+        part = "header",
+        value = as_paragraph(as_image(
+          src = Ch5IconPath(k),
+          width = size,
+          height = size
+        ))
       )
   }
   ft %>%
@@ -933,11 +947,211 @@ Ch5IconKeyTable <- function(shares, ns, size = 0.5) {
   for (i in k) {
     ft <- ft %>%
       compose(
-        i = i, j = "Icon", part = "body",
-        value = as_paragraph(as_image(src = Ch5IconPath(i), width = size, height = size))
+        i = i,
+        j = "Icon",
+        part = "body",
+        value = as_paragraph(as_image(
+          src = Ch5IconPath(i),
+          width = size,
+          height = size
+        ))
       )
   }
   ft %>%
     width(j = "Icon", width = size + 0.15) %>%
     valign(valign = "center", part = "body")
+}
+
+# Photo with the class icon overlaid in the lower-left corner (prompt 130,
+# D170). Drawn at render time, so neither image file is altered: the photo
+# fills the figure and the icon sits on a white rounded tile on top of it.
+Ch5PhotoWithIcon <- function(k, badge = 0.22) {
+  photo <- as.raster(magick::image_read(Ch5PhotoPath(k)))
+  icon <- as.raster(magick::image_read(Ch5IconPath(k)))
+  asp <- nrow(photo) / ncol(photo)
+  side <- grid::unit(badge, "snpc")
+  margin <- grid::unit(0.03, "snpc")
+  grid::grid.newpage()
+  grid::grid.raster(
+    photo,
+    width = grid::unit(1, "npc"),
+    height = grid::unit(1, "npc")
+  )
+  grid::pushViewport(grid::viewport(
+    x = margin,
+    y = margin,
+    width = side,
+    height = side,
+    just = c("left", "bottom")
+  ))
+  grid::grid.roundrect(
+    r = grid::unit(0.14, "snpc"),
+    gp = grid::gpar(fill = "white", col = "grey40", lwd = 0.5)
+  )
+  grid::grid.raster(
+    icon,
+    width = grid::unit(0.86, "npc"),
+    height = grid::unit(0.86, "npc")
+  )
+  grid::popViewport()
+  invisible(asp)
+}
+
+# Class mix of each family group (prompt 129, D171): weighted row % of each
+# class with 95% CI, one panel per family group plus Overall. Unassigned is
+# left out, so bars in a panel sum to less than 100. The dashed mark is the
+# Overall share for that class, repeated in every panel for reference.
+Ch5FamilyMixPlot <- function(long, titleText) {
+  dat <- long %>%
+    filter(
+      Type %in% c("Overall", "Family"),
+      !Suppressed,
+      Class != ch5.lpa.unassigned
+    ) %>%
+    mutate(
+      Panel = paste0(Column, "\n(n = ", FmtCount(ColumnN), ")"),
+      Panel = factor(Panel, levels = unique(Panel[order(Order)])),
+      Class = str_remove(Class, "Class "),
+      Class = factor(
+        Class,
+        levels = as.character(sort(as.integer(unique(Class))))
+      )
+    )
+  ref <- dat %>%
+    filter(Type == "Overall") %>%
+    select(Class, Ref = Value)
+  ggplot(dat, aes(Class, Value)) +
+    geom_col(width = 0.7) +
+    geom_errorbar(
+      aes(ymin = pmax(Value - CI, 0), ymax = Value + CI),
+      width = 0.25
+    ) +
+    geom_errorbar(
+      data = ref,
+      aes(x = Class, ymin = Ref, ymax = Ref),
+      inherit.aes = FALSE,
+      width = 0.9,
+      linetype = "dashed",
+      colour = "grey30"
+    ) +
+    facet_wrap(~Panel, ncol = 4) +
+    # D175: profile icons (with the number) as tick labels, as on the cards
+    scale_x_discrete(labels = function(x) {
+      paste0(
+        "<img src='",
+        normalizePath(Ch5IconPath(as.integer(x))),
+        "' width='13'/><br>",
+        x
+      )
+    }) +
+    labs(
+      title = titleText,
+      x = "Profile",
+      y = "Weighted % of family-group respondents \u00b1 95% CI",
+      caption = "Dashed mark: Overall share for that profile. Unassigned respondents not shown."
+    ) +
+    theme_bw() +
+    theme(axis.text.x = ggtext::element_markdown(lineheight = 1.05, size = 7))
+}
+
+# ---- Family-group cards (prompt 131, D173-D174) ----------------------------
+
+ch5.card.plot.w <- 4.0 # inches; landscape text width is 9 in
+ch5.card.text.w <- 5.0
+ch5.card.plot.h <- 2.8
+
+Ch5FamilyBars <- function(long) {
+  long %>%
+    filter(
+      Type %in% c("Overall", "Family"),
+      !Suppressed,
+      Class != ch5.lpa.unassigned
+    ) %>%
+    mutate(
+      Class = factor(
+        str_remove(Class, "Class "),
+        levels = as.character(seq_along(ch5.class.labels))
+      )
+    )
+}
+
+# One family group: bars = weighted row % by profile with 95% CI, dashed mark
+# = Overall share of that profile, profile icons (with the number) as x tick
+# labels. The y axis is shared across cards so bar heights compare directly.
+Ch5FamilyCardPlot <- function(long, family) {
+  bars <- Ch5FamilyBars(long)
+  ymax <- max(bars$Value + bars$CI, na.rm = TRUE)
+  dat <- bars %>% filter(Column == family)
+  ref <- bars %>% filter(Type == "Overall") %>% select(Class, Ref = Value)
+  stopifnot(nrow(dat) == length(ch5.class.labels))
+  icon_label <- function(x) {
+    paste0(
+      "<img src='",
+      normalizePath(Ch5IconPath(as.integer(x))),
+      "' width='22'/><br>",
+      x
+    )
+  }
+  ggplot(dat, aes(Class, Value)) +
+    geom_col(width = 0.7) +
+    geom_errorbar(
+      aes(ymin = pmax(Value - CI, 0), ymax = Value + CI),
+      width = 0.25
+    ) +
+    geom_errorbar(
+      data = ref,
+      aes(x = Class, ymin = Ref, ymax = Ref),
+      inherit.aes = FALSE,
+      width = 0.9,
+      linetype = "dashed",
+      colour = "grey30"
+    ) +
+    scale_x_discrete(labels = icon_label) +
+    scale_y_continuous(limits = c(0, ceiling(ymax / 5) * 5)) +
+    labs(
+      x = "Profile",
+      y = "Weighted % \u00b1 95% CI",
+      caption = "Dashed mark: Overall share"
+    ) +
+    theme_bw() +
+    theme(axis.text.x = ggtext::element_markdown(lineheight = 1.1))
+}
+
+# A card: title row with the family name across both columns, then the plot
+# and the text side by side. plotLeft alternates the sides between cards.
+Ch5FamilyCard <- function(title, plot, text, plotLeft = TRUE) {
+  big <- officer::fp_border(color = "black", width = 1.5)
+  thin <- officer::fp_border(color = "grey60", width = 0.75)
+  pj <- if (plotLeft) 1 else 2
+  tj <- 3 - pj
+  ft <- flextable(data.frame(a = "", b = "")) %>%
+    delete_part(part = "header") %>%
+    add_header_row(values = title, colwidths = 2) %>%
+    compose(
+      i = 1,
+      j = pj,
+      part = "body",
+      value = as_paragraph(
+        gg_chunk(
+          value = list(plot),
+          width = ch5.card.plot.w,
+          height = ch5.card.plot.h
+        )
+      )
+    ) %>%
+    compose(i = 1, j = tj, part = "body", value = as_paragraph(text)) %>%
+    width(j = pj, width = ch5.card.plot.w + 0.1) %>%
+    width(j = tj, width = ch5.card.text.w - 0.1) %>%
+    bold(part = "header") %>%
+    fontsize(part = "header", size = 12) %>%
+    fontsize(part = "body", size = 10) %>%
+    bg(part = "header", bg = "#CFCFCF") %>%
+    valign(j = tj, valign = "center", part = "body") %>%
+    align(align = "left", part = "all") %>%
+    padding(padding = 6, part = "all") %>%
+    border_outer(border = big, part = "all") %>%
+    hline(i = 1, border = thin, part = "header") %>%
+    set_table_properties(layout = "fixed") %>%
+    paginate(init = TRUE, hdr_ftr = TRUE)
+  ft
 }

@@ -849,3 +849,23 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-09-24 — Prompt 128
 
 > Commit everything from this session and push to remote.
+
+## 2026-09-25 — Prompt 129
+
+> I'd like to move the species specific table to after the class descriptions in Chapter 5...and then after the table include a paragraph or two on the makup of species-preferred anglers by the classes and include a plot showing the relative size of the classes for the species (bar plot with error bars?)...can we also put the class icon in the lower left corner of each of the class images?
+
+## 2026-09-25 — Prompt 130
+
+> don't alter the images used in the report...but overlay the icon image over the picture
+
+## 2026-09-25 — Prompt 131
+
+> I want the faceted species plot to go immediately after the table and before the section on species class makups.....then in the species class makeups I'd like each family group to be put into a card with the individual bar graph for the group.....use the icons for the x axis tick labels......maybe with the plot on the left and text on the right and alternate between cards...the card should use the family group name as a title
+
+## 2026-09-29 — Prompt 132
+
+> Word is closed; copy the verified docx into the project.
+>
+> Use the profile icons on the faceted plot's x-axis too.
+>
+> Commit and push the Chapter 5 changes.

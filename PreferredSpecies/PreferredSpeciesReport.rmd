@@ -1494,14 +1494,6 @@ stopifnot(Ch5ImagesPresent())
 CreateFlex(Ch5LPAProfileTable(ch5.prof), mergeOnFirst = TRUE) %>% Ch5IconHeader()
 ```
 
-## Profiles by preferred species
-
-`r paste0("The table below gives, for each preferred-species row, the weighted percentage of its respondents assigned to each profile, with Unassigned as a column so that each row sums to 100. The rows overlap, as elsewhere in this report, and must not be totalled. Where a row has no respondents in a profile, the percentage is 0.0 and the interval has zero width. ", Ch5SuppressedNote(ch5.long), " This is the only chapter of the report that withholds rows; the effective-N floor was set before the model was fitted.  ", caption.ch3selectone, "  ", caption.raked)`
-
-```{r ch5ClassBySpecies}
-CreateFlex(Ch5ClassBySpeciesTable(d, ch5.long)) %>% Ch5IconHeader()
-```
-
 ## Profiles on other survey questions
 
 ```{r ch5CompareSetup}
@@ -1658,14 +1650,14 @@ Ch5IconKeyTable(
 )
 ```
 
-`r paste0("The paragraphs below describe each profile by the scales on which it differs most from the Overall mean. Means are the weighted means in the profile means table; the figure after each mean is its distance from the Overall mean in standard deviations of the Overall weighted distribution (SD). Two scale names need a note: the Fishery resource motivation scale is made up of catch outcomes (competing for prizes, obtaining fish to eat, catching a trophy, the fun of catching), and the Simplification regulation scale measures agreement with uniform statewide regulations. Species shares are the row percentages from the table above, with their confidence intervals. The label and the closing picture in each paragraph are an interpretive summary of the eleven scale scores. They are not measured directly, and traits beyond those scales, such as how often or how an angler fishes, are not established by these data.")`
+`r paste0("The paragraphs below describe each profile by the scales on which it differs most from the Overall mean. Means are the weighted means in the profile means table; the figure after each mean is its distance from the Overall mean in standard deviations of the Overall weighted distribution (SD). Two scale names need a note: the Fishery resource motivation scale is made up of catch outcomes (competing for prizes, obtaining fish to eat, catching a trophy, the fun of catching), and the Simplification regulation scale measures agreement with uniform statewide regulations. Species shares are the row percentages from the profiles-by-preferred-species table at the end of this chapter, with their confidence intervals. The label and the closing picture in each paragraph are an interpretive summary of the eleven scale scores. They are not measured directly, and traits beyond those scales, such as how often or how an angler fishes, are not established by these data.")`
 
 `r paste0("The second paragraph for each profile compares it with the Overall column on the other survey questions in the table above; the values quoted are from that table, and its confidence intervals show that several of the differences described are small relative to their precision. Where a family group makes up at least ", ch5.mix.gap, " percentage points more of a profile than of all assigned respondents, the paragraph names it, because questions that vary by species may partly reflect that mix rather than the profile itself.")`
 
 ### Class 1: `r ch5.class.labels[1]`
 
-```{r ch5Photo1, fig.width=6.5, fig.height=3.55}
-knitr::include_graphics(Ch5PhotoPath(1))
+```{r ch5Photo1, fig.width=6.5, fig.height=3.55, dev="jpeg", dpi=250}
+Ch5PhotoWithIcon(1)
 ```
 
 *`r paste0("Class 1: ", ch5.class.labels[1])`*
@@ -1676,8 +1668,8 @@ knitr::include_graphics(Ch5PhotoPath(1))
 
 ### Class 2: `r ch5.class.labels[2]`
 
-```{r ch5Photo2, fig.width=6.5, fig.height=3.55}
-knitr::include_graphics(Ch5PhotoPath(2))
+```{r ch5Photo2, fig.width=6.5, fig.height=3.55, dev="jpeg", dpi=250}
+Ch5PhotoWithIcon(2)
 ```
 
 *`r paste0("Class 2: ", ch5.class.labels[2])`*
@@ -1688,8 +1680,8 @@ knitr::include_graphics(Ch5PhotoPath(2))
 
 ### Class 3: `r ch5.class.labels[3]`
 
-```{r ch5Photo3, fig.width=6.5, fig.height=3.55}
-knitr::include_graphics(Ch5PhotoPath(3))
+```{r ch5Photo3, fig.width=6.5, fig.height=3.55, dev="jpeg", dpi=250}
+Ch5PhotoWithIcon(3)
 ```
 
 *`r paste0("Class 3: ", ch5.class.labels[3])`*
@@ -1700,8 +1692,8 @@ knitr::include_graphics(Ch5PhotoPath(3))
 
 ### Class 4: `r ch5.class.labels[4]`
 
-```{r ch5Photo4, fig.width=6.5, fig.height=3.55}
-knitr::include_graphics(Ch5PhotoPath(4))
+```{r ch5Photo4, fig.width=6.5, fig.height=3.55, dev="jpeg", dpi=250}
+Ch5PhotoWithIcon(4)
 ```
 
 *`r paste0("Class 4: ", ch5.class.labels[4])`*
@@ -1712,8 +1704,8 @@ knitr::include_graphics(Ch5PhotoPath(4))
 
 ### Class 5: `r ch5.class.labels[5]`
 
-```{r ch5Photo5, fig.width=6.5, fig.height=3.55}
-knitr::include_graphics(Ch5PhotoPath(5))
+```{r ch5Photo5, fig.width=6.5, fig.height=3.55, dev="jpeg", dpi=250}
+Ch5PhotoWithIcon(5)
 ```
 
 *`r paste0("Class 5: ", ch5.class.labels[5])`*
@@ -1724,8 +1716,8 @@ knitr::include_graphics(Ch5PhotoPath(5))
 
 ### Class 6: `r ch5.class.labels[6]`
 
-```{r ch5Photo6, fig.width=6.5, fig.height=3.55}
-knitr::include_graphics(Ch5PhotoPath(6))
+```{r ch5Photo6, fig.width=6.5, fig.height=3.55, dev="jpeg", dpi=250}
+Ch5PhotoWithIcon(6)
 ```
 
 *`r paste0("Class 6: ", ch5.class.labels[6])`*
@@ -1734,7 +1726,112 @@ knitr::include_graphics(Ch5PhotoPath(6))
 
 `r paste0("On the other survey questions, Class 6 fishes less often than average (median days ", A(6, 'cmpDays', 'median'), ") and has the lowest rates of any profile for fishing tournaments (", A(6, 'cmpTourney', 'pct'), "), hiring a guide (", A(6, 'cmpGuide', 'pct'), ") and fishing from a motorized boat (", A(6, 'cmpBoat', 'pct'), "). Its median distance to its most visited water is ", V(6, 'cmpMiles', 'median'), " miles, against ", V('Overall', 'cmpMiles', 'median'), " overall. It reports the highest overall satisfaction of any profile (mean ", A(6, 'cmpSatisfaction', 'mean'), ", where lower means more satisfied), and, with Class 2, the highest share of women (", A(6, 'cmpFemale', 'pct'), "). With ", FmtCount(ch5.classN[['Class 6']]), " respondents it is the smallest profile, and most of its intervals in the table are correspondingly wide. ", MIX(6))`
 
-`r run_pagebreak()`
+`r sect_portrait()`
+
+## Profiles by preferred species
+
+`r paste0("The table below gives, for each preferred-species row, the weighted percentage of its respondents assigned to each profile, with Unassigned as a column so that each row sums to 100. The rows overlap, as elsewhere in this report, and must not be totalled. Where a row has no respondents in a profile, the percentage is 0.0 and the interval has zero width. ", Ch5SuppressedNote(ch5.long), " This is the only chapter of the report that withholds rows; the effective-N floor was set before the model was fitted.  ", caption.ch3selectone, "  ", caption.raked)`
+
+```{r ch5ClassBySpecies}
+CreateFlex(Ch5ClassBySpeciesTable(d, ch5.long)) %>% Ch5IconHeader()
+```
+
+```{r ch5FamilyMixSetup}
+# D171 (prompt 129), cards D173 (prompt 131): interpretive text on family-group
+# makeup, including management implications, at the user's request. Claims are asserted here.
+ch5.fam <- ch5.long %>%
+  filter(Type %in% c("Overall", "Family"), !Suppressed, Class != ch5.lpa.unassigned)
+fv <- function(col, cls) ch5.fam$Value[ch5.fam$Column == col & ch5.fam$Class == paste("Class", cls)]
+gap <- function(col, cls) fv(col, cls) - fv("Overall", cls)
+top.cls <- function(col) {
+  x <- ch5.fam %>% filter(Column == col)
+  as.integer(sub("Class ", "", x$Class[which.max(x$Value)]))
+}
+fam.cols <- setdiff(unique(ch5.fam$Column), "Overall")
+fam.n <- ch5.long %>% filter(Type == "Family") %>% distinct(Column, ColumnN)
+fam.unassigned <- ch5.long %>% filter(Type == "Family", Class == ch5.lpa.unassigned)
+small.ci <- ch5.fam %>% filter(Column %in% c("Moronides", "Trout")) %>% pull(CI) %>% max()
+FN <- function(col) FmtCount(fam.n$ColumnN[fam.n$Column == col])
+SA <- function(cls, col) paste0(S(cls, col), " against ", Sov(cls), " overall")
+
+stopifnot(
+  length(fam.cols) == 7,
+  # every family has every profile, except no Moronides anglers in Class 6
+  all(ch5.fam$Value[!(ch5.fam$Column == "Moronides" & ch5.fam$Class == "Class 6")] > 0),
+  fv("Moronides", 6) == 0,
+  # the largest share of any profile in any family group
+  with(ch5.fam %>% filter(Type == "Family"), Column[which.max(Value)] == "Moronides" && Class[which.max(Value)] == "Class 4"),
+  all(abs(sapply(1:6, gap, col = "Catfish")) < ch5.mix.gap),
+  fam.n$Column[which.max(fam.n$ColumnN)] == "Walleye / Sauger",
+  top.cls("Walleye / Sauger") == 1, gap("Walleye / Sauger", 1) >= ch5.mix.gap, gap("Walleye / Sauger", 6) < 0,
+  top.cls("Bass") == 3, gap("Bass", 3) >= ch5.mix.gap, gap("Bass", 1) <= -ch5.mix.gap,
+  top.cls("Moronides") == 4, gap("Moronides", 4) >= ch5.mix.gap,
+  gap("Panfish / Sunfish", 1) > 0, gap("Panfish / Sunfish", 6) > 0, gap("Panfish / Sunfish", 2) <= -ch5.mix.gap,
+  gap("Trout", 2) >= ch5.mix.gap, gap("Trout", 3) <= -ch5.mix.gap,
+  top.cls("No preference") == 2, gap("No preference", 2) >= ch5.mix.gap,
+  gap("No preference", 5) >= ch5.mix.gap, gap("No preference", 1) <= -ch5.mix.gap
+)
+fam.order <- ch5.long %>% filter(Type == "Family", !Suppressed) %>% distinct(Order, Column) %>% arrange(Order) %>% pull(Column)
+stopifnot(setequal(fam.order, fam.cols))
+
+# D173: one card per family group, text keyed by family name.
+fam.text <- list(
+  `Walleye / Sauger` = paste0("Walleye / Sauger anglers, the largest family group (n = ", FN('Walleye / Sauger'), "), lean toward Class 1, the harvest-minded, keep-it-simple angler (", SA(1, 'Walleye / Sauger'), "), and include very few Class 6 purists (", SA(6, 'Walleye / Sauger'), "). For walleye management this points to a constituency for whom harvest opportunity matters and for whom waterbody-specific length and bag limits may be a source of confusion; clear, consistent regulations and plain-language communication of any lake-specific rules are likely to matter as much as the rules themselves."),
+  Bass = paste0("Bass anglers (n = ", FN('Bass'), ") show the opposite regulatory lean to Walleye / Sauger anglers. Class 3, the regulation-savvy catch-and-release angler, is their largest profile (", SA(3, 'Bass'), "), and Class 1 is less common among them (", SA(1, 'Bass'), "). This is the family group whose makeup most favours understanding and supporting site-specific rules, which suggests bass anglers are a receptive audience for special length limits or catch-and-release rules tailored to individual waters."),
+  `Panfish / Sunfish` = paste0("Panfish / Sunfish anglers (n = ", FN('Panfish / Sunfish'), ") combine two contrasting profiles: Class 1 harvest-minded anglers (", SA(1, 'Panfish / Sunfish'), ") and Class 6 conservation-minded purists (", SA(6, 'Panfish / Sunfish'), ") are both more common than overall, while Class 2 is less common (", SA(2, 'Panfish / Sunfish'), "). Panfish management may therefore need to balance harvest opportunity for the larger group with the experience-focused, rules-engaged values of the smaller one."),
+  Catfish = paste0("Catfish anglers (n = ", FN('Catfish'), ") are the closest to the angler population as a whole: no profile's share among them differs from its Overall share by ", ch5.mix.gap, " percentage points or more. In profile terms catfish anglers look much like Nebraska anglers generally, so catfish management is in effect management for the general angler."),
+  Moronides = paste0("Moronides anglers (striped bass, wiper and white bass) have the most concentrated makeup: Class 4, the all-in enthusiast, makes up ", SA(4, 'Moronides'), ", and none of them fall in Class 6. The group is small (n = ", FN('Moronides'), ") and the interval is wide, but the lean suggests a highly engaged, trip-intensive and trophy-oriented constituency for whom reservoir fishing quality matters, and who may be reached effectively through angler clubs and events."),
+  Trout = paste0("Trout anglers lean toward Class 2, the relaxed, catch-optional angler (", SA(2, 'Trout'), "), with fewer Class 3 anglers (", SA(3, 'Trout'), "); with ", FN('Trout'), " respondents these intervals are wide. The lean fits a stocked fishery valued for the outing, where access, the timing of stockings and a pleasant setting may matter more than catch rates or trophy potential."),
+  `No preference` = paste0("Anglers with no preferred species (n = ", FN('No preference'), ") are the group most weighted toward the less committed profiles: Class 2 (", SA(2, 'No preference'), ") and Class 5, the low-involvement angler (", SA(5, 'No preference'), "), are both more common than overall, and Class 1 is less common (", SA(1, 'No preference'), "). These anglers are a natural focus for recruitment, retention and reactivation efforts, where convenience, easy access and general information are more likely to reach them than species-specific regulation.")
+)
+stopifnot(setequal(names(fam.text), fam.order))
+Card <- function(i) {
+  f <- fam.order[i]
+  Ch5FamilyCard(f, Ch5FamilyCardPlot(ch5.long, f), fam.text[[f]], plotLeft = i %% 2 == 1)
+}
+```
+
+`r paste0("The figure below shows the profile makeup of each family group against the Overall share of each profile. Unassigned respondents, between ", formatC(min(fam.unassigned$Value), format = 'f', digits = 1), " and ", formatC(max(fam.unassigned$Value), format = 'f', digits = 1), " percent of each family group, are not shown, so the bars in a panel sum to less than 100. Northern pike and muskellunge are reported as individual species rather than as a family group and are not in the figure.")`
+
+```{r ch5FamilyMix, fig.width=9, fig.height=5.5}
+Ch5FamilyMixPlot(ch5.long, "Profile makeup of each family group")
+```
+
+## Profile makeup of family-group anglers
+
+`r paste0("Every family group contains anglers of all six profiles, with one exception: none of the Moronides respondents fall in Class 6. No family group is dominated by a single profile; the largest share of any profile in any family group is Class 4 among Moronides anglers (", S(4, 'Moronides'), "). Managing for any one species therefore means serving a mix of angler types, and the differences described in the cards below are differences of emphasis rather than of kind. Each card shows one family group's weighted percentage in each profile, with 95 percent confidence intervals, on a common scale; the icons along the bottom mark the profiles, and the dashed mark is the Overall share of that profile.")`
+
+```{r ch5Card1}
+Card(1)
+```
+
+```{r ch5Card2}
+Card(2)
+```
+
+```{r ch5Card3}
+Card(3)
+```
+
+```{r ch5Card4}
+Card(4)
+```
+
+```{r ch5Card5}
+Card(5)
+```
+
+```{r ch5Card6}
+Card(6)
+```
+
+```{r ch5Card7}
+Card(7)
+```
+
+`r paste0("These implications are interpretive. The profiles are built from attitude, motivation and regulation scales, not from behaviour, and the shares are associations: preferring a species does not place an angler in a profile, nor the reverse. Differences of less than about ", ch5.mix.gap, " percentage points are within the precision of these estimates for most family groups, and the Moronides and Trout groups are small enough that their intervals reach \u00b1", formatC(small.ci, format = 'f', digits = 1), " points.")`
+
+`r sect_landscape()`
 
 <!--
 D36: Appendix A is a deliberately blank placeholder. The paper questionnaire is
