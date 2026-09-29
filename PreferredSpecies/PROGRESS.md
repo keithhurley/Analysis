@@ -2330,3 +2330,56 @@ Written by the `preparing-restart` skill. The session covered prompts 125-136: c
 
 - Chapter 5 layout in Word (cards, photos, icon header rows) has not been viewed on the page; only the docx XML and embedded images were checked.
 - Step 5 (guided text) has not started; it was deferred until after Chapter 5, which is now built.
+
+---
+
+## Easy open questions settled (2026-09-29, prompt 139)
+
+| # | Decision | Date |
+|---|---|---|
+| D177 | **Q57 closed: no icons on the faceted family figure.** `Ch5FamilyMixPlot()` reverted to plain number tick labels (the `scale_x_discrete()` icon labeller and `ggtext::element_markdown()` theme removed); D175 reversed for this figure only. The family cards keep their icons (D174) | 2026-09-29 |
+| D178 | **Q24 closed: Appendix A heading year is 2025.** Heading now "Appendix A - 2025 Nebraska Licensed Angler Survey (Paper Version)" | 2026-09-29 |
+| D179 | **Q49 closed: do NOT add model-estimated unweighted class means.** Weighted assigned-respondent means stay the only ones shown | 2026-09-29 |
+
+| # | Finding |
+|---|---|
+| F92 | **Q35 checked in the rendered docx:** the terse labels are still present in Chapter 5, once each, both in the **Profile means** table: "Catch Something" (Attitudes block) and "Physical and psycological" (Motivations block, upstream typo). "Total (Jan-Oct)" appears nowhere in the report. Elsewhere: Chapter 1 has 12 of each, Chapter 3 has 1 of each. Q35 stays open for the user's call |
+
+### Verification
+
+Edits not yet rendered; the render baseline is still 95 / 95 / 10 / 0 and is expected to stay there (no tables, images, or sections added or removed).
+
+### Open for the user (updated list)
+
+| # | Question |
+|---|---|
+| Q22 | Outcome-dimension multiplicity in Chapter 1 (F8) — flagged, never implemented |
+| Q25 | Appendix B wording: the inherited "roughly 9x too tight" passage reads as contradicting the newer scale-invariance note |
+| Q32 | Chapter 4 reliability presentation — offered as a full table, never answered |
+| Q35 | Terse `Labels.csv` labels confirmed in the Chapter 5 Profile means table (F92): keep, or relabel locally in this report? **Closed by D180** |
+
+| # | Decision | Date |
+|---|---|---|
+| D180 | **Q35 closed: relabel in this report only** (prompt 141). `scale.label.override` in `PreferredSpeciesFunctions.R`, applied inside `ScaleLabel()`: `attitude_catch` → "Catch something" (matches `Scales.csv` and the Ch. 3 heading), `motivation_pp` → "Physical and psychological" (typo fixed). `Labels.csv` untouched; the crosstabs report still shows "Catch Something" / "Physical and psycological". Every scale row label goes through `ScaleLabel()` (Ch. 1, Ch. 3, Ch. 5), so one override covers all 14 + 14 occurrences found in F92 | 2026-09-29 |
+
+Open after D180: **Q22, Q25, Q32.**
+
+| # | Decision | Date |
+|---|---|---|
+| D181 | **Q32 closed: reliability removed from the report** (prompt 144), superseding D117. Option C (weighted D4i-D4l alpha per banner column) was computed in the console first (prompt 143): Overall 0.762, n = 1,506, reproduced; Muskellunge / Tiger musky n = 8 gave 0.069, Yellow perch n = 12 gave -0.052. Removed: the `ch4.alphaSat` line in `ch4Setup`, the Chapter 4 alpha paragraph after the respondent-level correlation table, and the Appendix B sentence referring to it. Chapter 4 never had a reliability table. `Ch4Alpha()` is left in `PreferredSpeciesFunctions.R`, now unused. Tables/images/sections unchanged, so the render baseline should remain 95 / 95 / 10 / 0 | 2026-09-29 |
+
+Open after D181: **Q22, Q25.**
+
+| # | Decision | Date |
+|---|---|---|
+| D182 | **Q25 closed: Appendix B option B** (prompt 146). Percentage-CI paragraph reworded to say the problem is treating Σw as the sample size, and that Kish effN is unchanged by rescaling the weights *and* reflects the design effect (the old text merged the two). "Roughly 9 times" and "~234,000 / mean ~83" kept; they describe all 2025 respondents (the crosstabs universe). Chapter 1 comparisons paragraph shortened to a cross-reference. Wording now differs from the crosstabs Appendix B; the crosstabs report is untouched | 2026-09-29 |
+
+| # | Finding |
+|---|---|
+| F93 | On this report's universe (n = 1,915): Σw = 171,760, effN = 1,525 (identical after rescaling weights to sum to n), and sqrt(Σw / effN) = **10.6**, against the inherited "roughly 9x" for the full 2025 file. Not added to the report (option C declined) |
+
+Open after D182: **Q22.**
+
+### Verification of D177-D182 (prompt 147)
+
+Rendered to a temp folder (Word held `PreferredSpeciesReport.docx` open, F91), 3.4 min, clean environment. `DocxCounts()` **95 / 95 / 10 / 0**, baseline unchanged. Text checks on the rendered docx: Appendix A heading carries 2025 (1); "Catch Something" 0, "psycological" 0, "Catch something" 15 (14 scale rows + the Ch. 3 heading), "Physical and psychological" 14; "alpha" 0 in Ch. 4 and Appendix B, "reliability coefficient" 0; "9x too tight" 0, new Appendix B sentences present. Faceted family figure viewed from the docx media: number tick labels, no icons. **The project copy of the docx is not yet replaced** (Word open); the committed docx predates D177-D182.

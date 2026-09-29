@@ -365,10 +365,23 @@ BannerExclusionTable <- function(mydata) {
 
 # Within-family comparison blocks (ANALYSIS_PLAN.md 3.4) ------------------
 
+# Report-only relabels (Q35, D180). Labels.csv is upstream and must not be
+# edited, so these win over it in this report alone; the crosstabs report
+# still shows the upstream text.
+scale.label.override <- c(
+  attitude_catch = "Catch something",
+  motivation_pp = "Physical and psychological"
+)
+
 # Display label for a derived scale score, from Labels.csv. Falls back to the
 # variable name so a missing label never silently blanks a column header.
 ScaleLabel <- function(varName, labels) {
   op <- labels$Label[match(varName, labels$Response)]
+  op <- if_else(
+    varName %in% names(scale.label.override),
+    unname(scale.label.override[varName]),
+    op
+  )
   if_else(is.na(op), varName, op)
 }
 
@@ -1978,7 +1991,9 @@ Ch4GapNumbers <- function(mydata, v1, v2) {
       sub <- sub %>%
         filter(!is.na(.data[[v1]]), !is.na(.data[[v2]])) %>%
         mutate(gapv = as.numeric(.data[[v1]]) - as.numeric(.data[[v2]]))
-      if (nrow(sub) == 0) return(NULL)
+      if (nrow(sub) == 0) {
+        return(NULL)
+      }
       mg <- base.summary.means(sub, gapv) %>% as_tibble()
       tibble(
         RawLabel = RawLabel,
@@ -2001,6 +2016,8 @@ Ch4GapNames <- function(gapNumbers, direction = c("positive", "negative")) {
   } else {
     sel %>% filter(Gap < 0) %>% arrange(Gap)
   }
-  if (nrow(sel) == 0) return("none")
+  if (nrow(sel) == 0) {
+    return("none")
+  }
   paste(sel$RawLabel, collapse = ", ")
 }

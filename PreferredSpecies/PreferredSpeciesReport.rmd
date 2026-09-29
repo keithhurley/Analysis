@@ -1272,7 +1272,6 @@ nBeforeCh4 <- nrow(d)
 d <- Ch4AddSatVars(d)
 
 ch4.nSix <- Ch4CorrComplete(d)
-ch4.alphaSat <- Ch4Alpha(d, c("D4i", "D4j", "D4k", "D4l"))
 ch4.groupMeans <- Ch4GroupMeans(d)
 ch4.gapCatch <- Ch4GapNumbers(d, "D4i", "D4k")
 ch4.gapHarvest <- Ch4GapNumbers(d, "D4j", "D4l")
@@ -1332,8 +1331,6 @@ CreateFlex(Ch3MeansTable(d, ch4.sat.items$Field, ch4.sat.items$Short))
 ```{r ch4corr}
 CreateFlex(Ch4CorrTable(d))
 ```
-
-`r paste0("For reference, the four D4 satisfaction items form the Satisfaction sub-scale identified by the separate analysis of the D4 battery; their weighted alpha on this report's sample is ", formatC(ch4.alphaSat$alpha, format="f", digits=3), " on ", format(ch4.alphaSat$n, big.mark=","), " respondents. No composite score is built here and none is used anywhere in this report, which stays item-level. A9 asks about the season rather than about the preferred fish, and the D4 analysis places D4a with the constraint items rather than the satisfaction items, so neither is included in that coefficient. A single coefficient across all six would also conceal the structure visible in the table above.")`
 
 `r run_pagebreak()`
 
@@ -1839,7 +1836,7 @@ pasted in by hand, matching 2025CrossTabReport.rmd L1545-1547, which does the
 same thing. Do not pour the instrument in programmatically.
 -->
 
-# Appendix A - Nebraska Licensed Angler Survey (Paper Version)
+# Appendix A - 2025 Nebraska Licensed Angler Survey (Paper Version)
 
 `r run_pagebreak()`
 
@@ -1872,12 +1869,14 @@ sample size**, not the raw respondent count or the raw sum of weights:
 
 $$effN = \frac{(\sum w)^2}{\sum w^2}$$
 
-This matters because of the population-scaling difference noted above: 2025
-weights sum to roughly 234,000 with a mean weight around 83. Using the
-raw sum of weights as the CI denominator would make intervals roughly 9x too
-tight. The Kish effective sample size
-corrects for this by accounting for the variance introduced by unequal
-weighting (the "design effect").
+This matters because the 2025 weights sum to the angler population (roughly
+234,000 across all 2025 respondents, a mean weight around 83), not to the
+number of respondents. A formula that treated the sum of weights as the sample
+size would inherit that population scale and give intervals roughly 9 times
+too narrow. The Kish effective sample size avoids this in two ways: it is
+unchanged if every weight is multiplied by a constant, so the population scale
+drops out; and it is smaller than the respondent count, reflecting the design
+effect of unequal weighting.
 
 ## Mean confidence intervals
 
@@ -1939,14 +1938,11 @@ pair being compared:
 
 $$w_{norm} = w \times \frac{n}{\sum w}$$
 
-The rescaling is presentational rather than a variance correction. With
-independent sampling units, the linearized standard errors that **survey**
-computes are scale-invariant in the weights: the raw weights and the rescaled
-weights give identical standard errors and identical degrees of freedom. The
-"roughly 9x too tight" problem described under percentage confidence intervals
-above belongs specifically to the manual sum-of-weights calculation that the
-Kish effective sample size corrects, and it does **not** carry over to the
-design objects used here.
+The rescaling is presentational. Like the Kish effective sample size, the
+linearized standard errors that **survey** computes do not change when every
+weight is multiplied by a constant, so raw and rescaled weights give identical
+standard errors and degrees of freedom. The sum-of-weights problem described
+under percentage confidence intervals does not arise here.
 
 **No omnibus test is reported.** Each row of a comparison table is a single
 two-species contrast. An overall F-test across the species in a family was
@@ -1985,8 +1981,6 @@ adjusted p-value near the conventional threshold accordingly.
 `r paste0("The size-and-numbers comparisons are paired. For each respondent who answered both items of a pair, the difference between the two responses is computed first, and the group figure is the weighted mean of those differences with the usual interval. Restricting to respondents who answered both items means the two means printed beside the difference describe the same people, so the difference column equals the difference of the columns. Pairing removes between-angler variation in how the scale is used, which is why a difference of a few hundredths of a scale point can carry a narrower interval than either mean.")`
 
 `r paste0("No significance test is reported in Chapter 4, and no adjustment for multiple comparisons is applied. Each interval is a 95 percent interval for its own group taken alone. Seventeen groups are shown for each pair, and the groups overlap, since a family row contains the respondents in its own species rows; reading every interval at once is therefore a weaker exercise than reading any one of them, and a group whose interval just excludes zero should be read with that in mind. The correlation tables are likewise descriptive summaries with no test attached, and the group-level correlations are computed across 17 overlapping groups rather than across independent observations.")`
-
-`r paste0("The reliability coefficient quoted in Chapter 4 is a weighted raw alpha for the four D4 satisfaction items. It is reported for reference only; no composite score is constructed anywhere in this report, which is item-level throughout.")`
 
 ## Angler type profiles in Chapter 5
 

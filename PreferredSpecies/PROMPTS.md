@@ -889,3 +889,45 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-09-29 — Prompt 137
 
 > Commit and push the tracking files and restart skill, then start a new conversation.
+
+## 2026-09-29 — Prompt 138 (new conversation)
+
+> New conversation for the PreferredSpecies report. Read the "0. Start here" restart brief in
+> AGENTS.md and the PROGRESS.md section it points to, then summarise where we are and list the
+> open questions. Don't change any files until I say so.
+
+## 2026-09-29 — Prompt 139
+
+> let's settle easy questions...then rerun the question table and we'll proceed.....Q24 -2025, Q35 - check it now, Q49 - do NOT add, Q57 - leave icons out
+
+## 2026-09-29 — Prompt 140
+
+> I'm not sure what you mean in Q35
+
+## 2026-09-29 — Prompt 141
+
+> Relabel in this report only.
+
+## 2026-09-29 — Prompt 142
+
+> explain Q32
+
+## 2026-09-29 — Prompt 143
+
+> show me option c in the console
+
+## 2026-09-29 — Prompt 144
+
+> let's remove the reliability stuff in chapter 4...from both text and table
+
+## 2026-09-29 — Prompt 145
+
+> advise me through Q25
+
+## 2026-09-29 — Prompt 146
+
+> Apply option B with the draft wording as written.
+
+## 2026-09-29 — Prompt 147
+
+> Re-render the report and verify DocxCounts() plus all of today's changes. Commit today's changes (D177–D182) after the render checks out.

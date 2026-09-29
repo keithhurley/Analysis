@@ -1035,23 +1035,14 @@ Ch5FamilyMixPlot <- function(long, titleText) {
       colour = "grey30"
     ) +
     facet_wrap(~Panel, ncol = 4) +
-    # D175: profile icons (with the number) as tick labels, as on the cards
-    scale_x_discrete(labels = function(x) {
-      paste0(
-        "<img src='",
-        normalizePath(Ch5IconPath(as.integer(x))),
-        "' width='13'/><br>",
-        x
-      )
-    }) +
+    # Q57/D177: numbers only here; icons at this size were too small to read
     labs(
       title = titleText,
       x = "Profile",
       y = "Weighted % of family-group respondents \u00b1 95% CI",
       caption = "Dashed mark: Overall share for that profile. Unassigned respondents not shown."
     ) +
-    theme_bw() +
-    theme(axis.text.x = ggtext::element_markdown(lineheight = 1.05, size = 7))
+    theme_bw()
 }
 
 # ---- Family-group cards (prompt 131, D173-D174) ----------------------------
