@@ -18,9 +18,9 @@ caption.sizes <-
 caption.comparison <-
   "Rows are the individual species within the family group, followed by the family group as a whole. The family row is computed on the same respondents as the species rows above it, so it is their weighted combination rather than a separate sample."
 caption.banner <-
-  "Family columns contain the species columns listed beneath them, so a respondent who prefers largemouth bass is counted in both the Bass column and the Largemouth bass column. Preferred-group columns therefore overlap and do not sum to the analysis sample."
+  "Family columns contain the species columns listed beneath them, so a respondent who prefers largemouth bass is counted in both the Bass column and the Largemouth bass column. Preferred-group columns therefore overlap and do not sum to the analysis sample. Percentages are of the analysis sample."
 caption.contrasts <-
-  "Each row compares two species on the outcome named. Difference is the weighted mean of the second species minus the first, with a 95% confidence interval; it is a design-based comparison on weights rescaled to the sample size. g is Hedges' g computed on effective sample sizes. Bonferroni p multiplies the unadjusted p-value by the number of species comparisons available within that family for that outcome."
+  "Each row compares two species on the outcome named. Difference is the weighted mean of the second species minus the first, with a 95% confidence interval; it is a design-based comparison on weights rescaled to the sample size. g is Hedges' g computed on effective sample sizes. Family p multiplies the unadjusted p-value by the number of tests in the whole family (species pairs times nine outcomes) and is capped at 1. A dagger on n marks a comparison in which one species has fewer than 30 respondents."
 
 # Banner definition -------------------------------------------------------
 # Family groups (ANALYSIS_PLAN.md 2.1; D18, D22) used for coverage accounting.
@@ -35,9 +35,57 @@ banner.levels <- c(
   "Esocids"
 )
 
-# The displayed banner (D31). Families that Chapter 1 broke out carry BOTH a
-# combined column and one column per species, so the columns overlap. Esocids
-# is split outright and has no combined column.
+# Chapter 1 group-selection rules (D184-D190) ------------------------------
+# Candidate families: the only species that may be combined. Bullhead stays
+# out (D18). Species not listed here are in no candidate family.
+family.candidates <- tribble(
+  ~Family             , ~Species                    ,
+  "Bass"              , "Largemouth bass"           ,
+  "Bass"              , "Smallmouth bass"           ,
+  "Panfish / Sunfish" , "Crappie"                   ,
+  "Panfish / Sunfish" , "Bluegill / Sunfish"        ,
+  "Panfish / Sunfish" , "Yellow perch"              ,
+  "Catfish"           , "Channel catfish"           ,
+  "Catfish"           , "Blue catfish"              ,
+  "Catfish"           , "Flathead catfish"          ,
+  "Moronides"         , "Striped bass"              ,
+  "Moronides"         , "Wiper"                     ,
+  "Moronides"         , "White bass"                ,
+  "Esocids"           , "Northern pike"             ,
+  "Esocids"           , "Muskellunge / Tiger musky"
+)
+
+# Single-member groups: no test, size rule only.
+single.groups <- tribble(
+  ~Group              , ~Species                                      ,
+  "Walleye / Sauger"  , "Walleye / Sauger"                            ,
+  "Trout"             , "Trout"                                       ,
+  "No preference"     , "I do not prefer any particular type of fish"
+)
+
+# Display order of groups in every banner-shaped table.
+family.order <- c(
+  "Walleye / Sauger",
+  "Bass",
+  "Panfish / Sunfish",
+  "Catfish",
+  "Moronides",
+  "Trout",
+  "Esocids",
+  "No preference"
+)
+
+# D188: minimum raw B1 respondents for a column, applied after testing.
+min.group.n <- 30
+
+# D186: a family may be combined only if no family-adjusted p is below this.
+family.alpha <- 0.05
+
+# The displayed banner. Hand-typed (D190); the chunk `bannerRuleCheck` stops
+# the render if it disagrees with DeriveBanner(). A family that combines
+# carries BOTH a family column and one column per qualifying species, so
+# columns overlap (D31). "Split" marks a qualifying species whose family did
+# not combine, so it has no parent column.
 banner.definition <- tibble(
   Column = c(
     "Walleye / Sauger",
@@ -47,19 +95,15 @@ banner.definition <- tibble(
     "Panfish / Sunfish",
     "Crappie",
     "Bluegill / Sunfish",
-    "Yellow perch",
     "Catfish",
     "Channel catfish",
-    "Blue catfish",
     "Flathead catfish",
-    "Moronides",
+    "Wiper",
+    "White bass",
     "Trout",
     "Northern pike",
-    "Muskellunge / Tiger musky",
     "No preference"
   ),
-  # "Split" marks Northern pike and Muskellunge, which replaced the Esocids
-  # family column outright (D31) and so have no parent column to sit under.
   Type = c(
     "Family",
     "Family",
@@ -68,14 +112,12 @@ banner.definition <- tibble(
     "Family",
     "Species",
     "Species",
-    "Species",
     "Family",
     "Species",
     "Species",
-    "Species",
-    "Family",
-    "Family",
     "Split",
+    "Split",
+    "Family",
     "Split",
     "Family"
   ),
@@ -87,35 +129,16 @@ banner.definition <- tibble(
     c("Crappie", "Bluegill / Sunfish", "Yellow perch"),
     "Crappie",
     "Bluegill / Sunfish",
-    "Yellow perch",
     c("Channel catfish", "Blue catfish", "Flathead catfish"),
     "Channel catfish",
-    "Blue catfish",
     "Flathead catfish",
-    c("Striped bass", "Wiper", "White bass"),
+    "Wiper",
+    "White bass",
     "Trout",
     "Northern pike",
-    "Muskellunge / Tiger musky",
     "I do not prefer any particular type of fish"
   )
 )
-
-# Genus -> species map for the within-family comparisons (D18 removed Bullhead)
-genus.species <- tribble(
-  ~Genus              , ~Species                    ,
-  "Bass"              , "Largemouth bass"           ,
-  "Bass"              , "Smallmouth bass"           ,
-  "Panfish / Sunfish" , "Crappie"                   ,
-  "Panfish / Sunfish" , "Bluegill / Sunfish"        ,
-  "Panfish / Sunfish" , "Yellow perch"              ,
-  "Esocids"           , "Northern pike"             ,
-  "Esocids"           , "Muskellunge / Tiger musky" ,
-  "Catfish"           , "Channel catfish"           ,
-  "Catfish"           , "Blue catfish"              ,
-  "Catfish"           , "Flathead catfish"
-)
-
-genus.levels <- unique(genus.species$Genus)
 
 motivation.vars <- c(
   "motivation_pp",
@@ -312,51 +335,78 @@ ArrangeSpeciesSizeTable <- function(sizeTbl) {
     )
 }
 
-# Banner column sizes (3.3). Columns overlap, so there is no total row; the
-# distinct-coverage figure is reported separately in the report text.
-BannerSizeTable <- function(mydata) {
+# TRUE for respondents whose B1 answer appears in at least one banner column.
+InBannerColumn <- function(B1) {
+  as.character(B1) %in% unlist(banner.definition$Members)
+}
+
+# Final preferred groups (D184 step 5): every banner column with its raw n,
+# Kish effective n and population share. The percent and its CI come from
+# base.summary.percent.selectOne on an in-column / out-of-column indicator, so
+# a column's percentage equals the sum of its species' percentages in Table 1
+# by construction. Columns overlap, so there is no total row.
+FinalGroupsTable <- function(mydata, popTotalAll) {
+  nAnalysis <- sum(!is.na(mydata$B1))
+
+  rows <- purrr::map2_dfr(
+    banner.definition$Column,
+    banner.definition$Members,
+    function(column, members) {
+      inGroup <- as.character(mydata$B1) %in% members
+      tmp <- mydata %>%
+        mutate(grp = factor(if_else(inGroup, "In", "Out"), levels = c("In", "Out")))
+      pct <- base.summary.percent.selectOne(tmp, grp) %>%
+        as_tibble() %>%
+        filter(Response == "In")
+      tibble(
+        Column = column,
+        Respondents = pct$Number,
+        EffectiveN = Kish(mydata$postWeight[inGroup]),
+        Percent = pct$Value,
+        PercentCI = pct$CI
+      )
+    }
+  )
+
   banner.definition %>%
-    rowwise() %>%
-    mutate(
-      Respondents = sum(as.character(mydata$B1) %in% Members),
-      EffectiveN = Kish(mydata$postWeight[as.character(mydata$B1) %in% Members])
-    ) %>%
-    ungroup() %>%
+    select(Column, Type) %>%
+    left_join(rows, by = "Column") %>%
     transmute(
-      `Preferred group` = if_else(
-        Type == "Species",
-        paste0("   ", Column),
-        Column
-      ),
+      `Preferred group` = if_else(Type == "Family", Column, paste0("   ", Column)),
       Level = recode(
         Type,
         "Family" = "Family group",
         "Species" = "Species within family",
-        "Split" = "Species (family split)"
+        "Split" = "Species (family not combined)"
       ),
       Respondents = FmtCount(Respondents),
-      `Effective n` = formatC(EffectiveN, format = "f", digits = 1)
+      `Effective n` = formatC(EffectiveN, format = "f", digits = 1),
+      `% of angler population` = FmtPct(Percent, PercentCI),
+      `Total anglers` = FmtCount(
+        Percent / 100 * popTotalAll,
+        PercentCI / 100 * popTotalAll
+      )
     )
 }
 
 # The respondents inside the report universe who receive no banner column.
 BannerExclusionTable <- function(mydata) {
   excluded <- mydata %>%
-    filter(!is.na(B1), is.na(B1banner)) %>%
-    group_by(`Excluded from preferred groups` = B1, .drop = FALSE) %>%
+    filter(!is.na(B1), !InBannerColumn(B1)) %>%
+    group_by(`Outside every preferred group` = B1, .drop = FALSE) %>%
     summarise(Respondents = n(), .groups = "drop") %>%
-    filter(Respondents > 0 | `Excluded from preferred groups` == "Sturgeon") %>%
+    filter(Respondents > 0 | `Outside every preferred group` == "Sturgeon") %>%
     arrange(desc(Respondents)) %>%
     mutate(
-      `Excluded from preferred groups` = as.character(
-        `Excluded from preferred groups`
+      `Outside every preferred group` = as.character(
+        `Outside every preferred group`
       )
     )
 
   bind_rows(
     excluded,
     tibble(
-      `Excluded from preferred groups` = "Total",
+      `Outside every preferred group` = "Total",
       Respondents = sum(excluded$Respondents)
     )
   ) %>%
@@ -386,7 +436,7 @@ ScaleLabel <- function(varName, labels) {
 }
 
 SpeciesInGenus <- function(genus) {
-  genus.species$Species[genus.species$Genus == genus]
+  family.candidates$Species[family.candidates$Family == genus]
 }
 
 # Rows = each species in the genus, then the genus as a whole. Columns = the
@@ -500,9 +550,8 @@ GenusEffortTable <- function(mydata, genus) {
 # size before svydesign(); note this is presentational, since survey's
 # linearization SEs are scale-invariant in the weights (D20).
 #
-# Bonferroni multiplies the raw p by the number of contrasts available within
-# that family for that outcome (D24): 1 for Bass and Esocids, 3 for Panfish
-# and Catfish.
+# Returns unadjusted p only. The multiplicity adjustment needs every outcome
+# in the family at once, so it lives in FamilyTests() (D186).
 PairwiseContrasts <- function(mydata, genus, outcomeVar, gate = NULL) {
   species <- SpeciesInGenus(genus)
 
@@ -523,7 +572,7 @@ PairwiseContrasts <- function(mydata, genus, outcomeVar, gate = NULL) {
     # A pair with an empty arm cannot be compared; report it rather than error.
     if (length(unique(as.character(s$B1))) < 2) {
       return(tibble(
-        Genus = genus,
+        Family = genus,
         Outcome = outcomeVar,
         SpeciesA = p[1],
         SpeciesB = p[2],
@@ -557,7 +606,7 @@ PairwiseContrasts <- function(mydata, genus, outcomeVar, gate = NULL) {
     hedgesJ <- 1 - 3 / (4 * (effA + effB) - 9)
 
     tibble(
-      Genus = genus,
+      Family = genus,
       Outcome = outcomeVar,
       SpeciesA = p[1],
       SpeciesB = p[2],
@@ -573,26 +622,42 @@ PairwiseContrasts <- function(mydata, genus, outcomeVar, gate = NULL) {
     )
   })
 
+  op
+}
+
+# Every species pair x every outcome in one family (D186). Bonferroni is
+# applied across ALL of them: TestsInFamily = pairs x 9 outcomes, and PFamily
+# is min(1, P * TestsInFamily). Outcome gates match the tables they feed:
+# each scale's *_AnsweredAll, and C1_AnsweredAll for days fished.
+FamilyTests <- function(mydata, family) {
+  outcomes <- c(motivation.vars, attitude.vars, "C1Total_days")
+
+  op <- map_dfr(outcomes, function(v) {
+    gate <- if (v == "C1Total_days") "C1_AnsweredAll" else paste0(v, "_AnsweredAll")
+    PairwiseContrasts(mydata, family, v, gate = gate)
+  })
+
   op %>%
     mutate(
-      Contrasts = sum(!is.na(P)),
-      PBonferroni = pmin(1, P * Contrasts)
+      TestsInFamily = sum(!is.na(P)),
+      PFamily = pmin(1, P * TestsInFamily)
     )
 }
 
-ContrastTable <- function(mydata, genus, outcomeVars, labels, gated = TRUE) {
-  map_dfr(outcomeVars, function(v) {
-    PairwiseContrasts(
-      mydata,
-      genus,
-      v,
-      gate = if (gated) paste0(v, "_AnsweredAll") else NULL
-    )
-  }) %>%
+# A dagger flags a comparison with an arm below the minimum size (D189).
+FmtArms <- function(nA, nB) {
+  paste0(nA, " / ", nB, if_else(pmin(nA, nB) < min.group.n, "†", ""))
+}
+
+ContrastTable <- function(tests, outcomeVars, labels) {
+  tests %>%
+    filter(Outcome %in% outcomeVars) %>%
+    mutate(Outcome = factor(Outcome, levels = outcomeVars)) %>%
+    arrange(Outcome) %>%
     transmute(
-      Outcome = ScaleLabel(Outcome, labels),
+      Outcome = ScaleLabel(as.character(Outcome), labels),
       Comparison = paste(SpeciesA, "vs.", SpeciesB),
-      n = paste0(nA, " / ", nB),
+      n = FmtArms(nA, nB),
       Difference = paste0(
         formatC(Difference, format = "f", digits = 3),
         " (",
@@ -603,15 +668,16 @@ ContrastTable <- function(mydata, genus, outcomeVars, labels, gated = TRUE) {
       ),
       g = formatC(G, format = "f", digits = 2),
       `p` = FmtP(P),
-      `Bonferroni p` = FmtP(PBonferroni)
+      `Family p` = FmtP(PFamily)
     )
 }
 
-EffortContrastTable <- function(mydata, genus) {
-  PairwiseContrasts(mydata, genus, "C1Total_days", gate = "C1_AnsweredAll") %>%
+EffortContrastTable <- function(tests) {
+  tests %>%
+    filter(Outcome == "C1Total_days") %>%
     transmute(
       Comparison = paste(SpeciesA, "vs.", SpeciesB),
-      n = paste0(nA, " / ", nB),
+      n = FmtArms(nA, nB),
       `Difference in days` = paste0(
         formatC(Difference, format = "f", digits = 1),
         " (",
@@ -622,9 +688,121 @@ EffortContrastTable <- function(mydata, genus) {
       ),
       g = formatC(G, format = "f", digits = 2),
       `p` = FmtP(P),
-      `Bonferroni p` = FmtP(PBonferroni)
+      `Family p` = FmtP(PFamily)
     )
 }
+
+# Table 2: the proposed family groupings (D184 step 2). Only species that sit
+# in a candidate family appear.
+FamilyProposalTable <- function(mydata) {
+  family.candidates %>%
+    mutate(Family = factor(Family, levels = family.order)) %>%
+    arrange(Family) %>%
+    rowwise() %>%
+    mutate(
+      Respondents = sum(as.character(mydata$B1) == Species),
+      EffectiveN = Kish(mydata$postWeight[as.character(mydata$B1) == Species])
+    ) %>%
+    ungroup() %>%
+    transmute(
+      `Proposed family` = as.character(Family),
+      Species,
+      Respondents = FmtCount(Respondents),
+      `Effective n` = formatC(EffectiveN, format = "f", digits = 1)
+    )
+}
+
+# One row per candidate group (5 families + 3 single-member groups), in
+# display order, with the test result and both rule outcomes.
+FamilyDisposition <- function(mydata, tests) {
+  candidates <- family.candidates %>%
+    group_by(Group = Family) %>%
+    summarise(Members = list(Species), .groups = "drop")
+  singles <- single.groups %>%
+    transmute(Group, Members = as.list(Species))
+
+  bind_rows(candidates, singles) %>%
+    mutate(Group = factor(Group, levels = family.order)) %>%
+    arrange(Group) %>%
+    mutate(Group = as.character(Group)) %>%
+    rowwise() %>%
+    mutate(
+      Multi = length(Members) > 1,
+      Tests = if (Multi) sum(!is.na(tests$PFamily[tests$Family == Group])) else NA_integer_,
+      Differences = if (Multi) sum(tests$PFamily[tests$Family == Group] < family.alpha, na.rm = TRUE) else NA_integer_,
+      MinP = if (Multi) min(tests$PFamily[tests$Family == Group], na.rm = TRUE) else NA_real_,
+      Combines = !Multi || Differences == 0,
+      Respondents = sum(as.character(mydata$B1) %in% Members),
+      MeetsMin = Respondents >= min.group.n,
+      FamilyColumn = Combines && MeetsMin
+    ) %>%
+    ungroup()
+}
+
+FamilyDispositionTable <- function(disposition) {
+  disposition %>%
+    transmute(
+      Group,
+      `Species tested` = if_else(Multi, map_chr(Members, ~ as.character(length(.x))), "1 (no test)"),
+      Tests = if_else(Multi, as.character(Tests), "—"),
+      `Differences (family p < 0.05)` = if_else(Multi, as.character(Differences), "—"),
+      `Smallest family p` = if_else(Multi, FmtP(MinP), "—"),
+      `May combine` = if_else(Combines, "Yes", "No"),
+      Respondents = FmtCount(Respondents),
+      `n >= 30` = if_else(MeetsMin, "Yes", "No"),
+      `Family column` = if_else(FamilyColumn, "Yes", "No")
+    )
+}
+
+# Species in candidate families with the size rule (D187: independent of
+# whether the family combines).
+SpeciesDispositionTable <- function(mydata) {
+  family.candidates %>%
+    mutate(Family = factor(Family, levels = family.order)) %>%
+    arrange(Family) %>%
+    rowwise() %>%
+    mutate(Respondents = sum(as.character(mydata$B1) == Species)) %>%
+    ungroup() %>%
+    transmute(
+      `Proposed family` = as.character(Family),
+      Species,
+      Respondents = FmtCount(Respondents),
+      `n >= 30` = if_else(Respondents >= min.group.n, "Yes", "No"),
+      `Species column` = if_else(Respondents >= min.group.n, "Yes", "No")
+    )
+}
+
+# What the rules produce, in banner.definition's shape. Used only to verify the
+# hand-typed banner (D190).
+DeriveBanner <- function(mydata, disposition) {
+  purrr::pmap_dfr(
+    disposition,
+    function(Group, Members, FamilyColumn, ...) {
+      speciesN <- vapply(
+        Members,
+        function(m) sum(as.character(mydata$B1) == m),
+        numeric(1)
+      )
+      out <- tibble()
+      if (FamilyColumn) {
+        out <- tibble(Column = Group, Type = "Family", Members = list(Members))
+      }
+      if (length(Members) > 1) {
+        keep <- Members[speciesN >= min.group.n]
+        out <- bind_rows(
+          out,
+          tibble(
+            Column = keep,
+            Type = if (FamilyColumn) "Species" else "Split",
+            Members = as.list(keep)
+          )
+        )
+      }
+      out
+    }
+  )
+}
+
 
 # Chapter 2: the D4 battery, one table per item (D63) ---------------------
 caption.d4item <-

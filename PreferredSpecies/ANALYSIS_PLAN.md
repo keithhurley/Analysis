@@ -437,3 +437,46 @@ step, and §6's Appendix B list must gain an entry describing how the types were
 universe, with what treatment of the survey weights, and how the solution was validated. The D5
 precedent — inference requires a stated plan, a multiplicity policy, and its own appendix section —
 applies to that work in full.
+
+---
+
+## 9. Chapter 1 restructure — rule-based group selection (planned 2026-09-29; D184-D190, F94)
+
+Supersedes §3.4-§3.6 and the hand-made split calls of §2.5 once implemented. **Phases 0-2 are built (2026-09-29, D191-D193); Phases 3-4 are not started.** See `PROGRESS.md`, "Phase 2 built".
+
+### 9.1 Rules
+
+| Rule | Value | Decision |
+|---|---|---|
+| Candidate families | Bass (Largemouth, Smallmouth); Panfish / Sunfish (Crappie, Bluegill / Sunfish, Yellow perch); Catfish (Channel, Blue, Flathead; **no Bullhead**); Moronides (Striped bass, Wiper, White bass); Esocids (Northern pike, Muskellunge / Tiger musky) | D185 |
+| Single-member groups | Walleye / Sauger, Trout, No preference: no test, size rule only | D185 |
+| Test | Inherited: `PairwiseContrasts()` (`svyttest` on weights normalized to sum to n), 4 motivation scales, 4 attitude scales, `C1Total_days`; all species pairs | D10, D189 |
+| Multiplicity | **Bonferroni across every test in the family** (pairs x 9): 9 tests for 2 species, 27 for 3 | D186 (Q22) |
+| Family combines | only if **no** adjusted p < 0.05 | D186 |
+| Species column | qualifies on size alone, independent of the family result | D187 |
+| Minimum size | **raw `B1` n >= 30**, applied after testing, to species and families | D188 |
+| Banner | hand-typed `banner.definition` + render-stopping check against the rule | D190 |
+| Caveat text | F6: underpowered; overlapping CIs are weak evidence of similarity | F6 |
+
+### 9.2 New Chapter 1 order
+
+1. Question text (unchanged).
+2. **Table 1**, all species: raw n, Kish effN, weighted n, %, population, unchanged (`SpeciesSizeTable`).
+3. **Table 2, proposed family groupings**: candidate family -> member species with n. Species outside every candidate family are not listed.
+4. Within-family comparisons, one block per candidate family (**add Moronides**): means tables, effort table, contrast tables. Contrast tables gain the family-adjusted p.
+5. **Disposition table**: per family the number of tests, number of adjusted differences, combine yes/no, family n; per species n and size pass/fail.
+6. **Final preferred groups**: accepted families and accepted individual species, with n, effN, %, population. Doubles as the banner table; respondents outside every column itemized.
+
+### 9.3 Phases
+
+| Phase | Work | Gate |
+|---|---|---|
+| 0 | Decisions D184-D190 | done 2026-09-29 |
+| 1 | Console dry run of the rules and the disposition table (F94) | **User signs off the list before any code** |
+| 2 | `PreferredSpeciesFunctions.R`: `family.candidates` (replaces `genus.species`), Table 2 builder, family-wide Bonferroni in `PairwiseContrasts`/contrast tables, disposition builder, size-threshold constant, new `banner.definition` (15 columns per F94) and its check. `PreferredSpeciesReport.rmd` Chapter 1 rewritten (the L153 count sentence must become computed). Appendix B: multiplicity, minimum-size and banner-construction wording | Chapter 1 renders |
+| 3 | Downstream: Chapters 2-5 follow `banner.definition`; check `d2018` species check (L88), Chapter 3 landscape widths, Chapter 5 family cards (Moronides card removed, F94), fixed-text mentions of removed columns (Moronides, Blue catfish, Yellow perch, Muskellunge) | each chapter renders |
+| 4 | Full render, new `DocxCounts()` baseline, text scans, tracking files, commit | baseline recorded |
+
+### 9.4 Expected F94 outcome (dry run, to confirm at the Phase 1 gate)
+
+Family columns: Bass, Panfish / Sunfish, Catfish, Walleye / Sauger, Trout, No preference. No family column: Esocids, Moronides (each has 3 adjusted differences). Species columns: Largemouth, Smallmouth, Crappie, Bluegill / Sunfish, Channel, Flathead, Northern pike, Wiper, White bass. 15 columns; 60 respondents outside every column.

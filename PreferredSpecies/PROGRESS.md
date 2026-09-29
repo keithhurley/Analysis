@@ -2383,3 +2383,116 @@ Open after D182: **Q22.**
 ### Verification of D177-D182 (prompt 147)
 
 Rendered to a temp folder (Word held `PreferredSpeciesReport.docx` open, F91), 3.4 min, clean environment. `DocxCounts()` **95 / 95 / 10 / 0**, baseline unchanged. Text checks on the rendered docx: Appendix A heading carries 2025 (1); "Catch Something" 0, "psycological" 0, "Catch something" 15 (14 scale rows + the Ch. 3 heading), "Physical and psychological" 14; "alpha" 0 in Ch. 4 and Appendix B, "reliability coefficient" 0; "9x too tight" 0, new Appendix B sentences present. Faceted family figure viewed from the docx media: number tick labels, no icons. The source changes were committed as `e425e16`. After Word was closed (prompt 148) the verified render was copied into the project (MD5 identical to the temp render, `DocxCounts()` 95 / 95 / 10 / 0 on the project copy) and committed separately.
+
+---
+
+## Restart checkpoint (2026-09-29, prompt 150)
+
+Written by the `preparing-restart` skill. The session covered prompts 138-150: commits `e425e16` (D177-D182 source and tracking) and `b3edf40` (rendered docx), **both pushed** to `origin/master` (prompt 149). Six open questions were closed: Q24 (D178), Q57 (D177), Q49 (D179), Q35 (D180), Q32 (D181), Q25 (D182); findings F92-F93. Last verified render: `DocxCounts()` **95 / 95 / 10 / 0** (92 tables), 2026-09-29, now the project copy.
+
+### Environment notes for the next session
+
+| Item | Note |
+|---|---|
+| `DocxCounts()` | Still **only in the console** (F90); definition in F41 + F87. Recreate it before verifying, or ask to save it to a file |
+| Console objects from this session | `d` (report universe, n = 1,915), `ch4.alphaByGroup`, `sat4`, `docx_path`, `render_out`, `ch5.pics`, `docx_unzip`, `l`. None is needed by the report, which renders in `new.env()` |
+| `Ch4Alpha()` | Left in `PreferredSpeciesFunctions.R`, now unused (D181); delete only if the user asks |
+| Word heading styles | The docx uses French style names (`Titre1`, `Titre2`, `Titre3`); match those when scanning chapters in `document.xml` |
+| docx text scans | Joining `document.xml` lines leaves inter-run whitespace; a phrase spanning a source line break can fail a fixed-string match while present in Word (prompt 147) |
+| Word lock / render | Close Word before rendering (F91), or render with `output_dir = tempdir()` and copy; ~3.4 min |
+| Git | `.posit/assistant/settings.json` shows modified; it was not changed by this work and was left uncommitted. Harmless LF→CRLF and "unable to find all commit-graph files" warnings on every git call |
+
+### Open for the user (complete list)
+
+| # | Question |
+|---|---|
+| Q22 | Outcome-dimension multiplicity in Chapter 1 (F8) — flagged, never implemented |
+
+### Unverified
+
+- Chapter 5 layout in Word (cards, photos, icon header rows) still not viewed on the page.
+- Step 5 (guided text) not started; all open questions except Q22 are now closed, so it is next after Q22.
+
+---
+
+## DocxCounts saved to file (2026-09-29, prompt 151)
+
+| # | Decision | Date |
+|---|---|---|
+| D183 | **`DocxCounts()` saved to `DocxCounts.R`** in the project root (flat layout, D17), resolving F90. Definition copied verbatim from the console (F41 regex, F87 header-row counting) plus `library(stringr)`. Not sourced by the report; `source("DocxCounts.R")` before verifying a render. Verified by `sys.source()` into a clean environment on the project docx: **95 / 95 / 10 / 0**, matches baseline | 2026-09-29 |
+
+Next: Q22 (Chapter 1 multiplicity); the user has ideas on restructuring the whole chapter.
+
+---
+
+## Chapter 1 restructure — plan settled (2026-09-29, prompts 153-156)
+
+Planning only. **No report or function code was changed.** The user proposed restructuring Chapter 1 so the preferred-group list follows from stated rules rather than hand calls. Six design questions were answered; a read-only console dry run of the agreed rules (objects `dry`, `ch1_res` in the console; `genus.species` restored to 10 rows afterwards) produced the disposition below. The executable plan is `ANALYSIS_PLAN.md` §9.
+
+| # | Decision | Date |
+|---|---|---|
+| D184 | **Chapter 1 becomes rule-based group selection.** Order: (1) Table 1, all individual `B1` species with their stats, **unchanged**; (2) Table 2 revised to **"proposed family groupings"**: every candidate family with its member species, listing **no species that is not in a candidate family**; (3) the within-family tests as now, extended to every multi-species candidate; the results decide whether a family may be combined; (4) the **minimum sample size** is applied and any species or family below it is dropped; (5) a final table of the accepted families and individual species, the list used by the rest of the report (a species may be in a family, alone, or both). The **rest of the report (Chapters 2-5, Appendix B) is revised only after Chapter 1 is finished**, to add or remove families and species so it matches. Supersedes in part D5 (per-split go/no-go), D26, D31 | 2026-09-29 |
+| D185 | **Candidate families: Bass, Panfish / Sunfish, Catfish, Moronides, Esocids** (5). Catfish stays Channel + Blue + Flathead; **Bullhead stays out (D18 kept)**. Walleye / Sauger, Trout and No preference are single-member groups: no test, straight to the size rule. Other / Unique is not a candidate (D22 stands) | 2026-09-29 |
+| D186 | **Q22 closed (design): Bonferroni across every test in the family**, i.e. species pairs × 9 outcomes (4 motivation, 4 attitude, `C1Total_days`): 9 tests for a 2-species family, 27 for a 3-species family. Supersedes the within-outcome adjustment of D24/D32 and resolves F8. **A family may be combined only if no adjusted p < 0.05.** F6 (underpowered; overlapping CIs are weak evidence of similarity) is stated in the chapter text. Implementation pending | 2026-09-29 |
+| D187 | **Individual species qualify by the size rule alone**, whether or not their family combines (rejected: test-conditional species columns) | 2026-09-29 |
+| D188 | **Minimum size: raw `B1` n >= 30**, applied after testing to species and families. Per-question N stays displayed as now. Supersedes D16 and D30 (no minimum-n rule) | 2026-09-29 |
+| D189 | **All member species are tested, then the size rule is applied** (as the user specified), so pairs with arms of 7-12 respondents are in the family decision and are flagged in the tables | 2026-09-29 |
+| D190 | **`banner.definition` stays hand-typed**, with a `dataChecks` assertion that stops the render if it disagrees with what the rule produces | 2026-09-29 |
+
+| # | Finding |
+|---|---|
+| F94 | **Dry run of D185-D189 (console only, unverified against any rendered output).** Family tests, Bonferroni across the family: **Bass** 9 tests, 0 differences (min adjusted p 0.399); **Panfish** 27, 0 (0.393); **Catfish** 27, 0 (0.795); **Esocids** 9, **3** (Northern pike vs Muskellunge: `motivation_pp`, `motivation_resource`, `attitude_size`; min adjusted p 0.000416); **Moronides** (never tested before) 27, **3** (all Wiper vs White bass: `motivation_resource` g = -0.86, adj p 0.0148; `attitude_size` g = -1.15, 0.0032; `attitude_harvest` g = 1.32, 0.000034). The Striped bass pairs (arms of 7-11) show no adjusted difference. Under the old within-outcome adjustment Bass and Panfish each had one difference (p = 0.044, `attitude_numbers` / Crappie vs Bluegill `attitude_size`); across the family neither survives. **Resulting disposition:** family columns for Bass, Panfish / Sunfish, Catfish, Walleye / Sauger, Trout, No preference (6); **no** family column for Esocids or Moronides; species columns for Largemouth 316, Crappie 181, Channel 151, Flathead 50, Bluegill 43, Smallmouth 41, White bass 39, Wiper 35, Northern pike 32 (9). Below 30, no column: Blue catfish 27 and Yellow perch 12 (still inside their family columns), Striped bass 11 and Muskellunge 8 (Overall only). **15 columns against 17 today.** Outside every column: 60 respondents (Muskellunge 8, Striped bass 11, Bullhead 4, Other 4, Drum 6, Common carp 9, Invasive carp 4, Paddlefish 14); 1,855 + 60 = 1,915 |
+
+Downstream consequences noted, not yet acted on: the Chapter 5 Moronides family card and its hand-written management text go away (6 cards, not 7); Wiper and White bass must be present in the 2018 `B1` levels for the `d2018` check at `PreferredSpeciesReport.rmd` L88; Chapter 3 landscape table widths change with the column count; Appendix B needs the multiplicity, minimum-size and banner-construction wording rewritten.
+
+### Open for the user (complete list)
+
+| # | Question |
+|---|---|
+| Q22 | **Design settled (D186); implementation pending.** Open until Chapter 1 is rebuilt and rendered |
+| — | **Phase 1 sign-off:** the F94 disposition list is a dry run. The user confirms (or changes) it before any code is written (`ANALYSIS_PLAN.md` §9, Phase 1) |
+
+### Environment notes
+
+- Console still holds `dry` (99 rows, all 5 families, adds `TestsInFamily`, `PFamily`), `ch1_res` (72 rows, the 4 old families, old adjustment) and the objects from earlier sessions. Not needed by the report.
+- `DocxCounts.R` (D183) and this session's tracking edits are **uncommitted**, as are the restart edits of the earlier session (`AGENTS.md`, `PROGRESS.md`, `PROMPTS.md`). `.posit/assistant/settings.json` is not ours.
+- Render baseline is unchanged at **95 / 95 / 10 / 0**; it will change when Chapter 1 is rebuilt.
+
+## Chapter 1 restructure — Phase 2 built (2026-09-29, prompts 157-159)
+
+Phase 1 signed off by the user (prompt 158): the F94 disposition stands as written. Phase 2 (`ANALYSIS_PLAN.md` §9.3) is built and Chapter 1 renders. **The full report does not render yet** (see F95): Phase 3 is next.
+
+| # | Decision | Date |
+|---|---|---|
+| D191 | **Phase 2 implementation.** `PreferredSpeciesFunctions.R`: `family.candidates` (5 families, 13 species; replaces `genus.species`, `genus.levels` removed), `single.groups`, `family.order`, `min.group.n <- 30`, `family.alpha <- 0.05`; new 15-column hand-typed `banner.definition` (types Family / Species / Split); `FamilyTests()` (species pairs x 9 outcomes, `TestsInFamily`, `PFamily = min(1, P * TestsInFamily)`); `PairwiseContrasts()` now returns unadjusted p only and its `Genus` column is `Family`; `ContrastTable(tests, outcomeVars, labels)` and `EffortContrastTable(tests)` take a `FamilyTests()` result and print a `Family p` column; `FmtArms()` puts a dagger on `n` when an arm is below 30 (D189 flag); `FamilyProposalTable()` (Table 2), `FamilyDisposition()` / `FamilyDispositionTable()`, `SpeciesDispositionTable()`, `DeriveBanner()` (rules to banner shape), `FinalGroupsTable()` (n, Kish effN, %, population; % and CI from `base.summary.percent.selectOne` on an in/out indicator, so a column equals the sum of its species in Table 1), `InBannerColumn()`. `BannerSizeTable()` removed; `BannerExclusionTable()` now uses `InBannerColumn()`. `caption.banner` and `caption.contrasts` reworded. `SpeciesInGenus()` and the `Genus*Table()` builders keep their names and read `family.candidates` | 2026-09-29 |
+| D192 | **`AssignBannerGroup()`, `banner.levels` and `B1banner` are untouched in Phase 2** (still the 8 old family levels), so Chapter 5, which reads `B1banner`, is unchanged until Phase 3. "Outside every column" is now computed from `banner.definition` (`InBannerColumn()`), not from `is.na(B1banner)`; `nBanner` / `nBannerExcluded` in the setup chunk use it | 2026-09-29 |
+| D193 | **Report Chapter 1 rewritten** (`PreferredSpeciesReport.rmd`): Question Text; Table 1 (unchanged); Selection Rules; Proposed Family Groupings (Table 2); Comparisons Within Proposed Families (Bass, Panfish / Sunfish, Catfish, **Moronides**, Esocids; five tables each); Group Selection Results (family and species disposition tables); Final Preferred Groups (final table, outside-every-group table, coverage sentence). Chunks `familyTests` (computes `family.tests`, `family.disp` once) and `bannerRuleCheck` (D190: `stopifnot` that `DeriveBanner()` equals `banner.definition` in Column, Type and Members). The count sentence is computed. **Appendix B** edited in three places: "Analysis sample" (second exclusion paragraph), "The preferred groups, and why columns do not sum" (rule-based columns, size rule, render check), "Multiplicity" (family-wide Bonferroni; the "one dimension only" paragraph replaced by the combine rule and the F6 caveat). Remaining Appendix B wording is revisited in Phase 3 | 2026-09-29 |
+
+| # | Finding |
+|---|---|
+| F95 | **Phase 2 verification.** Console run of the new functions reproduces F94 exactly: tests 9 / 27 / 27 / 27 / 9 (Bass, Panfish, Catfish, Moronides, Esocids), differences 0 / 0 / 0 / 3 / 3; Wiper vs White bass family p 0.0148, 0.00323, 0.0000337; Northern pike vs Muskellunge 0.0064, 0.00804, 0.000416; `DeriveBanner()` equals the hand-typed banner; 15 columns; 60 outside every column (1,855 + 60 = 1,915). **A Chapter-1-only render** (header plus Chapter 1, temporary copy outside the project folder, `knit_root_dir` = project) took 18 s: `DocxCounts()` **31 tables / 0 images / 0 landscape / 0 leaked**; `bannerRuleCheck` and the `d2018` species check both passed. **The full render stops at `ch4Setup`** (`nrow(ch4.groupMeans) == 18`; now 16 rows). The **render baseline 95 / 95 / 10 / 0 is no longer valid** and the committed `PreferredSpeciesReport.docx` is the old one. No full render has been done since Chapter 1 changed |
+| F96 | **Slip, recovered.** A scripted replace briefly truncated the tail of `PreferredSpeciesFunctions.R`; it was restored from `HEAD` and `git diff` shows only intended changes. The working copy now has LF line endings and git warns it will convert to CRLF; harmless |
+
+### Phase 3 work list (found so far, not started)
+
+| Where | What |
+|---|---|
+| Chapter 4 `ch4Setup` (`PreferredSpeciesReport.rmd` ~L1361-1363) | three assertions hard-code 18 rows; now Overall + 15 = 16. Check the `Ch4*` builders and `ch4.alphaByGroup` for hard-coded groups |
+| Chapter 2 fixed prose (~L427-717) | text names removed columns (Blue catfish, Yellow perch, Muskellunge, Moronides) and hand-quoted values; every D4 paragraph must be re-verified against the 15 columns |
+| Chapter 3 | landscape table widths change with the column count |
+| Chapter 5 | `B1banner` still 8 levels (D192): decide whether to move Chapter 5 to the new banner; Moronides Class 6 checks (~L1648), `small.ci`, family-card assertions and text (~L1826-1905) reference Moronides; the Moronides card goes away (6 cards); Appendix B Chapter 5 supplement uses `Type == "Split"` (~L2008-2065) |
+| Appendix B | any remaining minimum-size wording; check "Comparisons between species" and any text saying Esocids were "replaced outright" |
+| Phase 4 | full render, new `DocxCounts()` baseline, text scans, tracking files, commit |
+
+### Open for the user (complete list)
+
+| # | Question |
+|---|---|
+| Q22 | **Implemented and verified in Chapter 1 (D191-D193).** Closes when a full report render includes it (Phase 4) |
+| — | **Phase 3 start:** no decisions are open; the list above is the work. Chapter 5's use of `B1banner` (keep the 8-level assignment or move to the new banner) is the one choice to settle when Chapter 5 is reached |
+
+### Environment notes
+
+- Console holds the new functions and `tests`, `disp`, `derived`, `family.candidates`; also stale `dry`, `ch1_res`, `genus.species`. Not needed by the report.
+- To check Chapter 1 alone: render a truncated copy of the `.rmd` (everything before `# Chapter 2`) from a temporary directory with `knit_root_dir = getwd()`.
+- Committed this session: functions, report, and the four tracking files. `DocxCounts.R` and `.posit/assistant/settings.json` remain uncommitted.

@@ -6,21 +6,22 @@
 > Companion files: `PROGRESS.md` (decisions + step status), `PROMPTS.md` (verbatim prompt log).
 
 <!-- RESTART-BRIEF:START -->
-## 0. Start here (restart brief, 2026-09-29)
+## 0. Start here (restart brief, 2026-09-29, third checkpoint)
 
-**Last commit:** the restart commit on top of `928c74a` (see `git log -1`): tracking files and the `preparing-restart` skill (D176). Working tree clean at handoff; everything pushed.
-**Where we are:** Chapters 1-5 and both appendices are built; the last render (2026-09-29) verified at `DocxCounts()` 95 / 95 / 10 / 0 (92 tables). Chapter 5 is complete through the family-group cards. Next major step is step 5 (guided text), after the open questions below.
+**Last commit:** the Phase 2 commit (Chapter 1 rebuild; see `git log -1`). Uncommitted: `DocxCounts.R` (untracked) and `.posit/assistant/settings.json` (not ours; leave it).
+**Where we are:** Phase 1 was signed off (F94 disposition stands). **Phase 2 is built and Chapter 1 renders** (D191-D193, F95): rule-based group selection, five within-family blocks including Moronides, family-wide Bonferroni, disposition tables, and a final 15-column banner with a render-stopping check against the rules. **The full report does not render**: it stops at `ch4Setup` (`nrow(ch4.groupMeans) == 18`, now 16), and Chapters 2, 4 and 5 still carry text and assertions for the old 17 columns. The committed `PreferredSpeciesReport.docx` is the old render; the 95 / 95 / 10 / 0 baseline is void until Phase 4. `B1banner` / `AssignBannerGroup()` still use the 8 old family levels (D192).
 
 **Read before doing anything** (in this order, only these):
-1. This file: §1 (standing directive and operating rules), §6 (build state and render baseline).
-2. `PROGRESS.md` from "## Restart checkpoint (2026-09-29, prompt 136)" (line ~2294) to the end: environment notes and the complete open-question list.
-3. Only if working on Chapter 5: `PROGRESS.md` from "## Chapter 5 — profile pictures and icons" (line ~2211) to the checkpoint, for D167-D176.
+1. This file: §1 (standing directive and operating rules), §6 (build state; note the Chapter 1 row).
+2. `PROGRESS.md` from "## Chapter 1 restructure — Phase 2 built" (last section, line ~2461) to the end: D191-D193, F95-F96, the **Phase 3 work list**, environment notes. Earlier context only if needed: D184-D190 and F94 at ~line 2428.
+3. `ANALYSIS_PLAN.md` §9.3 (phases) and §9.4.
+4. Only when coding: `PreferredSpeciesFunctions.R` (`banner.definition` and rule objects near the top; `FamilyTests` onward near line 650) and `PreferredSpeciesReport.rmd` Chapter 1 (~L131-405).
 
-**Open questions for the user:** Q22 multiplicity (Ch. 1) · Q24 Appendix A year · Q25 Appendix B wording · Q32 Ch. 4 reliability table · Q35 terse labels in Ch. 5 (unverified) · Q49 unweighted class means · Q57 small icons on the faceted figure.
-**Unverified / pending:** Chapter 5 layout not viewed in Word; step 5 not started.
-**Environment notes:** `magick` and `ggtext` are required and installed. `DocxCounts()` is not in any file; recreate it from the checkpoint section before verifying a render. Close Word before rendering (F91). Render takes ~3.5 min.
+**Open questions for the user:** none blocking. Q22 is implemented and closes at the Phase 4 full render. To settle when Chapter 5 is reached: keep `B1banner` at 8 levels or move Chapter 5 to the new banner.
+**Unverified / pending:** no full render since Chapter 1 changed; Chapters 2-5 and Appendix B not yet revised for the 15 columns (Phase 3 list in `PROGRESS.md`); Chapter 5 layout not viewed in Word; Step 5 (guided text) not started.
+**Environment notes:** `source("DocxCounts.R")` before verifying a render. To check Chapter 1 alone, render a truncated copy (everything before `# Chapter 2`) from a temp directory with `knit_root_dir = getwd()` (18 s; expect 31 / 0 / 0 / 0). Close Word before a full render (F91); a full render takes ~3.5 min. `magick` and `ggtext` are required and installed. Docx heading styles are French (`Titre1`-`Titre3`).
 
-**First action in the new conversation:** summarise this brief back to the user in a few lines, then ask which open question or step to take first. Change no files until the user says so.
+**First action in the new conversation:** summarise this brief back to the user in a few lines, then propose an order for the Phase 3 work list and ask which chapter to start with. Change no files until the user says so.
 <!-- RESTART-BRIEF:END -->
 
 ---
@@ -228,6 +229,7 @@ ask**, never change the other report.
 | `.gitignore` | Ignores build artifacts and Word lock files. **The rendered `.docx` IS tracked** (D109), via a negation against the repo-root `*.docx` rule (F36) |
 | `Ch5LPA.R` | Chapter 5 LPA layer and all Chapter 5 report builders (tables, figures, icon header rows, photo overlay, family cards). Sourced by the report; never fits |
 | `Ch5Images.R` | Run by hand: writes `angler_profile_images_derived/` (1600 px photos, cleaned 300 px icons) from the untracked originals in `angler_profile_pictures/` and `angler_profile_icons/` (D167) |
+| `DocxCounts.R` | Render-verification helper `DocxCounts(path)` (F41 + F87 logic). Not sourced by the report; source by hand (D183) |
 | `.posit/assistant/skills/preparing-restart/` | Restart/handoff skill (D176); writes the §0 brief above |
 
 **Source order in the setup chunk** (do not reorder — local definitions must win):
@@ -241,12 +243,13 @@ ask**, never change the other report.
 | 3 — crosstabs by species (Chapter 3) | **Done.** 21 sections, 39 tables, coverage per D86. The age table carries a weighted mean-age column (D108) |
 | 4 — visualizations | **Done.** No chapter of its own (D34) — 39 figures in Chapter 2, 14 in Chapter 3 (D101) |
 | 5 — guided text development | Not started. **Deferred again, until after Chapter 5** (D110, D119) |
-| 6 — appendices | **Done.** Appendix A blank for hand-pasted instrument; Appendix B drafted, wording read-through still open (Q25) |
-| **Chapter 4 — Satisfaction** | **Done 2026-09-18 (D111-D118).** Six items (`A9` reversed, `D4a`, `D4i`, `D4j`, `D4k`, `D4l`) in one place: inventory, a landscape matrix by group, respondent- and group-level correlations, and the size-vs-numbers paired comparison for the catch pair and the harvest pair. 6 tables, 2 dumbbell figures |
+| 6 — appendices | **Done.** Appendix A blank for hand-pasted instrument; Appendix B drafted; weighting wording reworded and Q25 closed (D182); Appendix A heading reads 2025 (D178) |
+| **Chapter 1 — restructure (D184-D193)** | **Phase 2 built 2026-09-29; Chapter 1 renders (31 tables in a Chapter-1-only render).** Rule-based group selection: Table 1 unchanged; Table 2 = proposed family groupings; family-wide Bonferroni tests incl. Moronides (D186); raw n >= 30 (D188); disposition and final-groups tables; 15 columns (6 family + 9 species; Esocids and Moronides do not combine); `bannerRuleCheck` chunk stops the render if `banner.definition` disagrees with the rules (D190). Executable plan: `ANALYSIS_PLAN.md` §9. **Phase 3 (Chapters 2-5 and Appendix B follow the new banner) and Phase 4 (full render, new baseline) are not started; the full report currently stops at `ch4Setup`** |
+| **Chapter 4 — Satisfaction** | **Done 2026-09-18 (D111-D118).** Six items (`A9` reversed, `D4a`, `D4i`, `D4j`, `D4k`, `D4l`) in one place: inventory, a landscape matrix by group, respondent- and group-level correlations, and the size-vs-numbers paired comparison for the catch pair and the harvest pair. 6 tables, 2 dumbbell figures. The reliability (alpha) note and its Appendix B sentence were removed 2026-09-29 (D181, supersedes D117) |
 | **Chapter 5 — Angler Type Profiles** | **Redesigned 2026-09-22 (D140-D148): one latent profile analysis** (`tidySEM::mx_profiles`, 11 scale scores, ≥ 7 answered, 1-6 classes × 2 variance structures, BIC with 5% floor and 0.60 entropy) with class membership crosstabbed by the 17 species columns. k-means per species (D120) and `Ch5Functions.R` are obsolete. **Fitting layer is `Ch5LPA.R`** (2026-09-22, D149-D151); fits saved per model in `Ch5LPA_fits/`, distilled to `Ch5LPA_results.rds`, which is all the report reads — both tracked (D154), so never refit without reason; D143 selected `equal_6` from the 1-6 grid; grid extended to `equal_7`/`equal_8` (D155), both fail the 5% floor, so `equal_6` still selected (F76); `varying_5/6` are degenerate ceiling-spike solutions (F77), kept excluded (D156), so **`equal_6` is final**; fitting only via detached `Ch5LPA_run.R` (D152-D153). `library(OpenMx)` must be attached or tidySEM silently returns `NULL` (F67). **Report sections built and rendered 2026-09-24 (D157-D159)**: the report sources `Ch5LPA.R` and never fits; `Ch5Functions.R` is deleted (prompt 120). **Chapter 5 Appendix B section inserted** ("Angler type profiles in Chapter 5", every figure inline); `Ch5_AppendixB_draft.md` is superseded. See the final section of `PROGRESS.md` |
-| **Chapter 5 — presentation (2026-09-24 to 09-29)** | **Done (D160-D175).** Six class descriptions with photos (icon overlaid at render time, D170) and an icon key table; icon header rows on the class tables; class-by-species table, faceted family figure and seven family-group cards (icon x-axes, alternating sides) moved after the descriptions, in their own landscape section; family-card text includes management implications at the user's request (D171) |
+| **Chapter 5 — presentation (2026-09-24 to 09-29)** | **Done (D160-D175).** Six class descriptions with photos (icon overlaid at render time, D170) and an icon key table; icon header rows on the class tables; class-by-species table, faceted family figure and seven family-group cards (icon x-axes, alternating sides) moved after the descriptions, in their own landscape section; family-card text includes management implications at the user's request (D171). The faceted family figure shows profile numbers only, no icons (D177). Scale labels `attitude_catch` / `motivation_pp` are overridden report-only as "Catch something" / "Physical and psychological" via `scale.label.override` in `ScaleLabel()` (D180) |
 
-**Render baseline: `DocxCounts()` 95 / 95 / 10 / 0 = 92 tables / 95 images / 10 landscape sections / 0 leaked markup** (2026-09-25, after the family-group cards, D173-D174; 88/88/10/0 after the species table move, family figure and icon overlay, D170-D172; 88/87/9/0 after the Ch5 profile images, D167-D169; `DocxCounts()` counts header rows, so the 3 icon header rows read as tables, F87. Images live in `angler_profile_images_derived/` (tracked via .gitignore negation, Q55), built by `Ch5Images.R`. Before the images: 84/57/9/0, after the Ch5 class comparisons, D163-D165; 83 before them;
+**Render baseline (VOID since the Chapter 1 rebuild, F95; re-set in Phase 4): `DocxCounts()` 95 / 95 / 10 / 0 = 92 tables / 95 images / 10 landscape sections / 0 leaked markup** (re-verified 2026-09-29 after D177-D182; set 2026-09-25, after the family-group cards, D173-D174; 88/88/10/0 after the species table move, family figure and icon overlay, D170-D172; 88/87/9/0 after the Ch5 profile images, D167-D169; `DocxCounts()` counts header rows, so the 3 icon header rows read as tables, F87. Images live in `angler_profile_images_derived/` (tracked via .gitignore negation, Q55), built by `Ch5Images.R`. Before the images: 84/57/9/0, after the Ch5 class comparisons, D163-D165; 83 before them;
 with the LPA Chapter 5; 79/55/7/0 without Chapter 5, D135). Verify every increment against it. Use the F41 regex for the leaked-markup
 scan — the obvious one gives false positives.
 
@@ -264,5 +267,5 @@ Three structural facts that are easy to get wrong and are already settled:
 3. **Scale scores carry the `*_AnsweredAll` listwise gate** per scale (D19), or the Overall
    column will not reproduce.
 
-Read `PROGRESS.md` for decisions D1-D176, findings F1-F91, and open questions (complete list in the latest restart checkpoint); `ANALYSIS_PLAN.md`
+Read `PROGRESS.md` for decisions D1-D193, findings F1-F96, and open questions (complete list in the latest restart checkpoint); `ANALYSIS_PLAN.md`
 for the executable spec (written for steps 1-3; §8 records that Chapters 4 and 5 sit outside it).

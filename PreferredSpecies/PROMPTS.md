@@ -935,3 +935,47 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-09-29 — Prompt 148
 
 > I've closed Word: copy the verified render into the project and commit the docx.
+
+## 2026-09-29 — Prompt 149
+
+> Push commits e425e16 and b3edf40 to the remote.
+
+## 2026-09-29 — Prompt 150
+
+> Run the preparing-restart skill to refresh the AGENTS.md brief.
+
+## 2026-09-29 — Prompt 151
+
+> New conversation for the PreferredSpecies report. Read the "0. Start here" restart brief in AGENTS.md and the PROGRESS.md section it points to, then summarise where we are and list the open questions. Don't change any files until I say so.
+
+## 2026-09-29 — Prompt 152
+
+> save the docxcounts so it doesn't have to be rerun if the session restarts...then we can start Q22 - I have ideas on restructuring the whole chapter
+
+## 2026-09-29 — Prompt 153
+
+> here's the general idea for chapter 1...leave the first table with all individual species from survey and their stats; the second table should be revised to reflect "proposed family groupings" with all the potential families we discussed (include Escocids) and their associated individual species like the current table has - but we shouldn't include any of the individual species that are NOT part of a proposed family; then we should run the testing as Chapter 1 currently does....the results of that testing should indicate if it's appropiate to combine species into families as well as analyze them as individual species (i.e. the escocids will likely test to be individual but not a family as per the tests we've already run);  at this point we should apply the minimum sample size and drop any species or family that does not meet it;.....then we will present a table of the acceptable family groups and individual species that should be included in the rest of the report (some individual species may or may not be in a family and some species included in a family may or may not be listed individually), this should provide a consistant and defendable list to include as the preferred species groups to be analyzed, once we finish the chapter 1 revisions, we will revise the rest of the report to add or remove familys and species that are supported by chapter 1
+
+## 2026-09-29 — Prompt 154
+
+> please plan this process deeply
+
+## 2026-09-29 — Prompt 155
+
+> (Answers to six planning questions.) Candidate families: "the size rule would not remove bullhead from the family as it would be combined with the other catfish species, it would only possibly remove it as an individual; do the 5 multi species familes with no bullhead in the catfish". Individual species rule: "Size rule only". Multiplicity: "I like your recommendation, but no word on the fate of the moronidae family". Minimum size: "Raw n ≥ 30". Test scope: "Test all members, then size (as specified)". Banner derivation: "Hand-typed, with a check".
+
+## 2026-09-29 — Prompt 156
+
+> let's update and start a new conversation
+
+## 2026-09-29 — Prompt 157
+
+> New conversation for the PreferredSpecies report. Read the "0. Start here" restart brief in AGENTS.md and the PROGRESS.md section it points to, then summarise where we are and list the open questions. Don't change any files until I say so.
+
+## 2026-09-29 — Prompt 158
+
+> Confirm the F94 disposition as is, and proceed to Phase 2 (build the Chapter 1 restructure).
+
+## 2026-09-29 — Prompt 159
+
+> Update PROGRESS.md, PROMPTS.md and AGENTS.md for Phase 2 (D184-D190 built), then commit the functions and report.

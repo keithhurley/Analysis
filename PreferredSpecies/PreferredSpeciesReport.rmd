@@ -97,8 +97,8 @@ stopifnot(
   abs(sum(sizeTbl$TotalAnglers) - popTotalAll) < 1e-6
 )
 
-nBanner <- sum(!is.na(d$B1banner))
-nBannerExcluded <- sum(is.na(d$B1banner))
+nBanner <- sum(InBannerColumn(d$B1))
+nBannerExcluded <- nrow(d) - nBanner
 
 # Sum of the banner column counts. Exceeds nBanner because family columns
 # contain their own species columns; quoted in Appendix B so the overlap is
@@ -148,27 +148,33 @@ CreateFlex(ArrangeSpeciesSizeTable(sizeTbl))
 
 `r paste0("Total anglers applies each species percentage to the full weighted 2025 angler population of ", format(round(popTotalAll), big.mark=","), ", so the column sums to that population. This assumes that leaving the preferred-species question blank is unrelated to which species an angler prefers. The weights carried by the ", format(nrow(d), big.mark=","), " respondents in the analysis sample themselves total ", format(round(sum(d$postWeight)), big.mark=","), ".")`
 
-## Preferred Groups
+## Selection Rules
 
-`r paste0("There are ", nrow(banner.definition), " preferred groups. Seven are family groups; eight are individual species reported alongside the family group that contains them; and two, northern pike and muskellunge, replace the Esocids family group outright. Species that fall outside every family group keep their place in the Overall column of every table but receive no preferred-group column of their own.")`
+`r paste0("The list of preferred groups used in the rest of this report is produced by the rules below, applied in this order. (1) Five candidate families are proposed in the next section; a species that is not in a candidate family is never combined. (2) Every pair of species inside a candidate family is compared on nine outcomes (four motivation scales, four attitude scales, and days fished), and the p-values are Bonferroni-adjusted across all of the tests in that family. A family may be combined only if none of its adjusted p-values is below ", family.alpha, ". (3) Walleye / Sauger, Trout and No preference are single-member groups; they are not tested. (4) A group or species needs at least ", min.group.n, " raw respondents to receive a column. All species in a candidate family are tested before the size rule is applied, and a species that meets the size rule receives its own column whether or not its family is combined.")`
 
-`r paste(caption.banner, sep="")`
+`r paste0("Overlapping confidence intervals are weak evidence that two species are similar, and the comparisons for the smaller species are underpowered. A dagger on the n column of a contrast table marks a comparison in which one species has fewer than ", min.group.n, " respondents.")`
 
-```{r bannerSizes}
-CreateFlex(BannerSizeTable(d))
+## Proposed Family Groupings
+
+`r paste0("Candidate families and their member species. Species that are in no candidate family are not listed. Respondents is the raw unweighted count. ", caption.raked)`
+
+```{r familyProposal}
+CreateFlex(FamilyProposalTable(d))
 ```
 
-`r paste0("Preferred species that fall outside every family group. These ", nBannerExcluded, " respondents remain in the Overall column of every table but receive no preferred-group column.")`
-
-```{r bannerExclusions}
-CreateFlex(BannerExclusionTable(d))
+```{r familyTests, echo=FALSE}
+# All within-family tests are computed once and shared by every contrast table,
+# the disposition table and the banner check below.
+family.tests <- purrr::map_dfr(
+  unique(family.candidates$Family),
+  function(f) FamilyTests(d, f)
+)
+family.disp <- FamilyDisposition(d, family.tests)
 ```
 
-`r paste0("The preferred groups cover ", format(nBanner, big.mark=","), " distinct respondents of the ", format(nrow(d), big.mark=","), " in the analysis sample; ", nBannerExcluded, " do not appear in any preferred-group column. Because family columns contain their own species columns, the respondent counts in the table above add to more than ", format(nBanner, big.mark=","), " and should not be totalled.")`
+## Comparisons Within Proposed Families
 
-## Comparisons Within Family Groups
-
-`r paste0("The four family groups below contain more than one species, so each is shown broken out by species alongside the family group as a whole. These are the comparisons used to decide whether any individual species is reported separately in later chapters.")`
+`r paste0("Each candidate family with more than one species is shown broken out by species alongside the family as a whole. These are the comparisons used to decide whether a family may be combined.")`
 
 ### Bass
 
@@ -193,13 +199,13 @@ CreateFlex(GenusEffortTable(d, "Bass"))
 `r paste(caption.contrasts, sep="")`
 
 ```{r bassContrasts}
-CreateFlex(ContrastTable(d, "Bass", c(motivation.vars, attitude.vars), l))
+CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Bass"), c(motivation.vars, attitude.vars), l))
 ```
 
 `r paste("Days fished, same species comparisons.", "  ", caption.contrasts, sep="")`
 
 ```{r bassEffortContrasts}
-CreateFlex(EffortContrastTable(d, "Bass"))
+CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Bass")))
 ```
 
 ### Panfish / Sunfish
@@ -225,45 +231,13 @@ CreateFlex(GenusEffortTable(d, "Panfish / Sunfish"))
 `r paste(caption.contrasts, sep="")`
 
 ```{r panfishContrasts}
-CreateFlex(ContrastTable(d, "Panfish / Sunfish", c(motivation.vars, attitude.vars), l))
+CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Panfish / Sunfish"), c(motivation.vars, attitude.vars), l))
 ```
 
 `r paste("Days fished, same species comparisons.", "  ", caption.contrasts, sep="")`
 
 ```{r panfishEffortContrasts}
-CreateFlex(EffortContrastTable(d, "Panfish / Sunfish"))
-```
-
-### Esocids
-
-`r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, "  ", caption.comparison, sep="")`
-
-```{r esocidMotivation}
-CreateFlex(GenusMeansTable(d, "Esocids", motivation.vars, l))
-```
-
-`r paste(trimws(GetQuestion(q, E1, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.raked, "  ", caption.reversed, sep="")`
-
-```{r esocidAttitude}
-CreateFlex(GenusMeansTable(d, "Esocids", attitude.vars, l))
-```
-
-`r paste("Total days fished in Nebraska during 2025.", "  ", caption.means, "  ", caption.medians, "  ", caption.raked, sep="")`
-
-```{r esocidEffort}
-CreateFlex(GenusEffortTable(d, "Esocids"))
-```
-
-`r paste(caption.contrasts, sep="")`
-
-```{r esocidContrasts}
-CreateFlex(ContrastTable(d, "Esocids", c(motivation.vars, attitude.vars), l))
-```
-
-`r paste("Days fished, same species comparisons.", "  ", caption.contrasts, sep="")`
-
-```{r esocidEffortContrasts}
-CreateFlex(EffortContrastTable(d, "Esocids"))
+CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Panfish / Sunfish")))
 ```
 
 ### Catfish
@@ -289,19 +263,121 @@ CreateFlex(GenusEffortTable(d, "Catfish"))
 `r paste(caption.contrasts, sep="")`
 
 ```{r catfishContrasts}
-CreateFlex(ContrastTable(d, "Catfish", c(motivation.vars, attitude.vars), l))
+CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Catfish"), c(motivation.vars, attitude.vars), l))
 ```
 
 `r paste("Days fished, same species comparisons.", "  ", caption.contrasts, sep="")`
 
 ```{r catfishEffortContrasts}
-CreateFlex(EffortContrastTable(d, "Catfish"))
+CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Catfish")))
 ```
 
-<!--
-Chapter 1 is complete apart from the 3.6 disposition table, which is not needed
-now that the split decisions have been made (D31).
--->
+### Moronides
+
+`r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, "  ", caption.comparison, sep="")`
+
+```{r moronidesMotivation}
+CreateFlex(GenusMeansTable(d, "Moronides", motivation.vars, l))
+```
+
+`r paste(trimws(GetQuestion(q, E1, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.raked, "  ", caption.reversed, sep="")`
+
+```{r moronidesAttitude}
+CreateFlex(GenusMeansTable(d, "Moronides", attitude.vars, l))
+```
+
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.means, "  ", caption.medians, "  ", caption.raked, sep="")`
+
+```{r moronidesEffort}
+CreateFlex(GenusEffortTable(d, "Moronides"))
+```
+
+`r paste(caption.contrasts, sep="")`
+
+```{r moronidesContrasts}
+CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Moronides"), c(motivation.vars, attitude.vars), l))
+```
+
+`r paste("Days fished, same species comparisons.", "  ", caption.contrasts, sep="")`
+
+```{r moronidesEffortContrasts}
+CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Moronides")))
+```
+
+### Esocids
+
+`r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, "  ", caption.comparison, sep="")`
+
+```{r esocidMotivation}
+CreateFlex(GenusMeansTable(d, "Esocids", motivation.vars, l))
+```
+
+`r paste(trimws(GetQuestion(q, E1, 2025)), "  ", caption.means, "  ", labels.agree, "  ", caption.raked, "  ", caption.reversed, sep="")`
+
+```{r esocidAttitude}
+CreateFlex(GenusMeansTable(d, "Esocids", attitude.vars, l))
+```
+
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.means, "  ", caption.medians, "  ", caption.raked, sep="")`
+
+```{r esocidEffort}
+CreateFlex(GenusEffortTable(d, "Esocids"))
+```
+
+`r paste(caption.contrasts, sep="")`
+
+```{r esocidContrasts}
+CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Esocids"), c(motivation.vars, attitude.vars), l))
+```
+
+`r paste("Days fished, same species comparisons.", "  ", caption.contrasts, sep="")`
+
+```{r esocidEffortContrasts}
+CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Esocids")))
+```
+
+## Group Selection Results
+
+`r paste0("Test results and size rule for every candidate group. Tests is the number of species pairs times nine outcomes. Differences counts the tests with a family p below ", family.alpha, ". Family column is Yes only when the group may be combined and has at least ", min.group.n, " respondents.")`
+
+```{r familyDisposition}
+CreateFlex(FamilyDispositionTable(family.disp))
+```
+
+`r paste0("Size rule for each species in a candidate family. A species column is independent of whether its family is combined.")`
+
+```{r speciesDisposition}
+CreateFlex(SpeciesDispositionTable(d))
+```
+
+```{r bannerRuleCheck, echo=FALSE}
+# D190: the hand-typed banner must equal what the rules produce. This stops the
+# render rather than letting the two drift apart.
+derived.banner <- DeriveBanner(d, family.disp)
+stopifnot(
+  identical(derived.banner$Column, banner.definition$Column),
+  identical(derived.banner$Type, banner.definition$Type),
+  identical(derived.banner$Members, banner.definition$Members)
+)
+```
+
+## Final Preferred Groups
+
+`r paste0("There are ", nrow(banner.definition), " preferred groups: ", sum(banner.definition$Type == "Family"), " family groups, ", sum(banner.definition$Type == "Species"), " species reported alongside the family group that contains them, and ", sum(banner.definition$Type == "Split"), " species whose family was not combined. Every table in the chapters that follow uses these columns. Respondents outside every column keep their place in the Overall column of every table.")`
+
+`r paste(caption.banner, "  ", caption.raked, sep="")`
+
+```{r bannerSizes}
+CreateFlex(FinalGroupsTable(d, popTotalAll))
+```
+
+`r paste0("Preferred species outside every preferred group. These ", nBannerExcluded, " respondents remain in the Overall column of every table but receive no preferred-group column.")`
+
+```{r bannerExclusions}
+CreateFlex(BannerExclusionTable(d))
+```
+
+`r paste0("The preferred groups cover ", format(nBanner, big.mark=","), " distinct respondents of the ", format(nrow(d), big.mark=","), " in the analysis sample; ", nBannerExcluded, " do not appear in any preferred-group column. Because family columns contain their own species columns, the respondent counts in the table above add to more than ", format(nBanner, big.mark=","), " and should not be totalled.")`
 
 `r run_pagebreak()`
 
@@ -1846,7 +1922,7 @@ same thing. Do not pour the instrument in programmatically.
 
 `r paste0("This report is restricted to respondents who answered the preferred-species question. Of the ", format(nAll2025, big.mark=","), " anglers who responded to the 2025 survey, ", format(nNoB1, big.mark=","), " left that question blank and are excluded from the report entirely rather than merely from the species columns. The analysis sample is therefore ", format(nrow(d), big.mark=","), " respondents.")`
 
-`r paste0("A second, narrower exclusion applies only to the preferred groups. ", nBannerExcluded, " respondents in the analysis sample prefer a species that falls outside every family group -- bullhead, drum, sturgeon, common carp, invasive carp, paddlefish, and the literal \"Other\" response. They remain in the Overall column of every table but receive no preferred-group column of their own. The two exclusions are distinct and are reported separately in Chapter 1.")`
+`r paste0("A second, narrower exclusion applies only to the preferred groups. ", nBannerExcluded, " respondents in the analysis sample prefer a species that has no preferred-group column, either because it is in no candidate family or because it and its family did not meet the selection rules in Chapter 1. They remain in the Overall column of every table but receive no preferred-group column of their own. The two exclusions are distinct and are reported separately in Chapter 1.")`
 
 `r paste0("Because of the first restriction, the Overall column of this report estimates a different population than the Overall column of the 2025 Crosstabs report: anglers who stated a species preference, rather than all licensed anglers. The two reports will therefore not agree in that column, and no attempt has been made to reconcile them. The one exception is the preferred-species distribution itself, which is computed on respondents to that question in both reports and does match exactly.")`
 
@@ -1925,7 +2001,9 @@ E1k, E1f, and E1l when computing those subscale and item means.
 
 ## The preferred groups, and why columns do not sum
 
-`r paste0("The preferred groups are not a partition. Bass, Panfish / Sunfish, and Catfish each appear both as a combined family column and as one column per constituent species, so a respondent who prefers largemouth bass is counted in both the Bass column and the Largemouth bass column. The Esocids family was replaced outright by separate northern pike and muskellunge columns and has no combined column.")`
+`r paste0("The preferred groups are not a partition. A family that Chapter 1 combined appears both as a family column and as one column per constituent species that met the minimum size, so a respondent who prefers largemouth bass is counted in both the Bass column and the Largemouth bass column. A family that was not combined has no family column, and only its species that met the minimum size appear, each as a column of its own.")`
+
+`r paste0("The columns are chosen by rule, not by hand. A candidate family is combined only if none of its within-family tests has a family-adjusted p-value below ", family.alpha, ". A column, whether for a family or a species, requires at least ", min.group.n, " raw respondents; the size rule is applied after testing, so every species in a candidate family is tested even if it later falls below the minimum. The hand-typed column list is checked against these rules at every render and the render stops if they disagree.")`
 
 `r paste0("Two consequences follow. Preferred-group column counts sum to ", format(nBannerCellSum, big.mark=","), " against ", format(nBanner, big.mark=","), " distinct respondents, so they must never be totalled. And because each column is computed on its own respondents and uses its own denominator, the percentages within any single column remain correct; only addition across columns is invalid.")`
 
@@ -1951,7 +2029,7 @@ split-or-combine decisions were made from the species estimates directly.
 
 ## Multiplicity
 
-`r paste0("Where a family contains three species there are three possible pairwise comparisons, and the unadjusted p-value for each is multiplied by three (Bonferroni). Where a family contains two species there is a single comparison and no adjustment is applied. Both the unadjusted and the Bonferroni-adjusted p-value are printed, rather than a single verdict against a fixed threshold.")`
+`r paste0("The Bonferroni adjustment is applied across every test in a family: the number of species pairs multiplied by the nine outcomes. A two-species family therefore carries ", 9, " tests and a three-species family ", 27, ". The unadjusted p-value for each test is multiplied by the family's test count and capped at 1, and both the unadjusted p and the family-adjusted p are printed.")`
 
 Bonferroni was chosen over Holm for simplicity of exposition. The two rest on
 identical assumptions and Bonferroni is uniformly the more conservative of the
@@ -1961,12 +2039,7 @@ the weighted design. Benjamini-Hochberg was not used because false-discovery
 control is suited to screening rather than to the go/no-go grouping decisions
 this chapter supports.
 
-**The adjustment covers one dimension only.** It accounts for the number of
-species comparisons made within a single outcome, not for the number of
-outcomes examined. Each family is compared on eight scale scores plus days
-fished, so a three-species family carries 27 comparisons in total with no
-adjustment across the outcome dimension. Readers should treat a single
-adjusted p-value near the conventional threshold accordingly.
+`r paste0("The family-adjusted p-values are used for one decision: a family is combined only if none of its adjusted p-values is below ", family.alpha, ". The comparisons for the smaller species are underpowered, and overlapping confidence intervals are weak evidence that two species are similar, so failing to separate two species is not evidence that they are alike. Comparisons in which one species has fewer than ", min.group.n, " respondents are marked with a dagger in the contrast tables.")`
 
 ## Effect sizes
 
