@@ -2280,3 +2280,53 @@ Rendered to a temp folder (Word lock), 6.5 min. `DocxCounts()` **95 / 95 / 10 / 
 | # | Question |
 |---|---|
 | Q57 | Faceted-figure icons are small; raise `dpi` for `ch5FamilyMix` and enlarge icons, or keep numbers-only? |
+
+---
+
+## Restart skill (2026-09-29, prompt 133)
+
+| # | Decision | Date |
+|---|---|---|
+| D176 | **Project skill `preparing-restart`** at `.posit/assistant/skills/preparing-restart/SKILL.md` (tracked with the project). Triggered by "prepare for restart" / "update all project files" / handoff requests. It logs the prompt, brings PROGRESS.md and AGENTS.md up to date, and **replaces a single restart brief** between `<!-- RESTART-BRIEF:START -->` / `END` markers directly under the AGENTS.md title (AGENTS.md is auto-injected into new conversations). The brief carries the last commit, current state, an ordered reading list with line numbers, open questions, unverified items, environment notes and the first action; the skill ends with a paste-ready opening prompt. It edits tracking files only and asks before commit/push. A user-level copy (`~/.posit/assistant/skills/`) was blocked: the write tool is limited to the workspace | 2026-09-29 |
+
+---
+
+## Restart checkpoint (2026-09-29, prompt 136)
+
+Written by the `preparing-restart` skill. The session covered prompts 125-136: commits `b18b55e` → `36524e8` → `928c74a` (all pushed), decisions **D167-D176**, findings **F86-F91**. Chapter 5 is built end to end: diagnostics, certainty, profile means, comparisons, six class descriptions (photo with render-time icon overlay, icon key table), class-by-species table, faceted family figure, seven family-group cards, caveats. Last verified render: `DocxCounts()` **95 / 95 / 10 / 0** (92 tables), 2026-09-29, rendered into the project.
+
+### Environment notes for the next session
+
+| Item | Note |
+|---|---|
+| Packages | `magick` 2.9.1 and `ggtext` 0.2.0 (+ `gridtext`, `jpeg`) installed this session; the report needs both |
+| `DocxCounts()` | Exists **only in the console** (F90). Its definition is in F41 + F87: counts `<w:tblHeader`, `<pic:pic`, `w:orient="landscape"`, and leaked runs matched by `<w:t(?: [^>]*[^/>])?>(.*?)</w:t>` containing `w:tblPr|w:sectPr|w:pgSz|&lt;!--`. Recreate it before verifying, or ask to save it to a file |
+| Word lock | Close Word before rendering (F91), or render with `output_dir = tempdir()` |
+| Render time | ~3.5 min; 6.5 min on a first run with the card plots |
+| Rewriting the rmd from R | Read fully before opening a `"wb"` connection (F89); write LF only |
+| Skill | `.posit/assistant/skills/preparing-restart/` (project copy, **uncommitted**); a user-level copy may also exist, and the project copy takes priority |
+
+### Open-question reconciliation
+
+| # | Status |
+|---|---|
+| Q7 | Closed earlier (step 3 coverage supplied by the user, see the step 3 section) |
+| Q33, Q34 | Superseded: k-means design replaced by the LPA (D140); the LPA Appendix B section was inserted in prompt 120 |
+| Q35 | Kept open, **unverified** whether the terse `Labels.csv` labels still appear in Chapter 5 tables |
+
+### Open for the user (complete list)
+
+| # | Question |
+|---|---|
+| Q22 | Outcome-dimension multiplicity in Chapter 1 (F8) — flagged, never implemented |
+| Q24 | Appendix A heading year — 2025 or 2026 |
+| Q25 | Appendix B wording: the inherited "roughly 9x too tight" passage reads as contradicting the newer scale-invariance note |
+| Q32 | Chapter 4 reliability presentation — offered as a full table, never answered |
+| Q35 | Terse `Labels.csv` row labels, if still present in Chapter 5 (unverified) |
+| Q49 | Model-estimated unweighted class means in addition to the weighted ones? |
+| Q57 | Faceted-figure icons are small; raise `dpi` for `ch5FamilyMix` and enlarge icons, or keep numbers only? |
+
+### Unverified
+
+- Chapter 5 layout in Word (cards, photos, icon header rows) has not been viewed on the page; only the docx XML and embedded images were checked.
+- Step 5 (guided text) has not started; it was deferred until after Chapter 5, which is now built.

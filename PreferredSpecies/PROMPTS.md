@@ -869,3 +869,23 @@ here. The user appended the following, which is the actual definition of the cha
 > Use the profile icons on the faceted plot's x-axis too.
 >
 > Commit and push the Chapter 5 changes.
+
+## 2026-09-29 — Prompt 133
+
+> can we create a skill that I can use to trigger a full update to all project files in anticipation of a restart, including a prompt in them to instruct the new conversation on what to read to prepare itself?
+
+## 2026-09-29 — Prompt 134
+
+> where do I copy the restart skill for use globally?
+
+## 2026-09-29 — Prompt 135
+
+> what's the command to show the skills available
+
+## 2026-09-29 — Prompt 136
+
+> run the restart skill
+
+## 2026-09-29 — Prompt 137
+
+> Commit and push the tracking files and restart skill, then start a new conversation.
