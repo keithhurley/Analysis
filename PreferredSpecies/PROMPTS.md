@@ -979,3 +979,23 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-09-29 — Prompt 159
 
 > Update PROGRESS.md, PROMPTS.md and AGENTS.md for Phase 2 (D184-D190 built), then commit the functions and report.
+
+## 2026-09-29 — Prompt 160
+
+> where are we?
+
+## 2026-09-29 — Prompt 161
+
+> let's do everything but the chapter 5
+
+## 2026-09-30 — Prompt 162
+
+> render the docx. I want chapter 5 to reflect the same groups and species used in the rest of the report....I'd also like to fix the render issues so I can review the changes we made in chapters 1-4
+
+## 2026-09-30 — Prompt 163
+
+> what are the statistical and modeling implications of lowering the floor in chapter 5?  Inclusion should be driven by methodology and not consistancy with other chapters; please give me the pros and cons so I can make the decision
+
+## 2026-09-30 — Prompt 164
+
+> keep the 30 floor in chapter 5restartprepare the project for a restart with a new conversation

@@ -814,9 +814,14 @@ Ch5CmpRank <- function(cmp, v, kind, fun) {
 # points more of a class than of all assigned respondents.
 ch5.mix.gap <- 5
 
-Ch5MixCaveat <- function(mix, cls) {
+# hidden: groups whose row is below the Chapter 5 floor; they are never named.
+Ch5MixCaveat <- function(mix, cls, hidden = character()) {
   x <- mix %>%
-    filter(Class == paste("Class", cls), Value - Baseline >= ch5.mix.gap) %>%
+    filter(
+      Class == paste("Class", cls),
+      Value - Baseline >= ch5.mix.gap,
+      !Family %in% hidden
+    ) %>%
     arrange(desc(Value - Baseline))
   if (nrow(x) == 0) {
     return("")

@@ -23,17 +23,6 @@ caption.contrasts <-
   "Each row compares two species on the outcome named. Difference is the weighted mean of the second species minus the first, with a 95% confidence interval; it is a design-based comparison on weights rescaled to the sample size. g is Hedges' g computed on effective sample sizes. Family p multiplies the unadjusted p-value by the number of tests in the whole family (species pairs times nine outcomes) and is capped at 1. A dagger on n marks a comparison in which one species has fewer than 30 respondents."
 
 # Banner definition -------------------------------------------------------
-# Family groups (ANALYSIS_PLAN.md 2.1; D18, D22) used for coverage accounting.
-banner.levels <- c(
-  "Walleye / Sauger",
-  "Bass",
-  "No preference",
-  "Panfish / Sunfish",
-  "Catfish",
-  "Trout",
-  "Moronides",
-  "Esocids"
-)
 
 # Chapter 1 group-selection rules (D184-D190) ------------------------------
 # Candidate families: the only species that may be combined. Bullhead stays
@@ -154,24 +143,21 @@ attitude.vars <- c(
   "attitude_harvest"
 )
 
-# Collapse B1 into the 8 family groups. Anything outside them becomes NA, which
-# is what defines "receives no banner column" for the coverage accounting.
+# Assign B1 to the one non-overlapping top-level preferred group: a family
+# column or a species whose family was not combined ("Split"). Species columns
+# inside a family are not separate levels. Anything outside them is NA, which
+# defines "receives no preferred-group column"; it is derived from
+# banner.definition, so it cannot drift from the rules (D198).
 AssignBannerGroup <- function(B1) {
-  g <- fct_collapse(
-    B1,
-    "Bass" = c("Largemouth bass", "Smallmouth bass"),
-    "Moronides" = c("Striped bass", "Wiper", "White bass"),
-    "Panfish / Sunfish" = c("Bluegill / Sunfish", "Crappie", "Yellow perch"),
-    "Walleye / Sauger" = "Walleye / Sauger",
-    "Esocids" = c("Northern pike", "Muskellunge / Tiger musky"),
-    "Catfish" = c("Channel catfish", "Blue catfish", "Flathead catfish"),
-    "Trout" = "Trout",
-    "No preference" = "I do not prefer any particular type of fish"
-  )
-
+  top <- banner.definition %>%
+    filter(Type %in% c("Family", "Split")) %>%
+    select(Column, Members) %>%
+    tidyr::unnest(Members)
+  stopifnot(!anyDuplicated(top$Members))
+  lookup <- setNames(top$Column, top$Members)
   factor(
-    if_else(as.character(g) %in% banner.levels, as.character(g), NA_character_),
-    levels = banner.levels
+    unname(lookup[as.character(B1)]),
+    levels = unique(top$Column)
   )
 }
 
@@ -950,7 +936,7 @@ D4PercentLong <- function(mydata, item, categories) {
   )
 }
 
-# Long-format means data. Banner columns only by default (17 rows, Overall
+# Long-format means data. Banner columns only by default (one row per preferred group, Overall
 # excluded, matching the means-ordered figure); includeOverall = TRUE adds the
 # Overall row too, used by the 2018-2025 slope figure (D76).
 D4MeansLong <- function(mydata, item, includeOverall = FALSE) {
@@ -1047,7 +1033,7 @@ D4PercentStackPlot <- function(mydata, item, categories, titleText = NULL) {
   p
 }
 
-# 2018-2025 slope data (D76). Includes Overall alongside the 17 banner rows
+# 2018-2025 slope data (D76). Includes Overall alongside the banner rows
 # (unlike the means-ordered figure); "No preference" is excluded here only --
 # in 2018, 224 of 292 No-preference respondents answered a given D4 item,
 # against 50 of 339 in 2025, indicating the battery was routed to that group
@@ -1213,7 +1199,7 @@ D4MeansOrderedPlot <- function(mydata, item, titleText = NULL) {
 
 # Chapter 3: crosstabs of the remaining questions by preferred group ------
 #
-# Row set is identical to Chapter 2's: Overall first, then the 17 preferred
+# Row set is identical to Chapter 2's: Overall first, then the preferred
 # groups with species indented under their family (D4RowSpec, reused
 # unmodified). Every row is computed on its own subset, so family rows contain
 # their species rows and rows must never be totalled (D31).
@@ -1915,7 +1901,7 @@ caption.ch4a9 <-
 caption.ch4corr <-
   "Cells are weighted Pearson correlations on the respondents who answered all six items. They are descriptive: no test and no adjustment for multiple comparisons is reported."
 caption.ch4groupcorr <-
-  "Cells are Spearman rank correlations between the 17 preferred-group means, one observation per group, taken from the table above. The groups overlap, because a family row contains its own species rows, so these summarise that table rather than estimate a population quantity; no standard error or test is reported."
+  "Cells are Spearman rank correlations between the preferred-group means, one observation per group, taken from the table above. The groups overlap, because a family row contains its own species rows, so these summarise that table rather than estimate a population quantity; no standard error or test is reported."
 caption.ch4gap <-
   "Both mean columns and the difference are computed on the same respondents, those who answered both items, so the difference is a paired comparison and equals the difference of the two means shown. Intervals are 95 percent and are built exactly as every other mean interval in this report. They are not adjusted for the number of groups compared."
 

@@ -424,7 +424,7 @@ D4MeansOrderedPlot(d, "D4a", titleText = ItemQuestionText("D4a", q))
 D4SlopePlot(d, d2018, "D4a", titleText = ItemQuestionText("D4a", q))
 ```
 
-`r paste0("For this item, Trout and Channel catfish anglers report the highest satisfaction, each averaging roughly 3.6 on the five-point scale, with more than half of each group agreeing or strongly agreeing and well under a fifth disagreeing. Walleye/Sauger anglers -- the largest single preferred group in the survey -- report the lowest satisfaction of any well-represented group, averaging 2.8, and are the only large group where more anglers disagree (40%) than agree (28%). The roughly three-quarter-point gap between Walleye/Sauger and Trout/Channel catfish anglers is the largest contrast among the larger preferred groups for this item, and may point to a difference in how reliably each species can be caught rather than a difference in how much anglers enjoy the pursuit itself. A similar pattern shows up within single families: Channel catfish anglers are considerably more satisfied (3.6) than Blue catfish (2.8) or Flathead catfish (3.0) anglers, and Yellow perch anglers report much lower satisfaction (2.4) than Bluegill/Sunfish (3.3) or Crappie (3.2) anglers within the panfish group.")`
+`r paste0("For this item, White bass, Trout, and Channel catfish anglers report the highest satisfaction, averaging 3.7, 3.6, and 3.6 on the five-point scale, with 62%, 58%, and 57% agreeing or strongly agreeing and no more than 17% disagreeing. Walleye/Sauger anglers -- the largest single preferred group in the survey -- report the lowest satisfaction, averaging 2.8, and are the only group where more anglers disagree (40%) than agree (28%); Flathead catfish anglers, at 3.0, divide evenly (36% each way). The gap between Walleye/Sauger and the three highest groups is roughly three-quarters of a point or more, and may point to a difference in how reliably each species can be caught rather than a difference in how much anglers enjoy the pursuit itself. Within families the widest contrast is among catfish, where Channel catfish anglers (3.6) are considerably more satisfied than Flathead catfish anglers (3.0); the two bass species and the two panfish species each fall within about a tenth of a point of each other.")`
 
 `r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Within 2025, one further pattern stands out: anglers with no single preferred species report above-average satisfaction (3.4, against 3.2 overall) and the largest neutral share of any group (45%), and neutral responses are common across the board -- roughly three in ten anglers in most groups take neither side -- so the group differences described above rest on the balance between agreement and disagreement rather than on lopsided views within any group.")`
 
@@ -448,9 +448,9 @@ D4MeansOrderedPlot(d, "D4b", titleText = ItemQuestionText("D4b", q))
 D4SlopePlot(d, d2018, "D4b", titleText = ItemQuestionText("D4b", q))
 ```
 
-`r paste0("Overall, disagreement (38%) outweighs agreement (24%) with this trade-off. Northern pike and Muskellunge anglers reject it most strongly of any preferred group, both averaging about 2.4 on the five-point scale, and Flathead catfish and Yellow perch anglers post the next-highest disagreement rates, at about half of each group. Pike and muskellunge anglers pursue larger, trophy-oriented fish, which may explain their reluctance to trade size for numbers. Blue catfish anglers stand apart at the opposite end as the only group where agreement (48%) outweighs disagreement (17%) by a wide margin, suggesting Blue catfish anglers place comparatively more value on numbers over size than anglers preferring any other species.")`
+`r paste0("Willingness to harvest smaller fish in exchange for more of them is low overall, averaging 2.8, with 38% disagreeing and 24% agreeing. Smallmouth bass and White bass anglers report the highest agreement (3.05 each), and Smallmouth bass anglers are the only group where more agree (40%) than disagree (33%). Northern pike anglers report the lowest (2.4), with 59% disagreeing and only 8% agreeing; Wiper anglers (58% disagree, 31% agree) and Flathead catfish anglers (51% disagree, 27% agree) also disagree far more often than they agree. The bass family shows the widest within-family spread, with Smallmouth bass anglers (3.1) well above Largemouth bass anglers (2.7).")`
 
-`r paste0("Blue catfish anglers' agreement rose sharply between 2018 and 2025, from 2.3 to 3.4 -- the largest year-over-year movement seen on this item, carrying them from the most reluctant group in 2018 to the most willing in 2025. No other group's change was large enough to appear in the figure above.")`
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Within 2025, what separates some groups is how many take no side: 58% of anglers with no single preferred species and 48% of Bluegill/Sunfish anglers are neutral, against 11% of Wiper anglers, so a middling average can reflect very different response patterns.")`
 
 ## `r ItemQuestionText("D4c", q)`
 
@@ -472,9 +472,9 @@ D4MeansOrderedPlot(d, "D4c", titleText = ItemQuestionText("D4c", q))
 D4SlopePlot(d, d2018, "D4c", titleText = ItemQuestionText("D4c", q))
 ```
 
-`r paste0("Support for size-increasing regulations is broad across every preferred group, but Muskellunge (4.5), Moronides (4.2), and Northern pike (4.0) anglers support it most strongly, while Yellow perch anglers support it least (3.3) and also disagree more than any other group (27%) -- a pattern that may reflect perch anglers' comparative indifference to trophy size on a species rarely pursued for its size in the first place. Largemouth and Smallmouth bass anglers are closely aligned with each other on this item (3.9 each), unlike several other items in this battery where the two bass species diverge.")`
+`r paste0("Support for regulations to increase the size of the preferred fish is high in every group, averaging 3.8 overall, with 66% agreeing and 12% disagreeing. Wiper anglers report the highest support (4.3; 87% agree, 5% disagree), followed by Northern pike anglers (4.05; 77% agree). Trout anglers report the lowest (3.6), alongside Walleye/Sauger and Flathead catfish anglers (3.6 each), though even in these groups more than half agree.")`
 
-`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. What distinguishes the groups in 2025 is instead the firmness of the support: in every group but Yellow perch, supporters outnumber opponents by at least three to one, and not a single Muskellunge respondent chose neutral -- every angler in that group took a side.")`
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. What distinguishes the groups in 2025 is the firmness of the support: in every group, supporters outnumber opponents by at least three to one, and Wiper and Northern pike anglers are the least likely to take neither side (8% and 9% neutral), while 35% of anglers with no single preferred species and 31% of Channel catfish anglers do.")`
 
 ## `r ItemQuestionText("D4d", q)`
 
@@ -496,9 +496,9 @@ D4MeansOrderedPlot(d, "D4d", titleText = ItemQuestionText("D4d", q))
 D4SlopePlot(d, d2018, "D4d", titleText = ItemQuestionText("D4d", q))
 ```
 
-`r paste0("Support for regulations aimed at increasing numbers is stronger and more uniform across preferred groups than support for size-increasing regulations was on the previous item -- disagreement stays in the single digits for most groups, and every Muskellunge respondent agreed. Muskellunge and Blue catfish anglers support numbers-focused regulation most strongly; Yellow perch and Crappie anglers support it comparatively least, though a clear majority of both still agree.")`
+`r paste0("Support for regulations to increase the numbers of the preferred fish is high in every group, averaging 3.9 overall, with 73% agreeing and 7% disagreeing. The spread across groups is narrow: Wiper anglers report the highest support (4.1; 81% agree), while Crappie (3.7) and Panfish/Sunfish anglers (3.8) report the lowest, though 69% and 71% of them agree. Set against the previous item, most groups support numbers-focused regulation more strongly than size-focused regulation; Wiper and Northern pike anglers are the exceptions, backing size rules somewhat more strongly, and Crappie anglers rate the two about equally. That tilt toward numbers over size may indicate that, for most anglers, catching fish at all matters more than catching bigger ones.")`
 
-`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Set against the previous item, most groups support numbers-focused regulation more strongly than size-focused regulation; Northern pike anglers are the main exception, backing size rules somewhat more strongly, with Moronides and Crappie anglers rating the two about equally. That tilt toward numbers over size may indicate that, for most anglers, catching fish at all matters more than catching bigger ones.")`
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Within 2025, the share who disagree is 0% after rounding among both Smallmouth bass anglers and anglers with no single preferred species, against 12% of Northern pike and Flathead catfish anglers, so the differences in averages reflect differences in how strongly anglers agree more than any split between supporters and opponents.")`
 
 ## `r ItemQuestionText("D4e", q)`
 
@@ -520,9 +520,9 @@ D4MeansOrderedPlot(d, "D4e", titleText = ItemQuestionText("D4e", q))
 D4SlopePlot(d, d2018, "D4e", titleText = ItemQuestionText("D4e", q))
 ```
 
-`r paste0("This item asks about the opposite trade-off from the harvest-satisfaction item above -- willingness to accept fewer fish in exchange for larger ones -- and the pattern largely mirrors it. Muskellunge (3.9) and Smallmouth bass (3.9) anglers are most willing to make that trade; Bluegill/Sunfish (3.2) and Walleye/Sauger anglers are least willing among the larger groups. Yellow perch anglers land in the middle on average but are unusually divided, with about a third disagreeing, one of the higher disagreement rates on this item.")`
+`r paste0("Willingness to harvest fewer fish in exchange for larger fish averages 3.6 overall, with 52% agreeing and 14% disagreeing. Wiper anglers report the highest willingness (4.2; 82% agree, 3% disagree), followed by the bass groups (Smallmouth bass 3.9, Largemouth bass 3.8; 63% to 67% agree). Bluegill/Sunfish and White bass anglers report the lowest (3.2 each), though for both the difference is mostly neutral rather than opposed responses: 49% and 56% of them take neither side, and 37% and 29% agree.")`
 
-`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. The 2025 pattern is internally consistent with the harvest-versus-size question two items later: the groups most willing to sacrifice numbers for size here -- Muskellunge and both bass groups -- are the same ones that lean toward size over harvest opportunity there, while Walleye/Sauger anglers, among the least willing here, lean furthest toward harvest opportunity. No group falls below neutral on average, so the differences are in degree of willingness, not direction.")`
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. The 2025 pattern is internally consistent with the harvest-versus-size question two items later: the groups most willing to sacrifice numbers for size here -- Wiper and both bass species -- are the same ones that lean toward size over harvest opportunity there, while Walleye/Sauger anglers, among the least willing here, lean toward harvest opportunity. No group falls below neutral on average, so the differences are in degree of willingness, not direction.")`
 
 ## `r ItemQuestionText("D4f", q)`
 
@@ -544,9 +544,9 @@ D4MeansOrderedPlot(d, "D4f", titleText = ItemQuestionText("D4f", q))
 D4SlopePlot(d, d2018, "D4f", titleText = ItemQuestionText("D4f", q))
 ```
 
-`r paste0("Yellow perch and Blue catfish anglers feel most strongly that their preferred fish has become harder to catch, and Walleye/Sauger anglers -- the largest preferred group -- also lean toward agreement, with 56% agreeing. Bluegill/Sunfish and Channel catfish anglers feel this least. The two catfish species diverge sharply from each other here -- Channel catfish anglers see little change in difficulty while Blue catfish anglers see a great deal -- and the same divergence appears within panfish, where Yellow perch anglers report much more difficulty than Bluegill/Sunfish anglers despite both belonging to the same combined preferred group.")`
+`r paste0("Agreement that the preferred fish is becoming harder to catch averages 3.3 overall, with 45% agreeing and 20% disagreeing. Walleye/Sauger anglers report the highest agreement (3.6; 56% agree), followed by Flathead catfish (3.5) and Northern pike anglers (3.5; 60% agree, the highest agree share of any group). Bluegill/Sunfish anglers report the lowest (2.6; 46% disagree, 16% agree) and are joined below the scale midpoint only by Channel catfish anglers (3.0). The within-family spreads are wide for panfish (Bluegill/Sunfish 2.6, Crappie 3.3) and catfish (Channel catfish 3.0, Flathead catfish 3.5).")`
 
-`r paste0("Agreement that the preferred fish has become harder to catch rose modestly across all anglers between 2018 and 2025, from 3.2 to 3.3 -- one of only two items in this battery, along with the water-availability item at the end, where the change across all anglers is what stands out between years. No individual preferred group's change was large enough to appear in the figure above, which suggests a broad, shallow drift toward agreement rather than a sharp movement concentrated in any one group.")`
+`r paste0("Agreement that the preferred fish has become harder to catch rose modestly across all anglers between 2018 and 2025, from 3.2 to 3.3 -- one of only two items in this battery, along with the places-to-fish item at the end, where the change across all anglers is what stands out between years. No individual preferred group's change was large enough to appear in the figure above, which suggests a broad, shallow drift toward agreement rather than a sharp movement concentrated in any one group.")`
 
 ## `r ItemQuestionText("D4g", q)`
 
@@ -568,9 +568,9 @@ D4MeansOrderedPlot(d, "D4g", titleText = ItemQuestionText("D4g", q))
 D4SlopePlot(d, d2018, "D4g", titleText = ItemQuestionText("D4g", q))
 ```
 
-`r paste0("Trout (3.3) and Walleye/Sauger (3.2) anglers lean furthest toward valuing the opportunity to harvest their preferred fish over its size, though neither sits far above the scale midpoint. Smallmouth bass anglers are the clear outlier at the other end, disagreeing by more than four to one -- consistent with smallmouth bass fisheries' typical size- and release-oriented management. Both bass species in fact lean toward size over harvest, but Smallmouth bass anglers (2.4) do so far more sharply than Largemouth bass anglers (2.7), and Moronides (2.6) and Muskellunge (2.7) anglers land near them at the size-oriented end of the scale.")`
+`r paste0("Views on whether harvest opportunity matters more than fish size are divided, averaging 3.0 overall, with 36% agreeing and 30% disagreeing. Trout (3.3) and Walleye/Sauger anglers (3.3) lean furthest toward harvest opportunity. Wiper anglers lean furthest toward size (2.3; 60% disagree, 25% agree), followed by Smallmouth bass anglers (2.4; 53% disagree, 13% agree) and the bass family as a whole (2.7; 41% disagree, 24% agree).")`
 
-`r paste0("Moronides anglers are the only group whose change between 2018 and 2025 appears in the figure above, moving from leaning toward harvest opportunity (3.2) to leaning toward size (2.6) -- one of the larger single-group shifts in this battery, and one that carries Moronides anglers from the harvest-oriented end of this item across to the size-oriented end, alongside the bass groups.")`
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Within 2025, half of the anglers with no single preferred species (50%) take neither side, the largest neutral share of any group, against 15% of Wiper anglers; the two groups' averages sit at different ends of the range for different reasons, with a majority of Wiper anglers disagreeing (60%) and the no-preference group split between disagreeing (28%) and agreeing (22%).")`
 
 ## `r ItemQuestionText("D4h", q)`
 
@@ -592,9 +592,9 @@ D4MeansOrderedPlot(d, "D4h", titleText = ItemQuestionText("D4h", q))
 D4SlopePlot(d, d2018, "D4h", titleText = ItemQuestionText("D4h", q))
 ```
 
-`r paste0("Bluegill/Sunfish anglers register the strongest disagreement seen anywhere in this battery -- roughly three in four disagree that they travel too far -- consistent with panfish being widely available close to home, and Largemouth bass and catfish anglers broadly share that view. Yellow perch (3.8) and Muskellunge (3.6) anglers sit at the opposite extreme -- not a single Yellow perch respondent disagreed -- suggesting perch and muskellunge anglers travel farther for their preferred fish than most other anglers do. Walleye/Sauger, Moronides, and Trout anglers also lean further toward agreement than the overall average, which may reflect how concentrated the waters holding those species are.")`
+`r paste0("Agreement that the angler has to travel too far to fish for the preferred fish averages 2.8 overall, with 43% disagreeing and 25% agreeing. Wiper anglers report the highest agreement (3.4; 55% agree, 18% disagree), with the widest margin of agreement over disagreement of any group; Northern pike (3.1), White bass (3.1), and Trout anglers (3.1) follow. Bluegill/Sunfish anglers report the lowest (2.1; 75% disagree, 12% agree), followed by Flathead catfish (2.4), Channel catfish (2.4), and Largemouth bass anglers (2.5).")`
 
-`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. The travel pattern does line up with the water-availability item at the end of this battery: Yellow perch, Muskellunge, and Northern pike anglers sit at or near the top of both, while Bluegill/Sunfish and Channel catfish anglers sit at or near the bottom of both, suggesting that travel distance and the perceived shortage of places to fish are two readings of the same underlying access picture for these species.")`
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. The travel pattern partly lines up with the places-to-fish item at the end of this battery: Northern pike, Wiper, and Trout anglers sit at or near the top of both, while Bluegill/Sunfish and Channel catfish anglers sit at or near the bottom of both, suggesting that travel distance and the perceived shortage of places to fish may be two readings of the same underlying access picture for these species. Flathead catfish anglers are the exception, near the bottom on travel (2.4) but second from the top on places to fish (3.3).")`
 
 ## `r ItemQuestionText("D4i", q)`
 
@@ -616,9 +616,9 @@ D4MeansOrderedPlot(d, "D4i", titleText = ItemQuestionText("D4i", q))
 D4SlopePlot(d, d2018, "D4i", titleText = ItemQuestionText("D4i", q))
 ```
 
-`r paste0("Moronides (3.8) and Muskellunge (3.8) anglers report the highest satisfaction with the size of fish they catch; Yellow perch (2.8) and Northern pike (3.0) anglers report the lowest. The gap between Muskellunge and Northern pike anglers is notable given both prefer esocids -- muskellunge, which grow considerably larger than pike, appear to deliver more size satisfaction to the anglers who pursue them. Within the bass and panfish families, Smallmouth bass and Bluegill/Sunfish anglers (both 3.5) are clearly more size-satisfied than Largemouth bass (3.0) and Yellow perch anglers respectively.")`
+`r paste0("Satisfaction with the size of the preferred fish caught averages 3.3 overall, with 46% agreeing and 21% disagreeing. Wiper anglers report the highest satisfaction (4.0; 80% agree, 7% disagree), followed by White bass anglers (3.6). Northern pike anglers report the lowest (3.0), the only group averaging below the scale midpoint, followed by Largemouth bass anglers (3.0).")`
 
-`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Within 2025, how the groups arrive at their averages differs as much as the averages themselves: Northern pike anglers split into opposing camps (43% agree, 37% disagree, only a fifth neutral), while nearly half of Blue catfish anglers (47%) and four in ten Trout anglers take no side at all.")`
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Within 2025, how the groups arrive at their averages differs as much as the averages themselves: Northern pike anglers split into opposing camps (43% agree, 37% disagree, only a fifth neutral), while half of the anglers with no single preferred species (50%), 44% of White bass anglers, and four in ten Trout anglers (41%) take no side at all.")`
 
 ## `r ItemQuestionText("D4j", q)`
 
@@ -640,9 +640,9 @@ D4MeansOrderedPlot(d, "D4j", titleText = ItemQuestionText("D4j", q))
 D4SlopePlot(d, d2018, "D4j", titleText = ItemQuestionText("D4j", q))
 ```
 
-`r paste0("Bluegill/Sunfish anglers (3.9) and Muskellunge anglers are most satisfied with the size limits that govern harvest of their preferred fish, and agreement outweighs disagreement in every group but one: Northern pike anglers, where disagreement (40%) edges out agreement (38%). That echoes the pike/muskellunge gap seen on the size-satisfaction item above -- pike anglers appear comparatively dissatisfied with both the size of fish they catch and the size they are allowed to keep.")`
+`r paste0("Satisfaction with the size of the preferred fish that may be harvested averages 3.5 overall, with 56% agreeing and 10% disagreeing. Bluegill/Sunfish anglers report the highest satisfaction (3.9; 69% agree, 3% disagree), followed by White bass anglers (3.8) and Smallmouth bass anglers (3.7). Northern pike anglers report the lowest (3.0; 38% agree, 40% disagree) and are the only group where disagreement is at least as common as agreement; anglers with no single preferred species (3.2) and Wiper anglers (3.3) follow.")`
 
-`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Compared with the previous item, nearly every group rates the size they are allowed to harvest at least as favorably as the size they actually catch; Moronides anglers are the one clear exception, rating the size they catch (3.8) above the size they are allowed to keep (3.5), which may hint that where Moronides anglers have a complaint, it is with the rules rather than the fish.")`
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Compared with the previous item, nearly every group rates the size they are allowed to harvest at least as favorably as the size they actually catch; Wiper anglers are the one clear exception, rating the size they catch (4.0) above the size they are allowed to keep (3.3), while Northern pike anglers rate the two about equally (3.0 each), which may hint that where Wiper anglers have a complaint, it is with the rules rather than the fish.")`
 
 ## `r ItemQuestionText("D4k", q)`
 
@@ -664,9 +664,9 @@ D4MeansOrderedPlot(d, "D4k", titleText = ItemQuestionText("D4k", q))
 D4SlopePlot(d, d2018, "D4k", titleText = ItemQuestionText("D4k", q))
 ```
 
-`r paste0("Bluegill/Sunfish (3.6) and Channel catfish (3.4) anglers are most satisfied with the number of fish they catch; Yellow perch (2.7) and Flathead catfish (2.8) anglers are least. The catfish family splits sharply on this item: half of Flathead catfish anglers disagree -- the highest disagreement rate of any group on this item -- and Blue catfish anglers also lean toward dissatisfaction, while Channel catfish anglers are among the most satisfied groups, which may point to differences in how consistently each catfish species can be caught rather than anything about catfish angling as a whole.")`
+`r paste0("Satisfaction with the number of the preferred fish caught averages 3.2 overall, with 46% agreeing and 27% disagreeing. Bluegill/Sunfish anglers report the highest satisfaction (3.6; 70% agree, 20% disagree), followed by Channel catfish and Wiper anglers (3.4 each). Flathead catfish anglers report the lowest (2.8; 50% disagree, 38% agree), the only group averaging below the scale midpoint, followed by Walleye/Sauger anglers (3.0).")`
 
-`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. The 2025 ranking largely mirrors the overall fishing-success item at the top of this battery -- Channel catfish and Trout anglers near the top of both, Yellow perch and Walleye/Sauger anglers near the bottom of both -- which may indicate that when anglers judge their overall success, the number of fish caught weighs at least as heavily as their size.")`
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. The 2025 ranking partly mirrors the overall fishing-success item at the top of this battery -- Channel catfish, White bass, and Trout anglers in the upper part of both, Walleye/Sauger and Flathead catfish anglers near the bottom of both -- which may indicate that when anglers judge their overall success, the number of fish caught weighs at least as heavily as their size.")`
 
 ## `r ItemQuestionText("D4l", q)`
 
@@ -688,9 +688,9 @@ D4MeansOrderedPlot(d, "D4l", titleText = ItemQuestionText("D4l", q))
 D4SlopePlot(d, d2018, "D4l", titleText = ItemQuestionText("D4l", q))
 ```
 
-`r paste0("Bluegill/Sunfish anglers (3.9) are again the most satisfied group, this time with harvest-number limits, and a majority of most groups agree. Both esocid species land at the bottom together on average, but they arrive there differently: Northern pike anglers (3.1) show real dissatisfaction, with about three in ten disagreeing, while Muskellunge anglers (3.2) are overwhelmingly neutral rather than dissatisfied -- not one disagreed. Yellow perch anglers (3.3) sit just above the esocids, continuing the comparatively low perch satisfaction that runs through most of the satisfaction items in this battery.")`
+`r paste0("Satisfaction with the number of the preferred fish that may be harvested averages 3.5 overall, with 56% agreeing and 10% disagreeing. Bluegill/Sunfish anglers report the highest satisfaction (3.9; 66% agree, 5% disagree), followed by Crappie, Smallmouth bass, and White bass anglers (3.7 each). Northern pike anglers report the lowest (3.15; 47% agree, 30% disagree), followed by Wiper anglers (3.2), 46% of whom take neither side.")`
 
-`r paste0("Moronides anglers are the only group whose change between 2018 and 2025 appears in the figure above, declining by nearly half a point -- from the most satisfied group on this item in 2018 to the lower third in 2025, a reversal worth noting given their generally high standing on the other satisfaction items in this battery.")`
+`r paste0("No group's change between 2018 and 2025 was large enough to appear in the figure above. Compared with the number caught in the previous item, every group rates the number it is allowed to harvest at least as favorably except Wiper anglers (3.2 allowed, against 3.4 caught) and, marginally, Northern pike anglers (3.15 allowed, against 3.21 caught); Wiper anglers also rate the size they may keep below the size they catch, so their lower ratings for what may be kept appear on both size and number.")`
 
 ## `r ItemQuestionText("D4m", q)`
 
@@ -712,9 +712,9 @@ D4MeansOrderedPlot(d, "D4m", titleText = ItemQuestionText("D4m", q))
 D4SlopePlot(d, d2018, "D4m", titleText = ItemQuestionText("D4m", q))
 ```
 
-`r paste0("Muskellunge anglers agree more strongly than any other preferred group (4.3) that there are not enough places to fish for their preferred fish, and Northern pike (3.5) and Yellow perch (3.5) anglers also lean toward agreement -- consistent with muskellunge, pike, and perch all being managed in a comparatively limited number of Nebraska waters. Bluegill/Sunfish and Channel catfish anglers feel the opposite, disagreeing by roughly two to one, consistent with how widely those species are stocked and available.")`
+`r paste0("Agreement that there are not enough places to fish for the preferred fish averages 3.1 overall, with 36% agreeing and 34% disagreeing. Northern pike anglers report the highest agreement (3.5; 62% agree, 28% disagree), followed by Flathead catfish (3.3), Wiper (3.3), Trout, and Smallmouth bass anglers (3.3 each). Bluegill/Sunfish anglers report the lowest (2.6; 56% disagree, 24% agree), followed by Channel catfish anglers (2.6).")`
 
-`r paste0("Flathead catfish anglers' agreement rose sharply between 2018 and 2025, from 2.5 to 3.3 -- the largest movement of any group on this item, and second in this battery only to Blue catfish anglers' shift on the smaller-fish trade-off item. Agreement across all anglers also crept upward between the two years, from 2.9 to 3.1, another instance, like the difficulty-of-catching item earlier, where the shift shows up broadly rather than only within individual preferred groups.")`
+`r paste0("Flathead catfish anglers' agreement rose sharply between 2018 and 2025, from 2.5 to 3.3 -- the only group whose change appears in any of the 2018-2025 figures for this battery. Agreement across all anglers also crept upward between the two years, from 2.9 to 3.1, another instance, like the difficulty-of-catching item earlier, where the shift shows up broadly rather than only within individual preferred groups.")`
 
 # Chapter 3: Crosstabs by Preferred Species
 
@@ -1358,9 +1358,10 @@ stopifnot(
   # is false and every column in this chapter points a different way.
   all(d$A9rev + as.numeric(d$A9) == 6, na.rm = TRUE),
   identical(is.na(d$A9rev), is.na(d$A9)),
-  nrow(ch4.groupMeans) == 18,
-  nrow(ch4.gapCatch) == 18,
-  nrow(ch4.gapHarvest) == 18
+  # Overall plus one row per preferred group
+  nrow(ch4.groupMeans) == nrow(banner.definition) + 1,
+  nrow(ch4.gapCatch) == nrow(banner.definition) + 1,
+  nrow(ch4.gapHarvest) == nrow(banner.definition) + 1
 )
 ```
 
@@ -1645,7 +1646,11 @@ stopifnot(
   top("reg_sitesupport") == 6, bottom("reg_uniform") == 6,
   z(6, "motivation_natural") > 0, z(6, "motivation_social") > 0, z(6, "motivation_resource") < 0,
   # Species shares quoted below
-  ch5.long$Number[ch5.long$Class == "Class 6" & ch5.long$Column == "Moronides"] == 0,
+  # Walleye / Sauger has the smallest Class 6 share of any displayed family group
+  with(
+    ch5.long[ch5.long$Class == "Class 6" & !ch5.long$Suppressed & ch5.long$Type == "Family", ],
+    Column[which.min(Value)] == "Walleye / Sauger"
+  ),
   with(
     ch5.long[ch5.long$Class == "Class 6" & !ch5.long$Suppressed & ch5.long$Type != "Overall", ],
     Column[which.max(Value)] == "Bluegill / Sunfish"
@@ -1705,7 +1710,7 @@ A <- function(cls, v, kind) {
   paste0(Ch5CmpFmt(ch5.cmp, cls, v, kind), ", against ", Ch5CmpFmt(ch5.cmp, "Overall", v, kind), " overall")
 }
 V <- function(cls, v, kind) Ch5CmpFmt(ch5.cmp, cls, v, kind)
-MIX <- function(cls) Ch5MixCaveat(ch5.mix, cls)
+MIX <- function(cls) Ch5MixCaveat(ch5.mix, cls, hidden = unique(ch5.long$Column[ch5.long$Suppressed]))
 
 M <- function(cls, v) Ch5M(ch5.std, cls, v)
 MZ <- function(cls, v) Ch5MZ(ch5.std, cls, v)
@@ -1725,7 +1730,7 @@ Ch5IconKeyTable(
 
 `r paste0("The paragraphs below describe each profile by the scales on which it differs most from the Overall mean. Means are the weighted means in the profile means table; the figure after each mean is its distance from the Overall mean in standard deviations of the Overall weighted distribution (SD). Two scale names need a note: the Fishery resource motivation scale is made up of catch outcomes (competing for prizes, obtaining fish to eat, catching a trophy, the fun of catching), and the Simplification regulation scale measures agreement with uniform statewide regulations. Species shares are the row percentages from the profiles-by-preferred-species table at the end of this chapter, with their confidence intervals. The label and the closing picture in each paragraph are an interpretive summary of the eleven scale scores. They are not measured directly, and traits beyond those scales, such as how often or how an angler fishes, are not established by these data.")`
 
-`r paste0("The second paragraph for each profile compares it with the Overall column on the other survey questions in the table above; the values quoted are from that table, and its confidence intervals show that several of the differences described are small relative to their precision. Where a family group makes up at least ", ch5.mix.gap, " percentage points more of a profile than of all assigned respondents, the paragraph names it, because questions that vary by species may partly reflect that mix rather than the profile itself.")`
+`r paste0("The second paragraph for each profile compares it with the Overall column on the other survey questions in the table above; the values quoted are from that table, and its confidence intervals show that several of the differences described are small relative to their precision. Where a family group makes up at least ", ch5.mix.gap, " percentage points more of a profile than of all assigned respondents, the paragraph names it, unless its row is below the effective-N floor and therefore not shown, because questions that vary by species may partly reflect that mix rather than the profile itself.")`
 
 ### Class 1: `r ch5.class.labels[1]`
 
@@ -1771,7 +1776,7 @@ Ch5PhotoWithIcon(4)
 
 *`r paste0("Class 4: ", ch5.class.labels[4])`*
 
-`r paste0("Class 4 holds ", Sov(4), " of respondents (n = ", FmtCount(ch5.classN[['Class 4']]), "). It has the highest score of any profile on all four motivations: challenge and relaxation (", MZ(4, 'motivation_pp'), "), outdoors (", MZ(4, 'motivation_natural'), "), social (", MZ(4, 'motivation_social'), "), and catch outcomes (", MZ(4, 'motivation_resource'), "). It is also the most size-oriented profile (", MZ(4, 'attitude_size'), ") and is above average on numbers (", M(4, 'attitude_numbers'), "), with average scores on needing a catch (", M(4, 'attitude_catch'), ") and on harvest (", M(4, 'attitude_harvest'), "). Its support for site-specific rules is above average (", M(4, 'reg_sitesupport'), "). The catch-outcomes scale, on which no other profile scores as high, includes competing for prizes or money. Picture the angler for whom fishing is a central hobby: every reason to go matters, trophies and tournament competition included. Class 4 makes up ", S(4, 'Moronides'), " of Moronides and ", S(4, 'Smallmouth bass'), " of Smallmouth bass anglers, against ", Sov(4), " overall.")`
+`r paste0("Class 4 holds ", Sov(4), " of respondents (n = ", FmtCount(ch5.classN[['Class 4']]), "). It has the highest score of any profile on all four motivations: challenge and relaxation (", MZ(4, 'motivation_pp'), "), outdoors (", MZ(4, 'motivation_natural'), "), social (", MZ(4, 'motivation_social'), "), and catch outcomes (", MZ(4, 'motivation_resource'), "). It is also the most size-oriented profile (", MZ(4, 'attitude_size'), ") and is above average on numbers (", M(4, 'attitude_numbers'), "), with average scores on needing a catch (", M(4, 'attitude_catch'), ") and on harvest (", M(4, 'attitude_harvest'), "). Its support for site-specific rules is above average (", M(4, 'reg_sitesupport'), "). The catch-outcomes scale, on which no other profile scores as high, includes competing for prizes or money. Picture the angler for whom fishing is a central hobby: every reason to go matters, trophies and tournament competition included. Class 4 makes up ", S(4, 'Smallmouth bass'), " of Smallmouth bass anglers, against ", Sov(4), " overall.")`
 
 `r paste0("On the other survey questions, Class 4 is the most active profile and the one most likely to fish tournaments (", A(4, 'cmpTourney', 'pct'), "), although tournament anglers remain a small share of it. It has the highest mean days fished (", A(4, 'cmpDays', 'mean'), ") and median days fished (", A(4, 'cmpDays', 'median'), "), and the highest rates of any profile for using a kayak or canoe (", A(4, 'cmpKayak', 'pct'), "), ice fishing (", A(4, 'cmpIce', 'pct'), "), fishing rivers and streams (", A(4, 'cmpStream', 'pct'), "), fishing waters that require a Park Entry Permit (", A(4, 'cmpPark', 'pct'), "), fishing outside Nebraska (", A(4, 'cmpOutState', 'pct'), ") and using live-imaging sonar (", A(4, 'cmpLiveScope', 'pct'), "). It is also the youngest profile (mean age ", A(4, 'cmpAge', 'mean'), "). ", MIX(4))`
 
@@ -1795,7 +1800,7 @@ Ch5PhotoWithIcon(6)
 
 *`r paste0("Class 6: ", ch5.class.labels[6])`*
 
-`r paste0("Class 6 holds ", Sov(6), " of respondents (n = ", FmtCount(ch5.classN[['Class 6']]), "), the smallest profile. It has the lowest score of any profile on all four catch attitudes: catch something ", M(6, 'attitude_catch'), ", numbers ", M(6, 'attitude_numbers'), " (", sprintf("%+.2f", z(6, 'attitude_numbers')), " SD), size ", M(6, 'attitude_size'), ", harvest ", M(6, 'attitude_harvest'), "; catching and keeping fish are close to irrelevant to it. It is motivated by the outdoors (", M(6, 'motivation_natural'), ") and by social reasons (", M(6, 'motivation_social'), ") but not by catch outcomes (", M(6, 'motivation_resource'), "). It has the highest comprehension of the rules (", M(6, 'reg_comprehension'), ") and support for site-specific rules (", M(6, 'reg_sitesupport'), ") of any profile, and the lowest preference for uniform rules (", M(6, 'reg_uniform'), "). Picture someone who values the experience and well-managed waters over the catch. Class 6 makes up ", S(6, 'Walleye / Sauger'), " of Walleye / Sauger anglers and none of the ", FmtCount(ch5.long$ColumnN[ch5.long$Column == 'Moronides'][1]), " Moronides respondents; its largest share of any displayed row is ", S(6, 'Bluegill / Sunfish'), " of Bluegill / Sunfish anglers.")`
+`r paste0("Class 6 holds ", Sov(6), " of respondents (n = ", FmtCount(ch5.classN[['Class 6']]), "), the smallest profile. It has the lowest score of any profile on all four catch attitudes: catch something ", M(6, 'attitude_catch'), ", numbers ", M(6, 'attitude_numbers'), " (", sprintf("%+.2f", z(6, 'attitude_numbers')), " SD), size ", M(6, 'attitude_size'), ", harvest ", M(6, 'attitude_harvest'), "; catching and keeping fish are close to irrelevant to it. It is motivated by the outdoors (", M(6, 'motivation_natural'), ") and by social reasons (", M(6, 'motivation_social'), ") but not by catch outcomes (", M(6, 'motivation_resource'), "). It has the highest comprehension of the rules (", M(6, 'reg_comprehension'), ") and support for site-specific rules (", M(6, 'reg_sitesupport'), ") of any profile, and the lowest preference for uniform rules (", M(6, 'reg_uniform'), "). Picture someone who values the experience and well-managed waters over the catch. Class 6 makes up ", S(6, 'Walleye / Sauger'), " of Walleye / Sauger anglers, its smallest share of any displayed family group; its largest share of any displayed row is ", S(6, 'Bluegill / Sunfish'), " of Bluegill / Sunfish anglers.")`
 
 `r paste0("On the other survey questions, Class 6 fishes less often than average (median days ", A(6, 'cmpDays', 'median'), ") and has the lowest rates of any profile for fishing tournaments (", A(6, 'cmpTourney', 'pct'), "), hiring a guide (", A(6, 'cmpGuide', 'pct'), ") and fishing from a motorized boat (", A(6, 'cmpBoat', 'pct'), "). Its median distance to its most visited water is ", V(6, 'cmpMiles', 'median'), " miles, against ", V('Overall', 'cmpMiles', 'median'), " overall. It reports the highest overall satisfaction of any profile (mean ", A(6, 'cmpSatisfaction', 'mean'), ", where lower means more satisfied), and, with Class 2, the highest share of women (", A(6, 'cmpFemale', 'pct'), "). With ", FmtCount(ch5.classN[['Class 6']]), " respondents it is the smallest profile, and most of its intervals in the table are correspondingly wide. ", MIX(6))`
 
@@ -1823,22 +1828,22 @@ top.cls <- function(col) {
 fam.cols <- setdiff(unique(ch5.fam$Column), "Overall")
 fam.n <- ch5.long %>% filter(Type == "Family") %>% distinct(Column, ColumnN)
 fam.unassigned <- ch5.long %>% filter(Type == "Family", Class == ch5.lpa.unassigned)
-small.ci <- ch5.fam %>% filter(Column %in% c("Moronides", "Trout")) %>% pull(CI) %>% max()
+# Trout is the smallest family group, so it has the widest intervals
+small.ci <- ch5.fam %>% filter(Column == "Trout") %>% pull(CI) %>% max()
+ch5.splitSpecies <- banner.definition$Column[banner.definition$Type == "Split"]
 FN <- function(col) FmtCount(fam.n$ColumnN[fam.n$Column == col])
 SA <- function(cls, col) paste0(S(cls, col), " against ", Sov(cls), " overall")
 
 stopifnot(
-  length(fam.cols) == 7,
-  # every family has every profile, except no Moronides anglers in Class 6
-  all(ch5.fam$Value[!(ch5.fam$Column == "Moronides" & ch5.fam$Class == "Class 6")] > 0),
-  fv("Moronides", 6) == 0,
+  length(fam.cols) == sum(banner.definition$Type == "Family"),
+  # every family group has every profile
+  all(ch5.fam$Value > 0),
   # the largest share of any profile in any family group
-  with(ch5.fam %>% filter(Type == "Family"), Column[which.max(Value)] == "Moronides" && Class[which.max(Value)] == "Class 4"),
+  with(ch5.fam %>% filter(Type == "Family"), Column[which.max(Value)] == "Walleye / Sauger" && Class[which.max(Value)] == "Class 1"),
   all(abs(sapply(1:6, gap, col = "Catfish")) < ch5.mix.gap),
   fam.n$Column[which.max(fam.n$ColumnN)] == "Walleye / Sauger",
   top.cls("Walleye / Sauger") == 1, gap("Walleye / Sauger", 1) >= ch5.mix.gap, gap("Walleye / Sauger", 6) < 0,
   top.cls("Bass") == 3, gap("Bass", 3) >= ch5.mix.gap, gap("Bass", 1) <= -ch5.mix.gap,
-  top.cls("Moronides") == 4, gap("Moronides", 4) >= ch5.mix.gap,
   gap("Panfish / Sunfish", 1) > 0, gap("Panfish / Sunfish", 6) > 0, gap("Panfish / Sunfish", 2) <= -ch5.mix.gap,
   gap("Trout", 2) >= ch5.mix.gap, gap("Trout", 3) <= -ch5.mix.gap,
   top.cls("No preference") == 2, gap("No preference", 2) >= ch5.mix.gap,
@@ -1853,7 +1858,6 @@ fam.text <- list(
   Bass = paste0("Bass anglers (n = ", FN('Bass'), ") show the opposite regulatory lean to Walleye / Sauger anglers. Class 3, the regulation-savvy catch-and-release angler, is their largest profile (", SA(3, 'Bass'), "), and Class 1 is less common among them (", SA(1, 'Bass'), "). This is the family group whose makeup most favours understanding and supporting site-specific rules, which suggests bass anglers are a receptive audience for special length limits or catch-and-release rules tailored to individual waters."),
   `Panfish / Sunfish` = paste0("Panfish / Sunfish anglers (n = ", FN('Panfish / Sunfish'), ") combine two contrasting profiles: Class 1 harvest-minded anglers (", SA(1, 'Panfish / Sunfish'), ") and Class 6 conservation-minded purists (", SA(6, 'Panfish / Sunfish'), ") are both more common than overall, while Class 2 is less common (", SA(2, 'Panfish / Sunfish'), "). Panfish management may therefore need to balance harvest opportunity for the larger group with the experience-focused, rules-engaged values of the smaller one."),
   Catfish = paste0("Catfish anglers (n = ", FN('Catfish'), ") are the closest to the angler population as a whole: no profile's share among them differs from its Overall share by ", ch5.mix.gap, " percentage points or more. In profile terms catfish anglers look much like Nebraska anglers generally, so catfish management is in effect management for the general angler."),
-  Moronides = paste0("Moronides anglers (striped bass, wiper and white bass) have the most concentrated makeup: Class 4, the all-in enthusiast, makes up ", SA(4, 'Moronides'), ", and none of them fall in Class 6. The group is small (n = ", FN('Moronides'), ") and the interval is wide, but the lean suggests a highly engaged, trip-intensive and trophy-oriented constituency for whom reservoir fishing quality matters, and who may be reached effectively through angler clubs and events."),
   Trout = paste0("Trout anglers lean toward Class 2, the relaxed, catch-optional angler (", SA(2, 'Trout'), "), with fewer Class 3 anglers (", SA(3, 'Trout'), "); with ", FN('Trout'), " respondents these intervals are wide. The lean fits a stocked fishery valued for the outing, where access, the timing of stockings and a pleasant setting may matter more than catch rates or trophy potential."),
   `No preference` = paste0("Anglers with no preferred species (n = ", FN('No preference'), ") are the group most weighted toward the less committed profiles: Class 2 (", SA(2, 'No preference'), ") and Class 5, the low-involvement angler (", SA(5, 'No preference'), "), are both more common than overall, and Class 1 is less common (", SA(1, 'No preference'), "). These anglers are a natural focus for recruitment, retention and reactivation efforts, where convenience, easy access and general information are more likely to reach them than species-specific regulation.")
 )
@@ -1864,7 +1868,7 @@ Card <- function(i) {
 }
 ```
 
-`r paste0("The figure below shows the profile makeup of each family group against the Overall share of each profile. Unassigned respondents, between ", formatC(min(fam.unassigned$Value), format = 'f', digits = 1), " and ", formatC(max(fam.unassigned$Value), format = 'f', digits = 1), " percent of each family group, are not shown, so the bars in a panel sum to less than 100. Northern pike and muskellunge are reported as individual species rather than as a family group and are not in the figure.")`
+`r paste0("The figure below shows the profile makeup of each family group against the Overall share of each profile. Unassigned respondents, between ", formatC(min(fam.unassigned$Value), format = 'f', digits = 1), " and ", formatC(max(fam.unassigned$Value), format = 'f', digits = 1), " percent of each family group, are not shown, so the bars in a panel sum to less than 100. ", knitr::combine_words(ch5.splitSpecies), " are reported as individual species because their families were not combined, and are not in the figure.")`
 
 ```{r ch5FamilyMix, fig.width=9, fig.height=5.5}
 Ch5FamilyMixPlot(ch5.long, "Profile makeup of each family group")
@@ -1872,7 +1876,7 @@ Ch5FamilyMixPlot(ch5.long, "Profile makeup of each family group")
 
 ## Profile makeup of family-group anglers
 
-`r paste0("Every family group contains anglers of all six profiles, with one exception: none of the Moronides respondents fall in Class 6. No family group is dominated by a single profile; the largest share of any profile in any family group is Class 4 among Moronides anglers (", S(4, 'Moronides'), "). Managing for any one species therefore means serving a mix of angler types, and the differences described in the cards below are differences of emphasis rather than of kind. Each card shows one family group's weighted percentage in each profile, with 95 percent confidence intervals, on a common scale; the icons along the bottom mark the profiles, and the dashed mark is the Overall share of that profile.")`
+`r paste0("Every family group contains anglers of all six profiles. No family group is dominated by a single profile; the largest share of any profile in any family group is Class 1 among Walleye / Sauger anglers (", S(1, 'Walleye / Sauger'), "). Managing for any one species therefore means serving a mix of angler types, and the differences described in the cards below are differences of emphasis rather than of kind. Each card shows one family group's weighted percentage in each profile, with 95 percent confidence intervals, on a common scale; the icons along the bottom mark the profiles, and the dashed mark is the Overall share of that profile.")`
 
 ```{r ch5Card1}
 Card(1)
@@ -1898,11 +1902,7 @@ Card(5)
 Card(6)
 ```
 
-```{r ch5Card7}
-Card(7)
-```
-
-`r paste0("These implications are interpretive. The profiles are built from attitude, motivation and regulation scales, not from behaviour, and the shares are associations: preferring a species does not place an angler in a profile, nor the reverse. Differences of less than about ", ch5.mix.gap, " percentage points are within the precision of these estimates for most family groups, and the Moronides and Trout groups are small enough that their intervals reach \u00b1", formatC(small.ci, format = 'f', digits = 1), " points.")`
+`r paste0("These implications are interpretive. The profiles are built from attitude, motivation and regulation scales, not from behaviour, and the shares are associations: preferring a species does not place an angler in a profile, nor the reverse. Differences of less than about ", ch5.mix.gap, " percentage points are within the precision of these estimates for most family groups, and the Trout group, the smallest family group, has intervals that reach \u00b1", formatC(small.ci, format = 'f', digits = 1), " points.")`
 
 `r sect_landscape()`
 
@@ -2053,7 +2053,7 @@ this chapter supports.
 
 `r paste0("The size-and-numbers comparisons are paired. For each respondent who answered both items of a pair, the difference between the two responses is computed first, and the group figure is the weighted mean of those differences with the usual interval. Restricting to respondents who answered both items means the two means printed beside the difference describe the same people, so the difference column equals the difference of the columns. Pairing removes between-angler variation in how the scale is used, which is why a difference of a few hundredths of a scale point can carry a narrower interval than either mean.")`
 
-`r paste0("No significance test is reported in Chapter 4, and no adjustment for multiple comparisons is applied. Each interval is a 95 percent interval for its own group taken alone. Seventeen groups are shown for each pair, and the groups overlap, since a family row contains the respondents in its own species rows; reading every interval at once is therefore a weaker exercise than reading any one of them, and a group whose interval just excludes zero should be read with that in mind. The correlation tables are likewise descriptive summaries with no test attached, and the group-level correlations are computed across 17 overlapping groups rather than across independent observations.")`
+`r paste0("No significance test is reported in Chapter 4, and no adjustment for multiple comparisons is applied. Each interval is a 95 percent interval for its own group taken alone. ", nrow(banner.definition), " groups are shown for each pair, and the groups overlap, since a family row contains the respondents in its own species rows; reading every interval at once is therefore a weaker exercise than reading any one of them, and a group whose interval just excludes zero should be read with that in mind. The correlation tables are likewise descriptive summaries with no test attached, and the group-level correlations are computed across ", nrow(banner.definition), " overlapping groups rather than across independent observations.")`
 
 ## Angler type profiles in Chapter 5
 
@@ -2084,8 +2084,8 @@ stopifnot(
   ch5.appb.n0 + ch5.appb.n16 == ch5.nUnassigned,
   nrow(ch5.appb.cert) == 3,
   all(ch5.appb.supp$Type %in% c("Species", "Split")),
-  length(ch5.appb.inFamily) > 0,
-  length(ch5.appb.split) > 0
+  length(ch5.appb.inFamily) + length(ch5.appb.split) == nrow(ch5.appb.supp),
+  nrow(ch5.appb.supp) > 0
 )
 ```
 
@@ -2135,13 +2135,13 @@ $$E = 1 - \frac{\sum_i \sum_j -\hat{p}_{ij} \ln \hat{p}_{ij}}{n \ln k}$$
 
 `r paste0("Chapter 5 is the only chapter of this report that withholds rows. Before the model was fitted, a floor of ", ch5.effn.floor, " on the Kish effective sample size was set for species rows, adopting the effective-sample-size element of the National Center for Health Statistics data presentation standards for proportions (Parker JD, Talih M, Malec DJ, et al. National Center for Health Statistics Data Presentation Standards for Proportions. Vital and Health Statistics, Series 2, No. 175. 2017). Only that element is adopted: the NCHS standard also calls for a raw sample size of at least 30 and for Korn-Graubard confidence intervals with width criteria, while this report's intervals are Wald intervals on the Kish effective N, as described above, and no width criterion is applied.")`
 
-`r paste0("Four rows fall below the floor and are not shown in the Chapter 5 tables: ", paste0(ch5.appb.supp$Column, " (", FmtCount(ch5.appb.supp$ColumnN), " respondents, effective N ", formatC(ch5.appb.supp$ColumnEffN, format = "f", digits = 1), ")", collapse = "; "), ". The floor applies to reporting only; these respondents are included in the model fit and in the Overall row. ", paste(ch5.appb.inFamily, collapse = " and "), " respondents are also contained in the ", paste(ch5.appb.family, collapse = " and "), " family rows", if (length(ch5.appb.family) > 1) ", respectively" else "", ". ", paste(ch5.appb.split, collapse = " and "), " have no family row, so their respondents appear in no displayed Chapter 5 species row. Where a profile has no respondents in a displayed row, the percentage is 0 and the Wald interval has zero width; this is a property of the interval formula, not a measurement of certainty.")`
+`r paste0(c("No", "One", "Two", "Three", "Four", "Five", "Six")[nrow(ch5.appb.supp) + 1], " rows fall below the floor and are not shown in the Chapter 5 tables: ", paste0(ch5.appb.supp$Column, " (", FmtCount(ch5.appb.supp$ColumnN), " respondents, effective N ", formatC(ch5.appb.supp$ColumnEffN, format = "f", digits = 1), ")", collapse = "; "), ". The floor applies to reporting only; these respondents are included in the model fit and in the Overall row. ", if (length(ch5.appb.inFamily) > 0) paste0(paste(ch5.appb.inFamily, collapse = " and "), " respondents are also contained in the ", paste(ch5.appb.family, collapse = " and "), " family rows", if (length(ch5.appb.family) > 1) ", respectively" else "", ". ") else "", if (length(ch5.appb.split) > 0) paste0(knitr::combine_words(ch5.appb.split), " are species whose family was not combined and have no family row, so their respondents appear in no displayed Chapter 5 species row. ") else "", "Where a profile has no respondents in a displayed row, the percentage is 0 and the Wald interval has zero width; this is a property of the interval formula, not a measurement of certainty.")`
 
 ### Comparisons on other survey questions
 
 `r paste0("The Chapter 5 table of profiles on other survey questions uses the same estimators as Chapter 3: weighted percentages and means with Kish effective-N intervals, and weighted medians with the bootstrap interval described above. Each question keeps its Chapter 3 universe, and the Overall column reproduces the Overall row of the corresponding Chapter 3 table. Unassigned respondents are counted in Overall only. One row is constructed for this chapter: a respondent counts as fishing rivers and streams if they reported the Missouri River, the Platte River, or other streams, rivers, and canals, among respondents who answered the waterbody question.")`
 
-`r paste0("These comparisons treat each respondent's assigned profile as known. Because assignment is uncertain, some respondents are counted in a profile they may not belong to, which tends to make the profiles look more alike on these questions than they are; the differences shown are therefore more likely understated than overstated. The profile paragraphs name a family group when it makes up at least ", ch5.mix.gap, " percentage points more of a profile than of all assigned respondents, as a reminder that species preference and profile membership are related. No adjustment for species mix is made.")`
+`r paste0("These comparisons treat each respondent's assigned profile as known. Because assignment is uncertain, some respondents are counted in a profile they may not belong to, which tends to make the profiles look more alike on these questions than they are; the differences shown are therefore more likely understated than overstated. The profile paragraphs name a family group when it makes up at least ", ch5.mix.gap, " percentage points more of a profile than of all assigned respondents, as a reminder that species preference and profile membership are related; a group whose row is below the reporting floor is not named. No adjustment for species mix is made.")`
 
 ### What is not reported
 

@@ -2496,3 +2496,51 @@ Phase 1 signed off by the user (prompt 158): the F94 disposition stands as writt
 - Console holds the new functions and `tests`, `disp`, `derived`, `family.candidates`; also stale `dry`, `ch1_res`, `genus.species`. Not needed by the report.
 - To check Chapter 1 alone: render a truncated copy of the `.rmd` (everything before `# Chapter 2`) from a temporary directory with `knit_root_dir = getwd()`.
 - Committed this session: functions, report, and the four tracking files. `DocxCounts.R` and `.posit/assistant/settings.json` remain uncommitted.
+
+## Phase 3 (Chapters 2-4 and Appendix B) — done 2026-09-29, prompt 161 (Chapter 5 excluded)
+
+| # | Decision / finding |
+|---|---|
+| D194 | `ch4Setup` assertions now compare against `nrow(banner.definition) + 1` (was 18). `Ch4*` builders and `D4RowSpec()` already derive rows from `banner.definition`; only stale "17" comments in `PreferredSpeciesFunctions.R` were edited |
+| D195 | **All 26 Chapter 2 closing paragraphs rewritten** against the 15 columns, with means, agree / neutral / disagree shares (rounded category sums) and 2018-2025 slope qualifiers recomputed first. Slope figures now qualify only: `D4f` Overall, `D4m` Overall and Flathead catfish. The old `D4b` (Blue catfish), `D4g` and `D4l` (Moronides) change commentary is gone; `D4m` no longer references the Blue catfish shift. Interpretive-voice exception (D77/D79) unchanged; nothing else in the chapter edited |
+| D196 | Appendix B "Satisfaction comparisons in Chapter 4": "Seventeen groups" and "17 overlapping groups" now computed from `nrow(banner.definition)`. No other Appendix B wording outside the Chapter 5 section needed change (no "replaced outright" text found) |
+| F97 | Chapter 3 tables have groups as rows, so the 15-column banner needed no width change. Chapter 3 prose is not hard-coded to group names |
+| F98 | **Verification.** Full render stops in Chapter 5 (`Ch5Share`, `nrow(r) == 1`), as expected while `B1banner` has 8 levels. A truncated render (header + Chapters 1-4 + Appendix A/B before the Chapter 5 section, `knit_root_dir` = project, 2.6 min) succeeds: `DocxCounts()` 87 tables / 55 images / 7 landscape / 0 leaked. Computed Chapter 4 sentences read correctly (15 groups). Not a baseline: Chapter 5 is absent |
+
+Still open: Chapter 5 (choose `B1banner` 8 levels vs new banner; Moronides checks, cards, Appendix B supplement); Phase 4 (full render, new baseline, commit). Not committed.
+
+## Chapter 5 moved to the new banner; full render restored (2026-09-30, prompt 162)
+
+| # | Decision / finding |
+|---|---|
+| D197 | **Chapter 5 follows the Chapter 1 banner.** `ch5.long` and the class-by-species table already read `D4RowSpec()` (the new banner). The remaining old dependency, `B1banner`, is resolved by D198 |
+| D198 | `AssignBannerGroup()` now derives from `banner.definition`: one level per Family or Split column (6 family + 3 split species), species inside a family are not levels, everything else is NA ("Other species" in `Ch5LPAClassMix`). `banner.levels` and the 8-level collapse are removed. Supersedes D192 |
+| D199 | Chapter 5 text and assertions rewritten for the new groups: Moronides card, checks and sentences removed (6 cards); "largest share of any profile in a family group" is now Class 1 among Walleye / Sauger; Class 6 sentence now says Walleye / Sauger has its smallest share of any family group; Class 4 sentence cites Smallmouth bass only; `small.ci` uses Trout only; figure sentence names the split species from `banner.definition`. Appendix B Chapter 5 supplement: floor paragraph count and wording computed (no "Four rows" / in-family assumption) |
+| F99 | **Stale assertion hazard.** `stopifnot(ch5.long$Number[... "Moronides"] == 0)` silently passed on `logical(0)` after Moronides left the banner. Replaced by a check on `which.min` over displayed family rows. Any other `x[Column == "<name>"]`-style assertion should be checked the same way |
+| F100 | **Chapter 5 effective-N floor (30, D146) suppresses three split species** that have a column elsewhere in the report: Wiper (n 35, effN 28.6), White bass (39, 29.8), Northern pike (32, 26.9). Smallmouth bass, Bluegill / Sunfish, Flathead catfish pass (effN 34.8, 34.5, 40.7). Left as is; raise with the user |
+| F101 | **Full render succeeds** (3.1 min): `DocxCounts()` **102 tables / 94 images / 10 landscape / 0 leaked**. This replaces the void 95 / 95 / 10 / 0 baseline (images 94 = one fewer card). Word layout not yet viewed |
+
+Open: keep or change the Chapter 5 floor for the three split species (F100); Phase 4 remainder: text scans, viewing the docx, commit.
+
+### Chapter 5 floor decision (2026-09-30, prompts 163-164)
+
+| # | Decision / finding |
+|---|---|
+| D200 | **The Chapter 5 effective-N floor stays at 30 (closes F100).** Wiper (effN 28.6), White bass (29.8) and Northern pike (26.9) remain hidden from the Chapter 5 tables and figures; they stay in the model fit and the Overall row. Pros and cons were laid out first (floor is reporting-only; interval widths differ by about 5% across the line; Wald intervals are weak at small n; rule was pre-specified) |
+| D201 | `Ch5MixCaveat(mix, cls, hidden)` no longer names a group whose Chapter 5 row is hidden. Before this, the Class 4 paragraph cited Wiper (7.8% of the profile against 2.8% of assigned respondents) from about 16 raw respondents. `MIX()` in the report passes the suppressed columns. The Chapter 5 comparison paragraph and Appendix B now say a group below the floor is not named |
+| F102 | **Verification.** Full render after D201: 3.1 min, `DocxCounts()` **102 tables / 94 images / 10 landscape / 0 leaked** (unchanged). Five caveat sentences remain (Walleye / Sauger, No preference x3, Bass, Panfish); none names Wiper, White bass or Northern pike. Word layout still not viewed. The earlier truncated Chapters 1-4 render gave 87 / 55 / 7 / 0 |
+
+### Open for the user (complete list, 2026-09-30)
+
+| # | Question |
+|---|---|
+| Q22 | Implemented and verified; closes once the docx has been reviewed |
+| — | No decision is open. Remaining work is review: open `PreferredSpeciesReport.docx` (close Word before any re-render, F91) and read Chapter 1 (new tables), Chapter 2 (26 rewritten paragraphs, D195), Chapter 4 and Chapter 5 (6 cards, floor note). Then the Phase 4 leftovers: full-document text scan, commit. Step 5 (guided text) is still not started |
+
+### Environment notes (2026-09-30)
+
+- `AssignBannerGroup()` now derives from `banner.definition` (D198); `banner.levels` is gone.
+- A stopifnot such as `x[Column == "Name"] == 0` passes silently on an empty result (F99); use `which.min` / `length() == 1` style checks.
+- Full render about 3 min. To test Chapters 1-4 plus Appendix B without Chapter 5, render a truncated copy from a temp directory with `knit_root_dir` = project.
+- Mixed line endings in `PreferredSpeciesReport.rmd` (some CRLF, some LF). Scripted multi-line edits must try both; single-line edit tools work.
+- Uncommitted at this point: `Ch5LPA.R`, `PreferredSpeciesFunctions.R`, `PreferredSpeciesReport.rmd`, `PreferredSpeciesReport.docx`, `PROGRESS.md`, `PROMPTS.md`, `AGENTS.md`, and `.posit/assistant/settings.json` (not ours).
