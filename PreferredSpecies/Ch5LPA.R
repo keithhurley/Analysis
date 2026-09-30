@@ -1113,6 +1113,32 @@ Ch5FamilyCardPlot <- function(long, family) {
     theme(axis.text.x = ggtext::element_markdown(lineheight = 1.1))
 }
 
+# Weighted mean of each scale score within each family group, standardized
+# against the Overall mean and weighted SD exactly as Ch5LPAStd() does for
+# profiles (same universe: everyone with a non-missing score). Membership
+# comes from banner.definition, so it cannot drift from the banner.
+Ch5FamilyScales <- function(mydata) {
+  fam <- banner.definition %>% filter(Type == "Family")
+  ov <- purrr::map_dfr(ch5.lpa.vars, function(v) {
+    k <- !is.na(mydata[[v]])
+    tibble(
+      var = v,
+      Overall = base.summary.means(mydata[k, ], !!sym(v))$Value,
+      SDw = WeightedSD(mydata[[v]][k], mydata$postWeight[k])
+    )
+  })
+  purrr::map_dfr(seq_len(nrow(fam)), function(i) {
+    sub <- mydata[as.character(mydata$B1) %in% fam$Members[[i]], ]
+    purrr::map_dfr(ch5.lpa.vars, function(v) {
+      base.summary.means(sub[!is.na(sub[[v]]), ], !!sym(v)) %>%
+        as_tibble() %>%
+        transmute(Column = fam$Column[i], var = v, N = Number, Value, CI)
+    })
+  }) %>%
+    left_join(ov, by = "var") %>%
+    mutate(Z = (Value - Overall) / SDw)
+}
+
 # A card: title row with the family name across both columns, then the plot
 # and the text side by side. plotLeft alternates the sides between cards.
 Ch5FamilyCard <- function(title, plot, text, plotLeft = TRUE) {
@@ -1147,7 +1173,13 @@ Ch5FamilyCard <- function(title, plot, text, plotLeft = TRUE) {
     padding(padding = 6, part = "all") %>%
     border_outer(border = big, part = "all") %>%
     hline(i = 1, border = thin, part = "header") %>%
-    set_table_properties(layout = "fixed") %>%
-    paginate(init = TRUE, hdr_ftr = TRUE)
+    # A one-row card must stay whole on a page: no row split, no repeated
+    # header, and the title row stays with the body row.
+    set_table_properties(
+      layout = "fixed",
+      opts_word = list(split = FALSE, repeat_headers = FALSE)
+    ) %>%
+    paginate(init = TRUE, hdr_ftr = TRUE) %>%
+    keep_with_next(i = 1, value = FALSE, part = "body")
   ft
 }

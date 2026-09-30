@@ -2544,3 +2544,13 @@ Open: keep or change the Chapter 5 floor for the three split species (F100); Pha
 - Full render about 3 min. To test Chapters 1-4 plus Appendix B without Chapter 5, render a truncated copy from a temp directory with `knit_root_dir` = project.
 - Mixed line endings in `PreferredSpeciesReport.rmd` (some CRLF, some LF). Scripted multi-line edits must try both; single-line edit tools work.
 - Uncommitted at this point: `Ch5LPA.R`, `PreferredSpeciesFunctions.R`, `PreferredSpeciesReport.rmd`, `PreferredSpeciesReport.docx`, `PROGRESS.md`, `PROMPTS.md`, `AGENTS.md`, and `.posit/assistant/settings.json` (not ours).
+
+## Chapter 5 card fixes and stale-wording scan (2026-09-30, prompt 166)
+
+| # | Decision / finding |
+|---|---|
+| D202 | `Ch5FamilyCard()` is now `split = FALSE, repeat_headers = FALSE` (`opts_word`), and the body row's keep-with-next is off. Before, the one-row card could split across a page and the title row repeated as a header. Docx check: each card table has 2 rows, both `cantSplit`, no `tblHeader` |
+| D203 | New `Ch5FamilyScales(mydata)` in `Ch5LPA.R`: weighted mean of the 11 profile scales per family group, z against the Overall mean and weighted SD, same universe and formulas as `Ch5LPAStd()` (Overall reproduces `ch5.std`). The report wraps it as `ch5.fs`, `FZ()`, `zf()` |
+| D204 | All six `fam.text` entries rewritten: profile mix first, then attitude and motivation scale means (value, z in SD), with regulation implications cut to one clause or sentence. Every claim is asserted in `ch5FamilyMixSetup` (extremes via `which.max/min` across the six families, not name lookups, F99). Intro paragraph now explains the scale means and SD and states the largest difference computed from the data |
+| F103 | **Baseline changes: `DocxCounts()` 96 tables / 94 images / 10 landscape / 0 leaked.** The 6-table drop from 102 is the 6 card title rows no longer being `tblHeader` rows (F87 logic), not lost content |
+| F104 | **Stale-wording scan** of the rendered docx by chapter: Moronides / Esocid / Uniques / Anything / gtype / "seventeen" / "17 or 8 groups" / B1banner / "2,695" / "1,874" appear only in Chapter 1 (intended); zero hits in Chapters 2-5 and Appendix B |

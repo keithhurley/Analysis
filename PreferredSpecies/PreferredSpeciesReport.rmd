@@ -1834,6 +1834,51 @@ ch5.splitSpecies <- banner.definition$Column[banner.definition$Type == "Split"]
 FN <- function(col) FmtCount(fam.n$ColumnN[fam.n$Column == col])
 SA <- function(cls, col) paste0(S(cls, col), " against ", Sov(cls), " overall")
 
+# Family-group means on the 11 profile scales, standardized against Overall
+# exactly as the profiles are (Ch5FamilyScales). Card text cites these.
+ch5.fs <- Ch5FamilyScales(d)
+FS <- function(col, v) {
+  r <- ch5.fs[ch5.fs$Column == col & ch5.fs$var == v, ]
+  stopifnot(nrow(r) == 1)
+  r
+}
+zf <- function(col, v) FS(col, v)$Z
+FZ <- function(col, v) {
+  r <- FS(col, v)
+  paste0(formatC(r$Value, format = "f", digits = 1), ", ", sprintf("%+.2f", r$Z), " SD")
+}
+fam.top <- function(v) fam.cols[which.max(vapply(fam.cols, zf, numeric(1), v = v))]
+fam.bot <- function(v) fam.cols[which.min(vapply(fam.cols, zf, numeric(1), v = v))]
+mot.vars <- c("motivation_pp", "motivation_natural", "motivation_social", "motivation_resource")
+att.vars <- c("attitude_catch", "attitude_numbers", "attitude_size", "attitude_harvest")
+zs <- function(col, vars) vapply(vars, function(v) zf(col, v), numeric(1))
+Wl <- "Walleye / Sauger"; Pf <- "Panfish / Sunfish"; Np <- "No preference"
+
+stopifnot(
+  nrow(ch5.fs) == length(fam.cols) * length(ch5.lpa.vars),
+  setequal(unique(ch5.fs$Column), fam.cols),
+  # Walleye / Sauger
+  fam.top("attitude_harvest") == Wl, zf(Wl, "attitude_harvest") >= 0.4, zf(Wl, "attitude_catch") >= 0.2,
+  setequal(fam.cols[order(-vapply(fam.cols, zf, numeric(1), v = "motivation_resource"))][1:2], c(Wl, "Catfish")),
+  zf(Wl, "motivation_natural") < 0, zf(Wl, "reg_comprehension") < 0, zf(Wl, "reg_sitesupport") < 0,
+  # Bass
+  fam.bot("attitude_harvest") == "Bass", zf("Bass", "attitude_harvest") <= -0.5, zf("Bass", "attitude_size") >= 0.2,
+  all(zs("Bass", c("motivation_pp", "motivation_natural")) > 0),
+  all(zs("Bass", c("reg_comprehension", "reg_sitesupport")) >= 0.1),
+  # Panfish / Sunfish
+  zf(Pf, "attitude_size") <= -0.3, all(zs(Pf, c("attitude_catch", "attitude_harvest")) > 0),
+  all(abs(zs(Pf, mot.vars)) < 0.1),
+  # Catfish
+  zf("Catfish", "motivation_resource") >= 0.2,
+  all(abs(zs("Catfish", setdiff(ch5.lpa.vars, "motivation_resource"))) < 0.15),
+  # Trout
+  all(zs("Trout", c("attitude_catch", "attitude_numbers", "motivation_resource")) <= -0.2),
+  zf("Trout", "motivation_natural") > 0, zf("Trout", "reg_uniform") > 0,
+  # No preference
+  all(zs(Np, mot.vars) < 0), fam.bot("motivation_resource") == Np, zf(Np, "motivation_resource") <= -0.5,
+  all(zs(Np, att.vars) <= -0.15)
+)
+
 stopifnot(
   length(fam.cols) == sum(banner.definition$Type == "Family"),
   # every family group has every profile
@@ -1854,12 +1899,12 @@ stopifnot(setequal(fam.order, fam.cols))
 
 # D173: one card per family group, text keyed by family name.
 fam.text <- list(
-  `Walleye / Sauger` = paste0("Walleye / Sauger anglers, the largest family group (n = ", FN('Walleye / Sauger'), "), lean toward Class 1, the harvest-minded, keep-it-simple angler (", SA(1, 'Walleye / Sauger'), "), and include very few Class 6 purists (", SA(6, 'Walleye / Sauger'), "). For walleye management this points to a constituency for whom harvest opportunity matters and for whom waterbody-specific length and bag limits may be a source of confusion; clear, consistent regulations and plain-language communication of any lake-specific rules are likely to matter as much as the rules themselves."),
-  Bass = paste0("Bass anglers (n = ", FN('Bass'), ") show the opposite regulatory lean to Walleye / Sauger anglers. Class 3, the regulation-savvy catch-and-release angler, is their largest profile (", SA(3, 'Bass'), "), and Class 1 is less common among them (", SA(1, 'Bass'), "). This is the family group whose makeup most favours understanding and supporting site-specific rules, which suggests bass anglers are a receptive audience for special length limits or catch-and-release rules tailored to individual waters."),
-  `Panfish / Sunfish` = paste0("Panfish / Sunfish anglers (n = ", FN('Panfish / Sunfish'), ") combine two contrasting profiles: Class 1 harvest-minded anglers (", SA(1, 'Panfish / Sunfish'), ") and Class 6 conservation-minded purists (", SA(6, 'Panfish / Sunfish'), ") are both more common than overall, while Class 2 is less common (", SA(2, 'Panfish / Sunfish'), "). Panfish management may therefore need to balance harvest opportunity for the larger group with the experience-focused, rules-engaged values of the smaller one."),
-  Catfish = paste0("Catfish anglers (n = ", FN('Catfish'), ") are the closest to the angler population as a whole: no profile's share among them differs from its Overall share by ", ch5.mix.gap, " percentage points or more. In profile terms catfish anglers look much like Nebraska anglers generally, so catfish management is in effect management for the general angler."),
-  Trout = paste0("Trout anglers lean toward Class 2, the relaxed, catch-optional angler (", SA(2, 'Trout'), "), with fewer Class 3 anglers (", SA(3, 'Trout'), "); with ", FN('Trout'), " respondents these intervals are wide. The lean fits a stocked fishery valued for the outing, where access, the timing of stockings and a pleasant setting may matter more than catch rates or trophy potential."),
-  `No preference` = paste0("Anglers with no preferred species (n = ", FN('No preference'), ") are the group most weighted toward the less committed profiles: Class 2 (", SA(2, 'No preference'), ") and Class 5, the low-involvement angler (", SA(5, 'No preference'), "), are both more common than overall, and Class 1 is less common (", SA(1, 'No preference'), "). These anglers are a natural focus for recruitment, retention and reactivation efforts, where convenience, easy access and general information are more likely to reach them than species-specific regulation.")
+  `Walleye / Sauger` = paste0("Walleye / Sauger anglers, the largest family group (n = ", FN(Wl), "), lean toward Class 1, the harvest-minded, keep-it-simple angler (", SA(1, Wl), "), and include very few Class 6 purists (", SA(6, Wl), "). Their attitude scores agree: keeping fish matters more to them than to any other family group (", FZ(Wl, "attitude_harvest"), "), and needing a catch is above average (", FZ(Wl, "attitude_catch"), "). Together with Catfish anglers they score highest on catch outcomes as a motivation (", FZ(Wl, "motivation_resource"), "), while the outdoors is slightly below average (", FZ(Wl, "motivation_natural"), "). Harvest opportunity and catch results are the levers most likely to matter to this group. Their comprehension of the rules (", FZ(Wl, "reg_comprehension"), ") is slightly below average, so plain-language communication of lake-specific length and bag limits also has a role."),
+  Bass = paste0("Bass anglers (n = ", FN("Bass"), ") sit at the opposite end from Walleye / Sauger anglers on harvest. Class 3, the regulation-savvy catch-and-release angler, is their largest profile (", SA(3, "Bass"), "), and Class 1 is less common among them (", SA(1, "Bass"), "). Keeping fish matters least to them of any family group (", FZ("Bass", "attitude_harvest"), "), and the size of the fish matters more than average (", FZ("Bass", "attitude_size"), "). Their motivations are close to average, with the physical and psychological rewards (", FZ("Bass", "motivation_pp"), ") and the outdoors (", FZ("Bass", "motivation_natural"), ") slightly above. They also report above-average comprehension of the rules (", FZ("Bass", "reg_comprehension"), ") and support for site-specific rules (", FZ("Bass", "reg_sitesupport"), "). Bass anglers look like a receptive audience for size-focused management, including special length limits and catch-and-release rules for individual waters."),
+  `Panfish / Sunfish` = paste0("Panfish / Sunfish anglers (n = ", FN(Pf), ") combine two contrasting profiles: Class 1 harvest-minded anglers (", SA(1, Pf), ") and Class 6 conservation-minded purists (", SA(6, Pf), ") are both more common than overall, while Class 2 is less common (", SA(2, Pf), "). Their attitudes lean toward keeping fish (", FZ(Pf, "attitude_harvest"), ") and needing a catch (", FZ(Pf, "attitude_catch"), "), while the size of the fish matters less than average (", FZ(Pf, "attitude_size"), "). All four motivations are within 0.1 SD of the Overall means, so this group differs in what it wants from the catch rather than in why it fishes. Panfish management may need to balance harvest opportunity for the larger group with the experience-focused values of the smaller one."),
+  Catfish = paste0("Catfish anglers (n = ", FN("Catfish"), ") are the closest to the angler population as a whole: no profile's share among them differs from its Overall share by ", ch5.mix.gap, " percentage points or more. Of the ", length(ch5.lpa.vars), " scales, only motivation by catch outcomes is 0.15 SD or more from the Overall mean (", FZ("Catfish", "motivation_resource"), "), and the rest are all within 0.15 SD. Catfish anglers are therefore much like Nebraska anglers generally, with a somewhat stronger interest in what they catch, so catfish management is in effect management for the general angler."),
+  Trout = paste0("Trout anglers lean toward Class 2, the relaxed, catch-optional angler (", SA(2, "Trout"), "), with fewer Class 3 anglers (", SA(3, "Trout"), "); with ", FN("Trout"), " respondents these intervals, and the scale means below, are imprecise. They score below average on needing a catch (", FZ("Trout", "attitude_catch"), "), on catching numbers of fish (", FZ("Trout", "attitude_numbers"), ") and on catch outcomes as a motivation (", FZ("Trout", "motivation_resource"), "), and slightly above average on the outdoors (", FZ("Trout", "motivation_natural"), "). The pattern fits a stocked fishery valued for the outing, where access, the timing of stockings and a pleasant setting may matter more than catch rates or trophy potential."),
+  `No preference` = paste0("Anglers with no preferred species (n = ", FN(Np), ") are the group most weighted toward the less committed profiles: Class 2 (", SA(2, Np), ") and Class 5, the low-involvement angler (", SA(5, Np), "), are both more common than overall, and Class 1 is less common (", SA(1, Np), "). They score below the Overall mean on every attitude and every motivation. Catch outcomes as a motivation is lowest of any family group (", FZ(Np, "motivation_resource"), "), and the physical and psychological rewards (", FZ(Np, "motivation_pp"), ") and the importance of size (", FZ(Np, "attitude_size"), ") are also low. These anglers are a natural focus for recruitment, retention and reactivation efforts, where convenience, easy access and general information are more likely to reach them than species-specific management.")
 )
 stopifnot(setequal(names(fam.text), fam.order))
 Card <- function(i) {
@@ -1876,7 +1921,7 @@ Ch5FamilyMixPlot(ch5.long, "Profile makeup of each family group")
 
 ## Profile makeup of family-group anglers
 
-`r paste0("Every family group contains anglers of all six profiles. No family group is dominated by a single profile; the largest share of any profile in any family group is Class 1 among Walleye / Sauger anglers (", S(1, 'Walleye / Sauger'), "). Managing for any one species therefore means serving a mix of angler types, and the differences described in the cards below are differences of emphasis rather than of kind. Each card shows one family group's weighted percentage in each profile, with 95 percent confidence intervals, on a common scale; the icons along the bottom mark the profiles, and the dashed mark is the Overall share of that profile.")`
+`r paste0("Every family group contains anglers of all six profiles. No family group is dominated by a single profile; the largest share of any profile in any family group is Class 1 among Walleye / Sauger anglers (", S(1, 'Walleye / Sauger'), "). Managing for any one species therefore means serving a mix of angler types, and the differences described in the cards below are differences of emphasis rather than of kind. Each card shows one family group's weighted percentage in each profile, with 95 percent confidence intervals, on a common scale; the icons along the bottom mark the profiles, and the dashed mark is the Overall share of that profile. The text beside each card also gives the group's mean on the attitude, motivation and regulation scales used to fit the profiles (1 to 5 scales), with the difference from the Overall mean in standard deviations (SD); the largest such difference for any family group is ", formatC(max(abs(ch5.fs$Z)), format = 'f', digits = 2), " SD.")`
 
 ```{r ch5Card1}
 Card(1)

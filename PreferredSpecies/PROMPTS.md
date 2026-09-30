@@ -999,3 +999,11 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-09-30 — Prompt 164
 
 > keep the 30 floor in chapter 5restartprepare the project for a restart with a new conversation
+
+## 2026-09-30 — Prompt 165
+
+> New conversation for the PreferredSpecies report. Read the "0. Start here" restart brief in AGENTS.md and the PROGRESS.md section it points to, then summarise where we are and list the open questions. Don't change any files until I say so.
+
+## 2026-09-30 — Prompt 166
+
+> the card headers in chapter 5 don't carry across page breaks properly; go ahead and scan for stale wording; in chapter 5 card writeups - centers entirely around regulation implications and I'd also like to see more about the attitudes and motivations as well.
