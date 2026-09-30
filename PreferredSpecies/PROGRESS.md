@@ -2554,3 +2554,63 @@ Open: keep or change the Chapter 5 floor for the three split species (F100); Pha
 | D204 | All six `fam.text` entries rewritten: profile mix first, then attitude and motivation scale means (value, z in SD), with regulation implications cut to one clause or sentence. Every claim is asserted in `ch5FamilyMixSetup` (extremes via `which.max/min` across the six families, not name lookups, F99). Intro paragraph now explains the scale means and SD and states the largest difference computed from the data |
 | F103 | **Baseline changes: `DocxCounts()` 96 tables / 94 images / 10 landscape / 0 leaked.** The 6-table drop from 102 is the 6 card title rows no longer being `tblHeader` rows (F87 logic), not lost content |
 | F104 | **Stale-wording scan** of the rendered docx by chapter: Moronides / Esocid / Uniques / Anything / gtype / "seventeen" / "17 or 8 groups" / B1banner / "2,695" / "1,874" appear only in Chapter 1 (intended); zero hits in Chapters 2-5 and Appendix B |
+
+## Step 5: guided text, Chapter 1 (2026-09-30, prompts 167-169)
+
+| # | Decision / finding |
+|---|---|
+| D205 | **Step 5 started. Interpretive-text override:** for Step 5 narrative only, the user overrides the technician-voice rule in AGENTS.md §1.2. Text is written and interpreted for fisheries biologists, specialists and administrators. Workflow: front to back (Ch 1 → 5); the assistant proposes the general thrust per section, the user approves, the assistant drafts and inserts, the user reviews and edits by hand afterwards. Tables, captions and Appendix B keep the technician voice |
+| D206 | **Chapter 1 text drafted and inserted.** New `ch1Helpers` chunk (`Pc()`, `Rn()`, `FamRow()`, `FamP()`, `top3`) so every quoted figure is live; `Rn()` moved out of `ch1Summary`. Added: chapter intro paragraph (why group, No preference kept as a group), sizes paragraph (top three about 60%), rules-rationale paragraph (Bonferroni leans toward combining; passing is not equivalence), one paragraph after each family's contrast tables (Bass, Panfish / Sunfish, Catfish combined; Moronides split on Wiper vs White bass: resource motivation, size attitude, harvest attitude; Esocids split on pike vs musky: pp motivation, resource motivation, size attitude), a rewritten Group Selection Results summary, and a how-to-read-the-banner paragraph under Final Preferred Groups |
+| D207 | p-values in Chapter 1 prose use `FmtP()` (`<0.001` / 3 dp), matching the contrast tables; `MinPList()` switched from `signif(, 3)` to `FmtP()` |
+| F105 | Verification: all 97 inline `r` expressions in Chapter 1 evaluated in the session without error and match the tables (e.g. 10 categories under 30 plus Sturgeon at 0; top three 60%; Moronides 3/27, Esocids 3/9). Direction of differences confirmed from `family.tests` (Difference = SpeciesB − SpeciesA). **Not rendered yet**; a full render will follow after the user reviews the Chapter 1 wording |
+
+Open: user review of the Chapter 1 wording (L131-440 of the `.rmd`); then Chapter 2 thrust.
+| F106 | **Full render after D206-D207** (prompt 170): 3.2 min, `DocxCounts()` **96 / 94 / 10 / 0**, unchanged from F103. Chapter 1 text is in the docx. User approved the two interpretive judgement calls (Wiper size-oriented/release-inclined vs White bass harvest-oriented; muskellunge small, engaged, size-focused) |
+
+## Step 5: guided text, Chapter 2 (2026-09-30, prompts 170-171)
+
+| # | Decision / finding |
+|---|---|
+| D208 | **Chapter 2 framing only; the 26 per-item paragraphs (D195) are left untouched** for the user to edit by hand. Orientation paragraph inserted after the universe paragraphs (three themes: satisfaction D4a/D4i-l, regulation trade-offs D4b-e/g, fishery and access D4f/h/m; points to Chapter 4). New closing section "## Reading Across the Items" before Chapter 3: six paragraphs (uniform regulation support; Walleye / Sauger and Flathead; Wiper size orientation and the allowed-vs-caught size gap; Northern pike; Bass, Bluegill and the contented groups; No preference caution) |
+| D209 | New `ch2Helpers` chunk: `d4.mat` / `d4.grp` from `D4MeansLong(includeOverall = TRUE)`, accessors `D4M()`, `D4Rng()`, `D4Top()`, `D4Bot()`, `D4N()`. Every ranking claim in the closing section is asserted by rank (`stopifnot`, F99 style), so the render stops if the data stop supporting the text |
+| F107 | **No preference row in the D4 battery rests on 50 of 339 respondents** (the statements presuppose a preferred fish). Stated in the closing section; asserted as < 20% |
+| F108 | Wiper is the only group whose D4j (size allowed) is materially below D4i (size caught): gap -0.67; all others > -0.1 (Northern pike -0.02). Asserted |
+| F109 | Verification: `ch2Helpers` assertions pass in the session; all 49 inline expressions in the closing section evaluate. **Not rendered yet** (last render F106 predates Chapter 2 text) |
+
+Open: user review of Chapter 2 framing text; render with Chapter 3 text to save a 3-minute cycle; Chapter 3 thrust next.
+| F110 | **Full render after D208-D209** (prompt 172): 3.2 min, `DocxCounts()` **96 / 94 / 10 / 0**, unchanged. The `ch2Helpers` assertions passed in the render. The orientation paragraph, the "Reading Across the Items" heading, the Wiper paragraph and the No preference caution are all present in the docx, with no leaked inline code or markdown. Word layout not viewed |
+
+## Step 5: guided text, Chapter 3 (2026-09-30, prompt 173)
+
+| # | Decision / finding |
+|---|---|
+| D210 | **Chapter 3 narrated: one paragraph at the start of all 22 sections** plus a chapter preamble stating the reading rule the user set: a group-vs-overall difference is described only when the group's 95% interval lies entirely outside the Overall interval. Zero-percent cells in small groups (degenerate Wald intervals) are reported descriptively (e.g. no tournament participation), never as interval-screened differences |
+| D211 | New `ch3TextHelpers` chunk before the first section: `ch3.t` (31 long tables from `Ch3RateLong`/`Ch3MeanLong`/`Ch3MedianLong`, same builders as the tables), `sa4`/`sa5`/`sa6` select-all lists via `Ch3SAList()`, `SepHi`/`SepLo` (the interval screen; median tables use Lower/Upper), accessors `V3/P3/M3/D3/N3`, and `ch3.claim()` asserting every claimed separation — with `hi_only`/`lo_only` for "the only group" phrasings — so the render stops if the data stop supporting the text |
+| D212 | `dAccess`, `dHiredGuide` and `dDays` moved from their section chunks into `ch3TextHelpers` (single definition, needed because the narrative precedes the tables); the section chunks keep a pointer comment. `dQ18means` stays in place (its means are not quoted) |
+| F111 | Headline separations: Walleye / Sauger high on boats/permits/sonar/officer contact/guides/out-of-state boating/catch-numbers-harvest attitudes, low on satisfaction; Wiper high on sonar, size items, natural+resource motivation, distance; Northern pike high on out-of-state, Sandhill lakes, public-only access, ice fishing, distance, low on uniform-regulation preference; No preference low on nearly everything, highest female share (32% vs 20%); Bass youngest-and-most-effort, most release-oriented (attitude_harvest 1.7 vs 2.2) |
+| F112 | Verification: `ch3TextHelpers` assertions pass; all 134 inline expressions in the section paragraphs evaluate with no errors or NAs. **Full render 3.7 min, `DocxCounts()` 96 / 94 / 10 / 0 (baseline held)**; spot-phrases from the preamble, A11, sonar, age and attitudes paragraphs present in the docx, no leaked markup |
+
+Open: user review of the Chapter 3 wording; Chapter 4 thrust next.
+
+## Step 5: guided text, Chapter 4 (2026-09-30, prompt 174)
+
+| # | Decision / finding |
+|---|---|
+| D213 | **Chapter 4 narrated.** New interpretive chapter introduction (why several satisfaction measures: season A9, success D4a, and the size/number x caught/harvestable two-by-two; the two questions they answer; the reading rule) placed before the existing technical paragraph. Each of the four live sections now has a two-sentence lead-in above its caption and one to three discussion paragraphs after its table/figure. The commented-out consistency/correlation block is untouched. User asked for the same voice as before plus plain, human-sounding prose; no em dashes or stock phrases |
+| D214 | New `ch4TextHelpers` chunk after `ch4Setup`: `tt4` (six `Ch3MeanLong` tables), `ch4.gapSize` (D4i minus D4j, paired), `G4/G4ci/G4n`, `GapSet()`, `OvB()`. Every claim asserted: group-vs-Overall separations via `ch3.claim()` (interval rule), within-angler gaps via `GapSet()` (interval excludes zero) |
+| F113 | **Wiper size caught minus size allowed is +0.67 ± 0.40 (n 33), the only positive group; overall is -0.25 ± 0.05.** This supports the Chapter 2 Wiper statement with a paired interval. The comparison is not tabulated anywhere in the report; the Chapter 4 text cites it as computed by the same paired function |
+| F114 | In the harvest size-vs-numbers gap only No preference is flagged (-0.25 ± 0.24, n 49), one of 15 unadjusted comparisons; the text says it should carry little weight. Walleye / Sauger does not separate on any of D4i-D4l in the matrix; its catch gap (+0.16 ± 0.10) is where the numbers shortfall shows |
+| F115 | Verification: helper assertions pass; 53 inline expressions evaluate with no errors or NAs. **Full render 3.7 min, `DocxCounts()` 96 / 94 / 10 / 0 (baseline held)**; intro, items, catch-gap and Wiper sentences present in the docx, no leaked markup |
+
+Open: user review of the Chapter 4 wording; Chapter 5 thrust next (card text D204 already interpretive; the unread-by-user item in the brief).
+
+## Chapter 4: global "Caught versus allowed" (2026-09-30, prompts 175-176)
+
+| # | Decision / finding |
+|---|---|
+| D215 | **New Chapter 4 section "Caught versus allowed"** (after the harvest size-vs-numbers section): `### Size` (D4i minus D4j) and `### Number` (D4k minus D4l), each a table (`Ch4GapTable`) and a dumbbell figure (`Ch4DumbbellPlot`), then four discussion paragraphs (overall pattern; group fit to the catch results; Wiper; cautions). Reason: the Wiper size comparison should be global, not a one-group aside, so it is shown for all 15 groups. The Wiper paragraph in the harvest section was replaced by a one-sentence pointer; the chapter introduction now names the third comparison. Chapter 2's "Chapter 4 quantifies that gap" is now true |
+| D216 | `ch4TextHelpers` extended: `ch4.gapNum`, `GLo()`, and assertions for every claim (6 groups flagged on size, all negative; 11 of 15 flagged on number, none positive; Walleye larger on number, Bass larger on size; Catfish number-only; Wiper positive on size with interval above zero and not flagged on number; Wiper top on D4i, D4c, D4e) |
+| F116 | **Global result:** overall size -0.25 ± 0.05, number -0.33 ± 0.05 (allowed rated above caught). Wiper is the only positive size difference (+0.67 ± 0.40, lower end +0.27, n 33); Wiper number +0.24 ± 0.45 not flagged. 30 unadjusted comparisons, stated in the text |
+| F117 | **Full render 3.9 min, `DocxCounts()` 98 tables / 96 images / 10 landscape / 0 leaked: the new baseline** (+2 tables, +2 images for the new section). 26 inline expressions evaluate with no errors or NAs; the new heading, Wiper paragraph and pointer sentence are in the docx; the old "not tabulated" sentence is gone; no leaked markup |
+
+Open: user review of the Chapter 4 wording; Chapter 5 thrust next.

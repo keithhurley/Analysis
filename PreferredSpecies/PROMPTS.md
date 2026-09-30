@@ -1007,3 +1007,47 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-09-30 — Prompt 166
 
 > the card headers in chapter 5 don't carry across page breaks properly; go ahead and scan for stale wording; in chapter 5 card writeups - centers entirely around regulation implications and I'd also like to see more about the attitudes and motivations as well.
+
+## 2026-09-30 — Prompt 167
+
+> let's start task 5
+
+## 2026-09-30 — Prompt 168
+
+> [Chapter order] Front to back (Ch 1 → 5)
+>
+> [Drafting workflow] you draft and write...I'll review and manually edit after.....ask me about general thrust of comments for each section before polishing and inserting; write and interpret for an audience of fisheries biologists, specialists, and administrators (override interpretive text mandate)...........
+
+## 2026-09-30 — Prompt 169
+
+> [Chapter 1 text thrust] Approve, draft it
+
+## 2026-09-30 — Prompt 170
+
+> the two judgement calls appear spot on....render to ensure it's working and then move to chapter 2
+
+## 2026-09-30 — Prompt 171
+
+> [Chapter 2 synthesis placement] Intro themes, closing synthesis
+>
+> [per-item paragraphs] Leave them as they are
+
+## 2026-09-30 — Prompt 172
+
+> Render now to check Chapter 2 before moving on.
+
+## 2026-09-30 — Prompt 173
+
+> Chapter 3: write a short paragraph at the start of every one of the 21 sections, do not claim differences unless the CI don't overlap
+
+## 2026-09-30 — Prompt 174
+
+> Chapter 4 should have a introductory paragraph explaining satisfaction determination efforts and their intents.  A short couple sentences should introduce each section with a discussion paragraph (or two or three) to follow it.  Use the same voice as before along with /human
+
+## 2026-09-30 — Prompt 175
+
+> with regards to the new figure - should that comparison be made globally? if yes our recommendations would be different...if not we'll need to explore a table or figure to introduce it for wipers
+
+## 2026-09-30 — Prompt 176
+
+> Build the global "Caught versus allowed" section for size and number, and rewrite the Wiper paragraph around it.

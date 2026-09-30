@@ -134,6 +134,19 @@ block_toc()
 
 `r paste0("Because of that restriction, the Overall column of this report describes anglers who stated a species preference rather than all licensed anglers, and it will therefore not match the Overall column of the 2025 Crosstabs report. The preferred-species distribution in the next table is the one quantity unaffected by the restriction, and it does match the Crosstabs report exactly.")`
 
+```{r ch1Helpers, echo=FALSE}
+# Small accessors for the Chapter 1 narrative so every quoted figure is live.
+Pc <- function(sp) round(sizeTbl$Percent[sizeTbl$Species == sp])
+Rn <- function(sp) sizeTbl$Respondents[sizeTbl$Species == sp]
+FamRow <- function(g) family.disp[family.disp$Group == g, ]
+FamP <- function(fam, out) {
+  FmtP(min(family.tests$PFamily[family.tests$Family == fam & family.tests$Outcome == out]))
+}
+top3 <- c("Walleye / Sauger", "Largemouth bass", "I do not prefer any particular type of fish")
+```
+
+The 2025 questionnaire offered `r nrow(sizeTbl)` answer categories for preferred species, and anglers concentrate on a few of them: `r sum(sizeTbl$Respondents < min.group.n & sizeTbl$Respondents > 0)` categories drew fewer than `r min.group.n` respondents and Sturgeon drew none. A species-by-species breakdown of the rest of the survey is therefore not supportable across the whole list. This chapter builds the set of preferred groups that organises every later chapter. Related species are combined into a family group only where their anglers cannot be distinguished on motivations, attitudes and effort, and a species keeps its own column wherever it has enough respondents to be reported on its own. Anglers who prefer no particular type of fish are kept as a group in their own right rather than set aside: they are roughly one in six of the sample, and their answers describe a segment of licence holders that species-specific management does not reach directly.
+
 ## Question Text
 
 `r paste0("*", trimws(GetQuestion(q, B1, 2025)), "*")`
@@ -148,11 +161,15 @@ CreateFlex(ArrangeSpeciesSizeTable(sizeTbl))
 
 `r paste0("Total anglers applies each species percentage to the full weighted 2025 angler population of ", format(round(popTotalAll), big.mark=","), ", so the column sums to that population. This assumes that leaving the preferred-species question blank is unrelated to which species an angler prefers. The weights carried by the ", format(nrow(d), big.mark=","), " respondents in the analysis sample themselves total ", format(round(sum(d$postWeight)), big.mark=","), ".")`
 
+Three categories account for about `r round(sum(sizeTbl$Percent[sizeTbl$Species %in% top3]))` percent of the weighted angler population: Walleye / Sauger (`r Pc("Walleye / Sauger")` percent), Largemouth bass (`r Pc("Largemouth bass")` percent) and anglers with no particular preference (`r Pc("I do not prefer any particular type of fish")` percent). Crappie and Channel catfish follow at `r Pc("Crappie")` and `r Pc("Channel catfish")` percent, and no other species reaches 5 percent. The practical consequence for managers is that walleye, largemouth bass, crappie and channel catfish programmes each speak to a measurable share of the angling public, while preferences for species such as paddlefish, yellow perch, common carp and muskellunge are held by too few surveyed anglers to describe with confidence, however locally important those fisheries may be.
+
 ## Selection Rules
 
 `r paste0("The list of preferred groups used in the rest of this report is produced by the rules below, applied in this order. (1) Five candidate families are proposed in the next section; a species that is not in a candidate family is never combined. (2) Every pair of species inside a candidate family is compared on nine outcomes (four motivation scales, four attitude scales, and days fished), and the p-values are Bonferroni-adjusted across all of the tests in that family. A family may be combined only if none of its adjusted p-values is below ", family.alpha, ". (3) Walleye / Sauger, Trout and No preference are single-member groups; they are not tested. (4) A group or species needs at least ", min.group.n, " raw respondents to receive a column. All species in a candidate family are tested before the size rule is applied, and a species that meets the size rule receives its own column whether or not its family is combined.")`
 
 `r paste0("Overlapping confidence intervals are weak evidence that two species are similar, and the comparisons for the smaller species are underpowered. A dagger on the n column of a contrast table marks a comparison in which one species has fewer than ", min.group.n, " respondents.")`
+
+The rules answer a practical question: when a family label such as "catfish" or "bass" is used as a management unit, does it describe one angling constituency or several? Combining species whose anglers behave alike buys precision, because the pooled column has narrower confidence intervals than any of its members; combining species whose anglers differ hides the very distinctions a species-specific programme depends on. The Bonferroni adjustment leans toward combining, since it is difficult for any single contrast to clear the threshold, so a family that fails the test does so on strong evidence. The reverse does not hold. With as few as `r Rn("Muskellunge / Tiger musky")` respondents in some species, a family that passes may still contain differences the survey is too small to detect, and the family columns should be read as "no measurable difference among these anglers", not as proof that the species are interchangeable.
 
 ## Proposed Family Groupings
 
@@ -208,6 +225,8 @@ CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Bass"), c(motiva
 CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Bass")))
 ```
 
+None of the `r FamRow("Bass")$Tests` largemouth-versus-smallmouth contrasts approached the adjusted threshold (smallest adjusted p = `r FmtP(FamRow("Bass")$MinP)`). Smallmouth anglers are few (`r Rn("Smallmouth bass")` respondents), so the comparison has limited power, but the point estimates for the two species sit close together on every motivation and attitude scale and on days fished. The Bass family is combined, and Largemouth bass and Smallmouth bass each keep a species column because both exceed the size floor.
+
 ### Panfish / Sunfish
 
 `r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, "  ", caption.comparison, sep="")`
@@ -239,6 +258,8 @@ CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Panfish / Sunfis
 ```{r panfishEffortContrasts}
 CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Panfish / Sunfish")))
 ```
+
+Crappie, Bluegill / Sunfish and Yellow perch produced no adjusted difference in `r FamRow("Panfish / Sunfish")$Tests` contrasts (smallest adjusted p = `r FmtP(FamRow("Panfish / Sunfish")$MinP)`). Yellow perch contributes only `r Rn("Yellow perch")` respondents and is the least informative member; its inclusion rests on the absence of contrary evidence rather than on a precise estimate. Crappie dominates the family numerically (`r Rn("Crappie")` of `r FamRow("Panfish / Sunfish")$Respondents` respondents), so the Panfish / Sunfish column will largely reflect crappie anglers. The separate Crappie and Bluegill / Sunfish columns let the reader check whether that matters for any given question.
 
 ### Catfish
 
@@ -272,6 +293,8 @@ CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Catfish"), c(mot
 CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Catfish")))
 ```
 
+The three catfish species were the most homogeneous family tested (smallest adjusted p = `r FmtP(FamRow("Catfish")$MinP)` across `r FamRow("Catfish")$Tests` contrasts). Channel, blue and flathead catfish anglers report similar motivations, attitudes and effort, which supports treating catfish as a single constituency for programme-level purposes. Blue catfish (`r Rn("Blue catfish")` respondents) falls below the size floor and appears only within the family column; Channel catfish and Flathead catfish are also reported separately.
+
 ### Moronides
 
 `r paste(trimws(GetQuestion(q, C2, 2025)), "  ", caption.means, "  ", labels.importance, "  ", caption.raked, "  ", caption.comparison, sep="")`
@@ -303,6 +326,8 @@ CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Moronides"), c(m
 ```{r moronidesEffortContrasts}
 CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Moronides")))
 ```
+
+Striped bass, Wiper and White bass were not combined. Wiper and White bass anglers differ on `r FamRow("Moronides")$Differences` of the nine outcomes after adjustment: wiper anglers place more importance on the fishery-resource motivations (adjusted p = `r FamP("Moronides", "motivation_resource")`), agree more strongly with the size-of-fish attitude items (`r FamP("Moronides", "attitude_size")`), and agree less with the harvest items (`r FamP("Moronides", "attitude_harvest")`). The pattern is of wiper anglers as a size-oriented, release-inclined group and white bass anglers as a more harvest-oriented one, a distinction a combined Moronid column would erase. Wiper and White bass each exceed the size floor and receive their own columns; Striped bass (`r Rn("Striped bass")` respondents) does not, and appears in no column.
 
 ### Esocids
 
@@ -336,6 +361,8 @@ CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Esocids"), c(mot
 CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Esocids")))
 ```
 
+Northern pike and Muskellunge / Tiger musky were not combined. Muskellunge anglers score higher on the physical and psychological motivations (adjusted p = `r FamP("Esocids", "motivation_pp")`), the fishery-resource motivations (`r FamP("Esocids", "motivation_resource")`) and the size-of-fish attitudes (`r FamP("Esocids", "attitude_size")`). With only `r Rn("Muskellunge / Tiger musky")` muskellunge respondents these estimates are imprecise, but the differences are large enough to clear the adjusted threshold regardless, and they point the same way: a small, highly engaged, size-focused muskellunge constituency that pike anglers do not describe well. Northern pike (`r Rn("Northern pike")` respondents) receives its own column; Muskellunge / Tiger musky does not meet the size floor and appears in no column.
+
 ## Group Selection Results
 
 `r paste0("Test results and size rule for every candidate group. Tests is the number of species pairs times nine outcomes. Differences counts the tests with a family p below ", family.alpha, ". Family column is Yes only when the group may be combined and has at least ", min.group.n, " respondents.")`
@@ -361,6 +388,20 @@ stopifnot(
 )
 ```
 
+```{r ch1Summary, echo=FALSE}
+fd <- family.disp |> dplyr::filter(Multi)
+fd_comb <- fd |> dplyr::filter(Combines)
+fd_split <- fd |> dplyr::filter(!Combines)
+Fam <- function(g) fd[fd$Group == g, ]
+FamList <- function(x) paste0(x$Group, " (", x$Tests, " tests)", collapse = ", ")
+MinPList <- function(x) paste(FmtP(x$MinP), collapse = ", ")
+below_min <- sizeTbl |>
+  dplyr::filter(Species %in% c("Striped bass", "Muskellunge / Tiger musky", "Blue catfish", "Yellow perch"))
+stopifnot(nrow(below_min) == 4, all(below_min$Respondents < min.group.n))
+```
+
+Of the `r nrow(fd)` candidate families, `r nrow(fd_comb)` were combined: `r FamList(fd_comb)`, with smallest Bonferroni-adjusted p-values of `r MinPList(fd_comb)`. The `r nrow(fd_split)` that were not, `r fd_split$Group[1]` (`r fd_split$Differences[1]` of `r fd_split$Tests[1]` contrasts below `r family.alpha`, smallest `r FmtP(fd_split$MinP[1])`) and `r fd_split$Group[2]` (`r fd_split$Differences[2]` of `r fd_split$Tests[2]`, smallest `r FmtP(fd_split$MinP[2])`), failed for a similar reason: in each, one member (Wiper, Muskellunge) is more size-focused and places more importance on fishery-resource motivations than its relative. Wiper (`r Rn("Wiper")` respondents), White bass (`r Rn("White bass")`) and Northern pike (`r Rn("Northern pike")`) meet the `r min.group.n`-respondent minimum and stand alone. Striped bass (`r Rn("Striped bass")`) and Muskellunge / Tiger musky (`r Rn("Muskellunge / Tiger musky")`) do not, and because their families were not combined they appear in no column; their respondents remain in the Overall column only. Blue catfish (`r Rn("Blue catfish")`) and Yellow perch (`r Rn("Yellow perch")`) also fall below the minimum but are carried within the Catfish and Panfish / Sunfish family columns. The final banner has `r nrow(banner.definition)` columns: `r sum(banner.definition$Type == "Family")` family columns and `r sum(banner.definition$Type != "Family")` species columns.
+
 ## Final Preferred Groups
 
 `r paste0("There are ", nrow(banner.definition), " preferred groups: ", sum(banner.definition$Type == "Family"), " family groups, ", sum(banner.definition$Type == "Species"), " species reported alongside the family group that contains them, and ", sum(banner.definition$Type == "Split"), " species whose family was not combined. Every table in the chapters that follow uses these columns. Respondents outside every column keep their place in the Overall column of every table.")`
@@ -378,6 +419,8 @@ CreateFlex(BannerExclusionTable(d))
 ```
 
 `r paste0("The preferred groups cover ", format(nBanner, big.mark=","), " distinct respondents of the ", format(nrow(d), big.mark=","), " in the analysis sample; ", nBannerExcluded, " do not appear in any preferred-group column. Because family columns contain their own species columns, the respondent counts in the table above add to more than ", format(nBanner, big.mark=","), " and should not be totalled.")`
+
+The family columns are the appropriate reference for programme-level questions, where the aim is to characterise catfish or panfish anglers as a whole; they carry the largest samples and the narrowest confidence intervals. The species columns nested beneath them show whether the family average conceals variation worth acting on: where a species column departs from its family, the family figure is a blend and should be quoted with that in mind. Wiper, White bass and Northern pike stand alone because the evidence in this chapter says their anglers should not be merged with their relatives. Because a respondent can appear in both a family column and a species column, columns are not additive across the banner, and a difference between a species and its own family is damped by the respondents they share and should not be over-read.
 
 `r run_pagebreak()`
 
@@ -401,6 +444,49 @@ stopifnot(
 `r paste0("Each item is reported in its own table. Rows are the preferred groups from Chapter 1, with individual species indented beneath the family group that contains them; family rows include the respondents in their species rows, so rows overlap and must not be totalled. Of the analysis sample of ", format(nrow(d), big.mark=","), " anglers, ", format(nD4Any, big.mark=","), " answered at least one item in this battery.")`
 
 `r paste0("This battery diverges from the 2025 Crosstabs report by more than the rest of the report does. The preferred-species question was not a strict gate on the battery in the delivered data: across all ", format(nAll2025, big.mark=","), " respondents to the 2025 survey, ", format(nD4AnyAll2025, big.mark=","), " answered at least one item in this battery, of whom ", format(nD4AnyNoB1, big.mark=","), " left the preferred-species question blank. Those respondents are outside this report's universe, so the Overall row here rests on fewer respondents than the corresponding Crosstabs report table.")`
+
+```{r ch2Helpers, echo=FALSE}
+# Group-by-item means for the chapter narrative, from the same builder as the
+# tables, so every quoted figure is live. Claims made in the closing section are
+# asserted here (F99 style: by rank, not by name lookup) so the render stops if
+# the data stop supporting them.
+d4.mat <- sapply(d4.items, function(i) {
+  x <- D4MeansLong(d, i, includeOverall = TRUE)
+  setNames(x$Mean, x$RawLabel)
+})
+d4.grp <- d4.mat[rownames(d4.mat) != "Overall", , drop = FALSE]
+D4M <- function(g, i) sprintf("%.1f", d4.mat[g, i])
+D4Rng <- function(i) sprintf("%.1f to %.1f", min(d4.grp[, i]), max(d4.grp[, i]))
+D4Top <- function(i, k = 1) names(sort(d4.grp[, i], decreasing = TRUE))[k]
+D4Bot <- function(i, k = 1) names(sort(d4.grp[, i]))[k]
+D4N <- function(g) { x <- D4MeansLong(d, "D4a"); x$N[x$RawLabel == g] }
+d4.gap.size <- d4.grp[, "D4j"] - d4.grp[, "D4i"]
+d4.nNumbersOverSize <- sum(d4.grp[, "D4d"] > d4.grp[, "D4c"])
+stopifnot(
+  setequal(names(sort(d4.mat["Overall", ]))[1:2], c("D4b", "D4h")),
+  D4Bot("D4a") == "Walleye / Sauger", d4.mat["Walleye / Sauger", "D4a"] < 3,
+  D4Top("D4f") == "Walleye / Sauger", D4Top("D4f", 2) == "Flathead catfish",
+  setequal(c(D4Top("D4g"), D4Top("D4g", 2)), c("Walleye / Sauger", "Trout")),
+  d4.mat["Walleye / Sauger", "D4h"] > d4.mat["Overall", "D4h"],
+  d4.mat["Walleye / Sauger", "D4m"] > d4.mat["Overall", "D4m"],
+  abs(d4.mat["Walleye / Sauger", "D4j"] - d4.mat["Overall", "D4j"]) < 0.1,
+  abs(d4.mat["Walleye / Sauger", "D4l"] - d4.mat["Overall", "D4l"]) < 0.1,
+  D4Bot("D4k") == "Flathead catfish",
+  D4Top("D4c") == "Wiper", D4Top("D4e") == "Wiper", D4Bot("D4g") == "Wiper", D4Top("D4i") == "Wiper",
+  d4.mat["Wiper", "D4j"] < d4.mat["Overall", "D4j"],
+  d4.gap.size["Wiper"] < -0.5, all(d4.gap.size[names(d4.gap.size) != "Wiper"] > -0.1),
+  D4Bot("D4i") == "Northern pike", D4Bot("D4j") == "Northern pike",
+  D4Bot("D4b") == "Northern pike", D4Top("D4m") == "Northern pike", D4Top("D4c", 2) == "Northern pike",
+  d4.mat["Bass", "D4h"] < d4.mat["Overall", "D4h"], d4.mat["Bass", "D4m"] < d4.mat["Overall", "D4m"],
+  d4.mat["Smallmouth bass", "D4b"] - d4.mat["Largemouth bass", "D4b"] > 0.3,
+  D4Top("D4j") == "Bluegill / Sunfish", D4Top("D4l") == "Bluegill / Sunfish",
+  D4Bot("D4h") == "Bluegill / Sunfish", D4Bot("D4m") == "Bluegill / Sunfish", D4Bot("D4f") == "Bluegill / Sunfish",
+  setequal(names(sort(d4.grp[, "D4a"], decreasing = TRUE))[1:3], c("White bass", "Trout", "Channel catfish")),
+  D4N("No preference") < 0.2 * Rn("I do not prefer any particular type of fish")
+)
+```
+
+The thirteen statements fall into three themes. Five ask about satisfaction: with fishing success (D4a) and with the size and number of fish caught and the size and number allowed to be harvested (D4i to D4l); Chapter 4 returns to those five as a set. Five ask about regulation and the trade-off between size and harvest: support for regulations that increase size (D4c) or numbers (D4d), willingness to take smaller fish for more of them (D4b) or fewer fish for larger ones (D4e), and whether harvest opportunity matters more than size (D4g). Three ask about the fishery and access to it: whether the preferred fish is becoming harder to catch (D4f), whether the angler travels too far (D4h) and whether there are enough places to fish (D4m). Each item is presented with its table, a stacked-percentage figure, a figure of group means ordered from lowest to highest, and a comparison with 2018 for any group whose change is large enough to show. The closing section of the chapter reads across the items by preferred group.
 
 `r paste(caption.d4gate, sep="")`
 
@@ -716,6 +802,20 @@ D4SlopePlot(d, d2018, "D4m", titleText = ItemQuestionText("D4m", q))
 
 `r paste0("Flathead catfish anglers' agreement rose sharply between 2018 and 2025, from 2.5 to 3.3 -- the only group whose change appears in any of the 2018-2025 figures for this battery. Agreement across all anglers also crept upward between the two years, from 2.9 to 3.1, another instance, like the difficulty-of-catching item earlier, where the shift shows up broadly rather than only within individual preferred groups.")`
 
+## Reading Across the Items
+
+Support for regulation is the most uniform result in the battery. Every preferred group agrees, on average, with regulations to increase the size of its preferred fish (group means `r D4Rng("D4c")`, overall `r D4M("Overall", "D4c")`) and with regulations to increase their numbers (`r D4Rng("D4d")`, overall `r D4M("Overall", "D4d")`), and support for number regulations exceeds support for size regulations in `r d4.nNumbersOverSize` of the `r nrow(d4.grp)` groups. The trade-off items are less generous. Willingness to accept smaller fish in exchange for more of them (`r D4M("Overall", "D4b")`) is, with travelling too far, one of the two lowest-scoring statements in the battery, while willingness to harvest fewer fish for larger ones scores `r D4M("Overall", "D4e")`. Anglers want more and bigger fish, and will give up harvest to gain size more readily than they will give up size to gain harvest.
+
+Walleye / Sauger anglers, the largest preferred group, are the least satisfied with their fishing success (`r D4M("Walleye / Sauger", "D4a")` against `r D4M("Overall", "D4a")` overall, and below the neutral point) and the most likely to say their preferred fish is becoming harder to catch (`r D4M("Walleye / Sauger", "D4f")`, the highest of any group). They sit above average on travelling too far (`r D4M("Walleye / Sauger", "D4h")`) and on not having enough places (`r D4M("Walleye / Sauger", "D4m")`), and with Trout anglers are the most inclined to rank harvest opportunity above size (`r D4M("Walleye / Sauger", "D4g")`). Their satisfaction with the size and number of fish they are allowed to harvest sits at the overall mean, so the discontent is with catch rates and access rather than with harvest rules. For a group of this size, a success-satisfaction mean below the neutral point is the most consequential single figure in the chapter. Flathead catfish anglers share part of the pattern: the lowest satisfaction with the number of fish caught of any group (`r D4M("Flathead catfish", "D4k")`) and a harder-to-catch score (`r D4M("Flathead catfish", "D4f")`) second only to Walleye / Sauger, on `r D4N("Flathead catfish")` respondents.
+
+Wiper anglers are the most size-oriented group on every measure: the highest support for size regulations (`r D4M("Wiper", "D4c")`), the greatest willingness to harvest fewer fish for larger ones (`r D4M("Wiper", "D4e")`) and the lowest ranking of harvest opportunity above size (`r D4M("Wiper", "D4g")`). They are also the group most satisfied with the size of fish they catch (`r D4M("Wiper", "D4i")`), yet their satisfaction with the size they are allowed to harvest (`r D4M("Wiper", "D4j")`) falls below the overall mean (`r D4M("Overall", "D4j")`). They are the only group whose satisfaction with the size allowed is materially below its satisfaction with the size caught; in every other group the two are within a tenth of a point or the allowed size scores higher. Chapter 4 quantifies that gap. Read with Chapter 1, where Wiper anglers separated from White bass anglers on exactly these attitudes, this is a constituency that strongly supports size regulation yet is among the least content with what current rules let it keep, a tension worth having in view when wiper length limits are reviewed. The group has `r D4N("Wiper")` respondents in this battery, so its intervals are wide.
+
+Northern pike anglers are the least satisfied with the size of fish they catch (`r D4M("Northern pike", "D4i")`) and the size they are allowed to harvest (`r D4M("Northern pike", "D4j")`), the least willing to trade size for numbers (`r D4M("Northern pike", "D4b")`), and the most likely to report not enough places to fish (`r D4M("Northern pike", "D4m")`). Their support for size regulations (`r D4M("Northern pike", "D4c")`) is second only to Wiper. The profile is of a size-focused group for which neither the fishery nor the current rules deliver the fish it wants, with the caveat that it rests on `r D4N("Northern pike")` respondents.
+
+Bass anglers, the second-largest preferred group, favour size over harvest (`r D4M("Bass", "D4e")` on harvesting fewer for larger, `r D4M("Bass", "D4g")` on harvest over size) and report fewer access problems than average, on both travel (`r D4M("Bass", "D4h")` against `r D4M("Overall", "D4h")`) and places (`r D4M("Bass", "D4m")` against `r D4M("Overall", "D4m")`). Smallmouth bass anglers are more willing than Largemouth bass anglers to take smaller fish for more of them (`r D4M("Smallmouth bass", "D4b")` against `r D4M("Largemouth bass", "D4b")`), the one item on which the two bass species differ noticeably. Bluegill / Sunfish anglers are the most satisfied with the size (`r D4M("Bluegill / Sunfish", "D4j")`) and number (`r D4M("Bluegill / Sunfish", "D4l")`) they are allowed to harvest and report the least travel (`r D4M("Bluegill / Sunfish", "D4h")`), the fewest place shortages (`r D4M("Bluegill / Sunfish", "D4m")`) and the least sense that their fish is harder to catch (`r D4M("Bluegill / Sunfish", "D4f")`): the least constrained constituency in the battery, on `r D4N("Bluegill / Sunfish")` respondents. White bass, Trout and Channel catfish anglers report the highest satisfaction with fishing success (`r D4M("White bass", "D4a")`, `r D4M("Trout", "D4a")` and `r D4M("Channel catfish", "D4a")`) without standing out on the regulation items.
+
+Anglers with no single preferred fish track the overall mean on most items and, as the item paragraphs note, carry the largest neutral shares. Their row deserves a caution of its own: because the statements presuppose a preferred fish, only `r D4N("No preference")` of the `r Rn("I do not prefer any particular type of fish")` anglers in this group answered the first item, so the row describes a small, self-selected subset of them rather than the group as a whole.
+
 # Chapter 3: Crosstabs by Preferred Species
 
 ```{r ch3Setup}
@@ -792,9 +892,186 @@ interspersed within Chapters 1-3 next to the questions they illustrate (D34).
 Chapter 3 figures are held until the tables have been reviewed (D91).
 -->
 
+In the text of this chapter, a difference between a preferred group and the overall estimate is described only when the group's 95 percent confidence interval lies entirely outside the Overall interval. That screen is conservative: modest differences, and most differences involving small groups, will fail it, so an unmentioned group is not shown to be typical — it is merely not shown to differ.
+
+```{r ch3TextHelpers, echo=FALSE}
+# Universes shared by the section narratives and the section tables. Moved here
+# from their section chunks so the narrative, which precedes each table, can
+# quote live values from the same objects.
+
+# Universe for the A17 combination columns copied from 2025CrossTabReport.rmd
+# L317: respondents who answered both parts and used at least one area type.
+dAccess <- d %>%
+  filter(!is.na(A17Pub_corrected) & !is.na(A17Priv_corrected)) %>%
+  filter(!(A17Pub_corrected == "No" & A17Priv_corrected == "No"))
+
+# Guided-trip indicator construction copied from 2025CrossTabReport.rmd L563.
+dHiredGuide <- d %>%
+  mutate(
+    hiredNE      = if_else(is.na(hiredGuide), NA, !is.na(Q18a) & Q18a > 0),
+    hiredOutside = if_else(is.na(hiredGuide), NA, !is.na(Q18b) & Q18b > 0),
+    hiredNEonly  = if_else(is.na(hiredGuide), NA, hiredNE & !hiredOutside),
+    hiredOutOnly = if_else(is.na(hiredGuide), NA, hiredOutside & !hiredNE),
+    hiredBoth    = if_else(is.na(hiredGuide), NA, hiredNE & hiredOutside),
+    hiredAny     = if_else(is.na(hiredGuide), NA, hiredNE | hiredOutside)
+  )
+
+# Days universe copied from 2025CrossTabReport.rmd L976: a total is only used
+# when every month was answered.
+dDays <- d %>% filter(!is.na(C1Total_days) & C1_AnsweredAll == TRUE)
+
+# Long tables behind the narratives, built by the same functions as the
+# tables. A difference is claimed in the text only when the group interval
+# lies entirely outside the Overall interval (SepHi / SepLo); every claim is
+# asserted below, by rule rather than by value, so the render stops if the
+# data stop supporting the text.
+ch3.t <- list(
+  a11      = Ch3RateLong(d, "A11", "Yes"),
+  a12      = Ch3RateLong(d %>% filter(A11 == "Yes"), "A12", "Yes"),
+  a10      = Ch3RateLong(d, "A10", "Yes"),
+  tourn    = Ch3RateLong(dTourney, "fishedTourney", "Fished Tournaments"),
+  tournmean = Ch3MeanLong(d %>% filter(A13_corrected > 0), "A13_corrected"),
+  q11o     = Ch3RateLong(d %>% filter(!is.na(Q11)), "Q11", "Often"),
+  q11n     = Ch3RateLong(d %>% filter(!is.na(Q11)), "Q11", "Never"),
+  pub      = Ch3RateLong(dAccess, "A17justPub", "Yes"),
+  both     = Ch3RateLong(dAccess, "A17both", "Yes"),
+  a7med    = Ch3MedianLong(d, "A7_miles"),
+  a8med    = Ch3MedianLong(d, "A8_miles"),
+  a9       = Ch3MeanLong(d, "A9"),
+  q16      = Ch3RateLong(d %>% filter(!is.na(Q16)), "Q16", "Yes"),
+  e7       = Ch3RateLong(d, "E7", "Yes"),
+  guide    = Ch3RateLong(dHiredGuide, "hiredAny", "TRUE"),
+  daysmean = Ch3MeanLong(dDays, "C1Total_days"),
+  daysmed  = Ch3MedianLong(dDays, "C1Total_days"),
+  q26      = Ch3RateLong(d %>% filter(!is.na(Q26)), "Q26", "Yes"),
+  e2f      = Ch3RateLong(d %>% filter(!is.na(E2)), "E2", "Female"),
+  age      = Ch3MeanLong(d, "Age"),
+  mn = Ch3MeanLong(d, "motivation_natural", gate = "motivation_natural_AnsweredAll"),
+  mp = Ch3MeanLong(d, "motivation_pp", gate = "motivation_pp_AnsweredAll"),
+  ms = Ch3MeanLong(d, "motivation_social", gate = "motivation_social_AnsweredAll"),
+  mr = Ch3MeanLong(d, "motivation_resource", gate = "motivation_resource_AnsweredAll"),
+  rc = Ch3MeanLong(d, "reg_comprehension", gate = "reg_comprehension_AnsweredAll"),
+  rs = Ch3MeanLong(d, "reg_sitesupport", gate = "reg_sitesupport_AnsweredAll"),
+  ru = Ch3MeanLong(d, "reg_uniform", gate = "reg_uniform_AnsweredAll"),
+  ac = Ch3MeanLong(d, "attitude_catch", gate = "attitude_catch_AnsweredAll"),
+  an = Ch3MeanLong(d, "attitude_numbers", gate = "attitude_numbers_AnsweredAll"),
+  asz = Ch3MeanLong(d, "attitude_size", gate = "attitude_size_AnsweredAll"),
+  ah = Ch3MeanLong(d, "attitude_harvest", gate = "attitude_harvest_AnsweredAll")
+)
+
+Ch3SAList <- function(fields, gate) {
+  out <- list()
+  for (f in fields) {
+    v <- setdiff(levels(d[[f]]), "Unchecked")
+    if (length(v) == 1 && any(d[[f]] == v, na.rm = TRUE)) {
+      out[[v]] <- Ch3RateLong(d, f, v, gate = gate)
+    }
+  }
+  out
+}
+sa4 <- Ch3SAList(a4.fields, "A4_Answered")
+sa5 <- Ch3SAList(a5.fields, "A5_Answered")
+sa6 <- Ch3SAList(a6.fields, "A6_Answered")
+
+Ch3Bounds <- function(t) {
+  if ("CI" %in% names(t)) {
+    data.frame(RawLabel = t$RawLabel, lo = t$Value - t$CI, hi = t$Value + t$CI)
+  } else {
+    data.frame(RawLabel = t$RawLabel, lo = unname(t$Lower), hi = unname(t$Upper))
+  }
+}
+SepHi <- function(t) {
+  b <- Ch3Bounds(t); ov <- b[b$RawLabel == "Overall", ]
+  g <- b[b$RawLabel != "Overall" & !is.na(b$lo), ]
+  g$RawLabel[g$lo > ov$hi]
+}
+SepLo <- function(t) {
+  b <- Ch3Bounds(t); ov <- b[b$RawLabel == "Overall", ]
+  g <- b[b$RawLabel != "Overall" & !is.na(b$hi), ]
+  g$RawLabel[g$hi < ov$lo]
+}
+V3 <- function(t, g) t$Value[t$RawLabel == g]
+P3 <- function(t, g) sprintf("%.0f%%", V3(t, g))
+M3 <- function(t, g) sprintf("%.1f", V3(t, g))
+D3 <- function(t, g) sprintf("%.0f", V3(t, g))
+N3 <- function(t, g) t$N[t$RawLabel == g]
+
+ch3.claim <- function(t, hi = character(), lo = character(),
+                      hi_only = FALSE, lo_only = FALSE) {
+  stopifnot(all(hi %in% SepHi(t)), all(lo %in% SepLo(t)))
+  if (hi_only) stopifnot(setequal(SepHi(t), hi))
+  if (lo_only) stopifnot(setequal(SepLo(t), lo))
+  invisible(TRUE)
+}
+
+ch3.claim(ch3.t$a11, hi = c("Wiper", "Northern pike"), lo = c("White bass", "No preference"))
+ch3.claim(ch3.t$a12, hi = "Walleye / Sauger", lo = c("White bass", "No preference"))
+ch3.claim(ch3.t$a10, hi = c("Wiper", "Walleye / Sauger"), lo = "No preference")
+stopifnot(length(SepHi(ch3.t$tourn)) == 0)
+stopifnot(all(V3(ch3.t$tourn, "Flathead catfish") == 0, V3(ch3.t$tourn, "Wiper") == 0,
+              V3(ch3.t$tourn, "White bass") == 0, V3(ch3.t$tourn, "No preference") == 0))
+ch3.claim(ch3.t$tournmean, lo = "Panfish / Sunfish")
+ch3.claim(ch3.t$q11o, lo = "No preference")
+stopifnot(length(SepHi(ch3.t$q11n)) == 0, length(SepLo(ch3.t$q11n)) == 0)
+stopifnot(V3(ch3.t$q11o, "Northern pike") == 0)
+ch3.claim(ch3.t$pub, hi = "Northern pike")
+ch3.claim(ch3.t$both, lo = "Northern pike")
+ch3.claim(ch3.t$a7med, hi = c("Walleye / Sauger", "Wiper", "Northern pike"))
+stopifnot(length(SepLo(ch3.t$a7med)) == 0)
+ch3.claim(ch3.t$a8med, hi = c("Wiper", "Northern pike"),
+          lo = c("Bass", "Panfish / Sunfish", "Catfish"))
+ch3.claim(ch3.t$a9, hi = "Walleye / Sauger",
+          lo = c("Wiper", "Bluegill / Sunfish", "Trout"), hi_only = TRUE)
+ch3.claim(ch3.t$q16, hi = c("Wiper", "Walleye / Sauger"), lo = c("Catfish", "No preference"))
+ch3.claim(ch3.t$e7, hi = "Walleye / Sauger", lo = "No preference",
+          hi_only = TRUE, lo_only = TRUE)
+ch3.claim(ch3.t$guide, hi = "Walleye / Sauger", hi_only = TRUE)
+ch3.claim(ch3.t$daysmean, hi = "Bass", lo = c("Northern pike", "No preference"))
+ch3.claim(ch3.t$daysmed, hi = c("Bass", "Catfish"), lo = "No preference")
+ch3.claim(ch3.t$q26,
+          hi = c("Northern pike", "Crappie", "Panfish / Sunfish", "Walleye / Sauger"),
+          lo = c("White bass", "Trout", "No preference", "Largemouth bass"))
+ch3.claim(ch3.t$e2f, hi = "No preference", lo = "Wiper", hi_only = TRUE, lo_only = TRUE)
+ch3.claim(ch3.t$age, hi = c("Walleye / Sauger", "Panfish / Sunfish"),
+          lo = c("Bass", "Smallmouth bass", "Wiper"))
+ch3.claim(ch3.t$mn, hi = "Wiper", lo = "No preference")
+ch3.claim(ch3.t$mp, lo = "No preference")
+stopifnot(length(SepHi(ch3.t$ms)) == 0, length(SepLo(ch3.t$ms)) == 0)
+ch3.claim(ch3.t$mr, hi = c("Wiper", "Walleye / Sauger", "Catfish"), lo = "No preference")
+ch3.claim(ch3.t$rc, hi = c("Bass", "Smallmouth bass"))
+ch3.claim(ch3.t$rs, hi = "Smallmouth bass", hi_only = TRUE)
+ch3.claim(ch3.t$ru, lo = "Northern pike", lo_only = TRUE)
+ch3.claim(ch3.t$ac, hi = "Walleye / Sauger", lo = "No preference", hi_only = TRUE)
+ch3.claim(ch3.t$an, hi = "Walleye / Sauger", lo = c("Trout", "No preference"), hi_only = TRUE)
+ch3.claim(ch3.t$asz, hi = c("Wiper", "Northern pike", "Bass"),
+          lo = c("Bluegill / Sunfish", "Panfish / Sunfish", "No preference"))
+ch3.claim(ch3.t$ah, hi = c("White bass", "Walleye / Sauger", "Channel catfish"), lo = "Bass")
+ch3.claim(sa4[["Ponds and sandpits"]], hi = "Bass", lo = "Walleye / Sauger")
+ch3.claim(sa4[["Lakes and Reservoirs"]], hi = c("Walleye / Sauger", "Wiper"), lo = "Trout")
+ch3.claim(sa4[["Sandhill lakes"]], hi = "Northern pike", hi_only = TRUE)
+ch3.claim(sa4[["Missouri River"]], hi = c("Catfish", "Flathead catfish"))
+ch3.claim(sa4[["Platte River"]], hi = "Catfish")
+ch3.claim(sa4[["Other streams, rivers, and canals"]], hi = c("Catfish", "Trout"))
+ch3.claim(sa5[["Bank/wading"]], hi = "Catfish", lo = "Walleye / Sauger", lo_only = TRUE)
+ch3.claim(sa5[["Wading"]], hi = "Trout", hi_only = TRUE)
+ch3.claim(sa5[["Motorized boat"]], hi = "Walleye / Sauger",
+          lo = c("Bluegill / Sunfish", "Trout", "No preference"), hi_only = TRUE)
+ch3.claim(sa5[["Kayak/Canoe"]], hi = "Bass")
+ch3.claim(sa5[["Ice fishing"]],
+          hi = c("Panfish / Sunfish", "Crappie", "Walleye / Sauger"),
+          lo = c("Bass", "White bass", "No preference"))
+ch3.claim(sa6[["Rod & reel"]], lo = "Trout")
+ch3.claim(sa6[["Fly-fishing"]], hi = "Trout", lo = "Catfish", hi_only = TRUE)
+for (nm in setdiff(names(sa6), c("Rod & reel", "Fly-fishing"))) {
+  stopifnot(length(SepHi(sa6[[nm]])) == 0)
+}
+```
+
 `r run_pagebreak()`
 
 ## Fish Out-Of-State
+
+Just under half of anglers (`r P3(ch3.t$a11, "Overall")`) also fished outside Nebraska in 2025. Northern pike (`r P3(ch3.t$a11, "Northern pike")`) and Wiper (`r P3(ch3.t$a11, "Wiper")`) anglers did so at rates above the overall, consistent with the travel distances they report later in this chapter, while White bass (`r P3(ch3.t$a11, "White bass")`) and No preference (`r P3(ch3.t$a11, "No preference")`) anglers fell below it.
 
 `r paste(trimws(GetQuestion(q, A11, 2025)), "  ", caption.ch3selectone, "  ", caption.raked, sep="")`
 
@@ -813,6 +1090,8 @@ Ch3RatePlot(
 
 ## Boat Out-Of-State
 
+Among anglers who fished out of state, `r P3(ch3.t$a12, "Overall")` took a boat with them. Walleye / Sauger anglers (`r P3(ch3.t$a12, "Walleye / Sauger")`) sit above the overall rate and anglers with no preferred type (`r P3(ch3.t$a12, "No preference")`) below it. White bass anglers' rate (`r P3(ch3.t$a12, "White bass")`) is also below, though it rests on only `r N3(ch3.t$a12, "White bass")` respondents.
+
 `r paste(trimws(GetQuestion(q, A12, 2025)), "  ", caption.ch3selectone, "  Only respondents who fished out of state are included in this calculation.", "  ", caption.raked, sep="")`
 
 ```{r ch3A12}
@@ -830,6 +1109,8 @@ Ch3RatePlot(
 
 ## Park Entry Permit
 
+`r P3(ch3.t$a10, "Overall")` of anglers held a park entry permit. Wiper (`r P3(ch3.t$a10, "Wiper")`) and Walleye / Sauger (`r P3(ch3.t$a10, "Walleye / Sauger")`) anglers exceed the overall rate and No preference anglers (`r P3(ch3.t$a10, "No preference")`) fall below it, a separation that tracks the boat-oriented groups in the Methods section.
+
 `r paste(trimws(GetQuestion(q, A10, 2025)), "  ", caption.ch3selectone, "  ", caption.raked, sep="")`
 
 ```{r ch3A10}
@@ -839,6 +1120,8 @@ CreateFlex(Ch3SelectOneTable(d, "A10"))
 `r run_pagebreak()`
 
 ## Fishing Tournaments
+
+Tournament fishing is rare: `r P3(ch3.t$tourn, "Overall")` of anglers fished at least one tournament, and no group sits above the overall rate by the interval screen. Flathead catfish, Wiper, White bass and No preference anglers reported no tournament participation at all. Among the anglers who did fish tournaments, the mean was `r M3(ch3.t$tournmean, "Overall")` tournaments; Panfish / Sunfish anglers averaged `r M3(ch3.t$tournmean, "Panfish / Sunfish")`, below the overall mean.
 
 `r paste("Percent of respondents who participated in at least one fishing tournament (derived from ", trimws(GetQuestion(q, A13, 2025)), ").", "  ", caption.ch3selectone, "  ", caption.raked, sep="")`
 
@@ -870,6 +1153,8 @@ CreateFlex(Ch3MeansTable(
 
 ## Waterbody Types
 
+Lakes and reservoirs are the dominant water type for every group (`r P3(sa4[["Lakes and Reservoirs"]], "Overall")` overall), but the remaining types carry distinct group signatures. Bass anglers use ponds and sandpits most (`r P3(sa4[["Ponds and sandpits"]], "Bass")` against `r P3(sa4[["Ponds and sandpits"]], "Overall")` overall), while Walleye / Sauger anglers use them least (`r P3(sa4[["Ponds and sandpits"]], "Walleye / Sauger")`) and are heaviest on lakes and reservoirs (`r P3(sa4[["Lakes and Reservoirs"]], "Walleye / Sauger")`). Northern pike anglers are the only group above the overall on Sandhill lakes (`r P3(sa4[["Sandhill lakes"]], "Northern pike")` against `r P3(sa4[["Sandhill lakes"]], "Overall")`). Catfish anglers separate upward on the rivers: the Missouri (`r P3(sa4[["Missouri River"]], "Catfish")` against `r P3(sa4[["Missouri River"]], "Overall")` overall, and `r P3(sa4[["Missouri River"]], "Flathead catfish")` among Flathead catfish anglers), the Platte (`r P3(sa4[["Platte River"]], "Catfish")` against `r P3(sa4[["Platte River"]], "Overall")`) and other streams, rivers and canals (`r P3(sa4[["Other streams, rivers, and canals"]], "Catfish")`). Trout anglers fall below the overall on lakes and reservoirs (`r P3(sa4[["Lakes and Reservoirs"]], "Trout")`) and sit above it on other streams, rivers and canals (`r P3(sa4[["Other streams, rivers, and canals"]], "Trout")` against `r P3(sa4[["Other streams, rivers, and canals"]], "Overall")`).
+
 `r paste(trimws(GetQuestion(q, A4, 2025)), "  ", caption.ch3selectall, "  ", caption.raked, sep="")`
 
 ```{r ch3A4}
@@ -879,6 +1164,8 @@ CreateFlex(Ch3SelectAllTable(d, a4.fields, "A4_Answered"))
 `r run_pagebreak()`
 
 ## Methods
+
+Bank or wading fishing is the most common method (`r P3(sa5[["Bank/wading"]], "Overall")` overall), led by Catfish anglers (`r P3(sa5[["Bank/wading"]], "Catfish")`); Walleye / Sauger anglers are the one group below the overall on it (`r P3(sa5[["Bank/wading"]], "Walleye / Sauger")`) and far above on motorized boats (`r P3(sa5[["Motorized boat"]], "Walleye / Sauger")` against `r P3(sa5[["Motorized boat"]], "Overall")` overall), where Bluegill / Sunfish (`r P3(sa5[["Motorized boat"]], "Bluegill / Sunfish")`), Trout (`r P3(sa5[["Motorized boat"]], "Trout")`) and No preference (`r P3(sa5[["Motorized boat"]], "No preference")`) anglers fall below. Trout anglers stand alone above the overall on wading (`r P3(sa5[["Wading"]], "Trout")` against `r P3(sa5[["Wading"]], "Overall")`), and Bass anglers separate upward on kayaks and canoes (`r P3(sa5[["Kayak/Canoe"]], "Bass")` against `r P3(sa5[["Kayak/Canoe"]], "Overall")`). Ice fishing separates Crappie (`r P3(sa5[["Ice fishing"]], "Crappie")`), Panfish / Sunfish (`r P3(sa5[["Ice fishing"]], "Panfish / Sunfish")`) and Walleye / Sauger (`r P3(sa5[["Ice fishing"]], "Walleye / Sauger")`) anglers upward and Bass, White bass and No preference anglers downward, matching the ice-fishing question later in this chapter.
 
 `r paste(trimws(GetQuestion(q, A5, 2025)), "  ", caption.ch3selectall, "  ", caption.raked, sep="")`
 
@@ -890,6 +1177,8 @@ CreateFlex(Ch3SelectAllTable(d, a5.fields, "A5_Answered"))
 
 ## Techniques
 
+Rod and reel is near-universal (`r P3(sa6[["Rod & reel"]], "Overall")` overall); Trout anglers are the only group below the overall on it (`r P3(sa6[["Rod & reel"]], "Trout")`), while `r P3(sa6[["Fly-fishing"]], "Trout")` of them fly-fish against `r P3(sa6[["Fly-fishing"]], "Overall")` overall — the largest technique separation in the table. Catfish anglers fall below the overall on fly-fishing (`r P3(sa6[["Fly-fishing"]], "Catfish")`). No other technique lifts any group above its overall rate by the interval screen.
+
 `r paste(trimws(GetQuestion(q, A6, 2025)), "  ", caption.ch3selectall, "  ", caption.raked, sep="")`
 
 ```{r ch3A6}
@@ -899,6 +1188,8 @@ CreateFlex(Ch3SelectAllTable(d, a6.fields, "A6_Answered"))
 `r sect_landscape()`
 
 ## Crowding
+
+Crowding perceptions barely differ by preferred species: `r P3(ch3.t$q11n, "Overall")` of anglers never feel crowded and `r P3(ch3.t$q11o, "Overall")` often do, and no group separates from the overall on the Never response. No preference anglers report feeling crowded Often less than the overall (`r P3(ch3.t$q11o, "No preference")`), and no Northern pike angler chose Often, though the latter rests on `r N3(ch3.t$q11o, "Northern pike")` respondents.
 
 `r paste(trimws(GetQuestion(q, Q11, 2025)), "  ", caption.ch3selectone, "  ", caption.raked, sep="")`
 
@@ -917,15 +1208,13 @@ Ch3StackPlot(
 
 ## Access
 
+Of the anglers who fished at least one of the two area types, `r P3(ch3.t$pub, "Overall")` fished public areas only and `r P3(ch3.t$both, "Overall")` fished both. Northern pike anglers are the one departure: `r P3(ch3.t$pub, "Northern pike")` public-only and `r P3(ch3.t$both, "Northern pike")` both, on `r N3(ch3.t$pub, "Northern pike")` respondents — little private-water access in this group.
+
 `r paste(trimws(GetQuestion(q, A17, 2025)), "  ", caption.ch3indicator, "  The first two columns are computed on everyone who answered the question; the last three are computed on respondents who used at least one of the two area types, matching the 2025 Crosstabs report.", "  ", caption.raked, sep="")`
 
 ```{r ch3A17}
-# Universe for the combination columns copied from 2025CrossTabReport.rmd L317:
-# respondents who answered both parts and used at least one area type.
-dAccess <- d %>%
-  filter(!is.na(A17Pub_corrected) & !is.na(A17Priv_corrected)) %>%
-  filter(!(A17Pub_corrected == "No" & A17Priv_corrected == "No"))
-
+# dAccess is built in ch3TextHelpers, above, so the section narrative can
+# quote it before this table renders.
 A17Label <- function(key) l$Label[l$Response == key]
 
 CreateFlex(Ch3IndicatorTable(list(
@@ -940,6 +1229,8 @@ CreateFlex(Ch3IndicatorTable(list(
 `r sect_landscape()`
 
 ## Favorite Waterbody Distance
+
+The median one-way distance to the favorite water body is roughly `r D3(ch3.t$a7med, "Overall")` miles, computed on band midpoints. Walleye / Sauger anglers' median is `r D3(ch3.t$a7med, "Walleye / Sauger")` miles, and the Wiper and Northern pike medians fall in the 101-to-250-mile band: the favorite waters of these three groups are a substantial drive. No group's median separates below the overall.
 
 `r paste(trimws(GetQuestion(q, A7, 2025)), "  ", caption.ch3selectone, "  ", caption.raked, sep="")`
 
@@ -969,6 +1260,8 @@ Ch3MedianPlot(
 
 ## Most-Visited Waterbody Distance
 
+The water fished most often is closer (median `r D3(ch3.t$a8med, "Overall")` miles overall), and the split is sharp: the Bass, Panfish / Sunfish and Catfish family medians fall to `r D3(ch3.t$a8med, "Bass")` miles, while the Wiper median stays in the 101-to-250-mile band and Northern pike anglers' is `r D3(ch3.t$a8med, "Northern pike")` miles. The banner separates local-water constituencies from travelling ones, which bears on where a regulation change would actually be felt by each group.
+
 `r paste(trimws(GetQuestion(q, A8, 2025)), "  ", caption.ch3selectone, "  ", caption.raked, sep="")`
 
 ```{r ch3A8}
@@ -994,6 +1287,8 @@ Ch3MedianPlot(
 `r run_pagebreak()`
 
 ## Satisfaction
+
+Mean satisfaction here is scored from 1 (Very satisfied) to 5 (Very dissatisfied), so lower is better. Walleye / Sauger anglers are the only group less satisfied than the overall (`r M3(ch3.t$a9, "Walleye / Sauger")` against `r M3(ch3.t$a9, "Overall")`), while Wiper (`r M3(ch3.t$a9, "Wiper")`), Bluegill / Sunfish (`r M3(ch3.t$a9, "Bluegill / Sunfish")`) and Trout (`r M3(ch3.t$a9, "Trout")`) anglers are more satisfied. The same ordering appears in the preferred-fish satisfaction item in Chapter 2, and Chapter 4 examines the satisfaction items as a set.
 
 `r paste(trimws(GetQuestion(q, A9, 2025)), "  ", caption.ch3selectone, "  Mean scores the five responses from 1 (Very satisfied) to 5 (Very dissatisfied).", "  ", caption.raked, sep="")`
 
@@ -1021,6 +1316,8 @@ Ch3MeanPlot(
 
 ## Live-imaging Sonar Use
 
+`r P3(ch3.t$q16, "Overall")` of anglers used live-imaging sonar in 2025. Wiper (`r P3(ch3.t$q16, "Wiper")`) and Walleye / Sauger (`r P3(ch3.t$q16, "Walleye / Sauger")`) anglers sit well above the overall; Catfish (`r P3(ch3.t$q16, "Catfish")`) and No preference (`r P3(ch3.t$q16, "No preference")`) anglers sit below it. Uptake concentrates in the boat-borne, open-water groups, so any future rule on the technology would land unevenly across the banner.
+
 `r paste(trimws(GetQuestion(q, Q16, 2025)), "  ", caption.ch3selectone, "  ", caption.raked, sep="")`
 
 ```{r ch3Q16}
@@ -1038,6 +1335,8 @@ Ch3RatePlot(
 
 ## Conservation Officer
 
+`r P3(ch3.t$e7, "Overall")` of anglers encountered a conservation officer while fishing. Walleye / Sauger anglers are the only group above the overall (`r P3(ch3.t$e7, "Walleye / Sauger")`) and No preference anglers the only group below it (`r P3(ch3.t$e7, "No preference")`), consistent with the two groups' effort and boat use elsewhere in this chapter.
+
 `r paste(trimws(GetQuestion(q, E7, 2025)), "  ", caption.ch3selectone, "  ", caption.raked, sep="")`
 
 ```{r ch3E7}
@@ -1048,20 +1347,13 @@ CreateFlex(Ch3SelectOneTable(d, "E7"))
 
 ## Guided Trips
 
+Hiring a guide is uncommon (`r P3(ch3.t$guide, "Overall")` of anglers), and Walleye / Sauger anglers (`r P3(ch3.t$guide, "Walleye / Sauger")`) are the only group above the overall rate. The trip-count means in the second table rest on few respondents per column and should be read with their intervals in view.
+
 `r paste(trimws(GetQuestion(q, Q18, 2025)), "  ", caption.ch3indicator, "  ", caption.raked, sep="")`
 
 ```{r ch3Q18pct}
-# Indicator construction copied from 2025CrossTabReport.rmd L563.
-dHiredGuide <- d %>%
-  mutate(
-    hiredNE      = if_else(is.na(hiredGuide), NA, !is.na(Q18a) & Q18a > 0),
-    hiredOutside = if_else(is.na(hiredGuide), NA, !is.na(Q18b) & Q18b > 0),
-    hiredNEonly  = if_else(is.na(hiredGuide), NA, hiredNE & !hiredOutside),
-    hiredOutOnly = if_else(is.na(hiredGuide), NA, hiredOutside & !hiredNE),
-    hiredBoth    = if_else(is.na(hiredGuide), NA, hiredNE & hiredOutside),
-    hiredAny     = if_else(is.na(hiredGuide), NA, hiredNE | hiredOutside)
-  )
-
+# dHiredGuide is built in ch3TextHelpers, above, so the section narrative can
+# quote it before this table renders.
 CreateFlex(Ch3IndicatorTable(list(
   list(label = "Hired a guide",                 data = dHiredGuide, var = "hiredAny",     value = TRUE),
   list(label = "Hired in Nebraska",             data = dHiredGuide, var = "hiredNE",      value = TRUE),
@@ -1097,13 +1389,13 @@ CreateFlex(Ch3MeansSpecTable(list(
 
 ## Days Fished
 
+Anglers fished a mean of `r D3(ch3.t$daysmean, "Overall")` days in 2025, with a median of `r D3(ch3.t$daysmed, "Overall")`. Bass anglers are above the overall on both (mean `r D3(ch3.t$daysmean, "Bass")`, median `r D3(ch3.t$daysmed, "Bass")`) and Catfish anglers on the median (`r D3(ch3.t$daysmed, "Catfish")`); Northern pike anglers (mean `r D3(ch3.t$daysmean, "Northern pike")`) and No preference anglers (mean `r D3(ch3.t$daysmean, "No preference")`, median `r D3(ch3.t$daysmed, "No preference")`) fished the least. Effort concentrates in the bass and catfish constituencies, and the No preference group's low effort marks it as the most casual segment of the licence base.
+
 `r paste(trimws(GetQuestion(q, C1, 2025)), "  Total days fished across all months.", "  ", caption.ch3means, "  ", caption.ch3medians, "  ", caption.raked, sep="")`
 
 ```{r ch3Days}
-# Universe copied from 2025CrossTabReport.rmd L976: a total is only used when
-# every month was answered.
-dDays <- d %>% filter(!is.na(C1Total_days) & C1_AnsweredAll == TRUE)
-
+# dDays is built in ch3TextHelpers, above, so the section narrative can quote
+# it before this table renders.
 left_join(
   Ch3MeansTable(dDays, "C1Total_days", "Mean days fished"),
   Ch3MediansTable(dDays, "C1Total_days", "Median days fished"),
@@ -1122,6 +1414,8 @@ Ch3MeanPlot(
 `r run_pagebreak()`
 
 ## Ice Fishing
+
+`r P3(ch3.t$q26, "Overall")` of anglers ice fish. Northern pike (`r P3(ch3.t$q26, "Northern pike")`), Crappie (`r P3(ch3.t$q26, "Crappie")`), Panfish / Sunfish (`r P3(ch3.t$q26, "Panfish / Sunfish")`) and Walleye / Sauger (`r P3(ch3.t$q26, "Walleye / Sauger")`) anglers do so above the overall rate; White bass (`r P3(ch3.t$q26, "White bass")`), Trout (`r P3(ch3.t$q26, "Trout")`), No preference (`r P3(ch3.t$q26, "No preference")`) and Largemouth bass (`r P3(ch3.t$q26, "Largemouth bass")`) anglers fall below it. The ordering repeats the ice-fishing method in the Methods section and maps onto the species reachable through the ice.
 
 `r paste(trimws(GetQuestion(q, Q26, 2025)), "  ", caption.ch3selectone, "  ", caption.raked, sep="")`
 
@@ -1142,6 +1436,8 @@ Ch3RatePlot(
 `r run_pagebreak()`
 
 ## Angler Motivations
+
+Across the four motivation sub-scales, the natural-environment (`r M3(ch3.t$mn, "Overall")` overall) and social (`r M3(ch3.t$ms, "Overall")`) scales rate highest and the fishery-resource scale lowest (`r M3(ch3.t$mr, "Overall")`). The group separations concentrate in the resource scale: Wiper (`r M3(ch3.t$mr, "Wiper")`), Walleye / Sauger (`r M3(ch3.t$mr, "Walleye / Sauger")`) and Catfish (`r M3(ch3.t$mr, "Catfish")`) anglers sit above the overall and No preference anglers below it (`r M3(ch3.t$mr, "No preference")`). Wiper anglers are also above on the natural-environment scale (`r M3(ch3.t$mn, "Wiper")`), and No preference anglers below the overall on the natural-environment and psychological scales. No group separates on the social scale in either direction: the companionship motive is shared across species preferences.
 
 `r paste(trimws(GetQuestion(q, C2, 2025)), "  Items are grouped by the motivation sub-scale they belong to in Scales.csv; the grouping organizes the tables and does not change any value.", "  ", caption.ch3means, "  ", caption.raked, sep="")`
 
@@ -1202,6 +1498,8 @@ CreateFlex(Ch3MeansTable(d, v, ScaleLabel(v, l), gates = paste0(v, "_AnsweredAll
 
 ## Regulations
 
+The regulation scales separate few groups. On comprehension and confidence (`r M3(ch3.t$rc, "Overall")` overall), Bass (`r M3(ch3.t$rc, "Bass")`) and especially Smallmouth bass (`r M3(ch3.t$rc, "Smallmouth bass")`) anglers sit above the overall, and Smallmouth bass anglers are the one group above it on site-specific support (`r M3(ch3.t$rs, "Smallmouth bass")` against `r M3(ch3.t$rs, "Overall")`). On preference for uniform statewide regulations (`r M3(ch3.t$ru, "Overall")` overall), Northern pike anglers are the only group below the overall (`r M3(ch3.t$ru, "Northern pike")`), consistent with a group fishing a small set of specialized waters.
+
 `r paste(trimws(GetQuestion(q, Q31, 2025)), "  Items are grouped by the regulation sub-scale they belong to in Scales.csv. Item means are computed on the responses as recorded and are not reverse-adjusted, matching the 2025 Crosstabs report. None of the three sub-scales reported here contains a reverse-coded item; the reversals the codebook records for this battery belong to a separate bipolar orientation scale that this report does not use.", "  ", caption.ch3means, "  ", caption.raked, sep="")`
 
 ### Comprehension and Confidence
@@ -1260,6 +1558,8 @@ Ch3ScaleFacetPlot(
 
 ## Angler Attitudes
 
+The four attitude scales reprise the evidence behind Chapter 1's groupings. Walleye / Sauger anglers are the only group above the overall on catching something (`r M3(ch3.t$ac, "Walleye / Sauger")` against `r M3(ch3.t$ac, "Overall")`) and on numbers of fish (`r M3(ch3.t$an, "Walleye / Sauger")` against `r M3(ch3.t$an, "Overall")`); No preference anglers fall below on both, and Trout anglers on numbers. On size of fish, Wiper (`r M3(ch3.t$asz, "Wiper")`) and Northern pike (`r M3(ch3.t$asz, "Northern pike")`) anglers sit highest and Bass anglers also above the overall (`r M3(ch3.t$asz, "Bass")`), with Panfish / Sunfish and particularly Bluegill / Sunfish anglers (`r M3(ch3.t$asz, "Bluegill / Sunfish")`) below. On harvesting, White bass (`r M3(ch3.t$ah, "White bass")`), Walleye / Sauger (`r M3(ch3.t$ah, "Walleye / Sauger")`) and Channel catfish (`r M3(ch3.t$ah, "Channel catfish")`) anglers are above the overall and Bass anglers well below it (`r M3(ch3.t$ah, "Bass")`): bass anglers are the most release-oriented constituency in the survey, and walleye and white bass anglers the most harvest-oriented.
+
 `r paste(trimws(GetQuestion(q, E1, 2025)), "  Items are grouped by the attitude sub-scale they belong to in Scales.csv. Item means are computed on the responses as recorded and are not reverse-adjusted; a dagger marks an item the codebook flags as reverse-coded.", "  ", caption.ch3means, "  ", ReversedItemsNote("Attitudes"), "  ", caption.raked, sep="")`
 
 ### Catch something
@@ -1312,6 +1612,8 @@ Ch3ScaleFacetPlot(
 
 ## Gender
 
+`r P3(ch3.t$e2f, "Overall")` of anglers who answered are female. The share is above the overall among No preference anglers (`r P3(ch3.t$e2f, "No preference")`) and below it among Wiper anglers (`r P3(ch3.t$e2f, "Wiper")`); no other group separates. Group differences elsewhere in this report are therefore partly demographic as well as behavioural.
+
 `r paste(trimws(GetQuestion(q, E2, 2025)), "  ", caption.ch3selectone, "  ", caption.raked, "  Percentages are weighted, as they are throughout this report.", sep="")`
 
 ```{r ch3E2}
@@ -1321,6 +1623,8 @@ CreateFlex(Ch3SelectOneTable(d %>% filter(!is.na(E2)), "E2"))
 `r run_pagebreak()`
 
 ## Age
+
+The weighted mean age is `r D3(ch3.t$age, "Overall")` years. Walleye / Sauger and Panfish / Sunfish anglers are older than the overall (both about `r D3(ch3.t$age, "Walleye / Sauger")`), while Bass (`r D3(ch3.t$age, "Bass")`), Smallmouth bass (`r D3(ch3.t$age, "Smallmouth bass")`) and Wiper (`r D3(ch3.t$age, "Wiper")`) anglers are younger. The age gradient is worth holding alongside the effort and attitude differences above when deciding whether a group contrast reflects the species or the cohort that pursues it.
 
 `r paste("Respondent age group.", "  ", caption.ch3selectone, "  The final column is the weighted mean age in years, taken from the reported age rather than from the bands, and computed on the same respondents as the percentages.", "  ", caption.raked, "  Percentages and the mean are weighted, as they are throughout this report.", sep="")`
 
@@ -1365,6 +1669,93 @@ stopifnot(
 )
 ```
 
+```{r ch4TextHelpers, echo=FALSE}
+# Long tables behind the Chapter 4 narrative, built by the same function as the
+# matrix table. The text claims a group differs from Overall only when its
+# interval lies entirely outside the Overall interval (SepHi / SepLo), and claims
+# a within-angler gap only when its own interval excludes zero (GapSet). Every
+# claim is asserted, by rule, so the render stops if the data stop supporting it.
+tt4 <- setNames(
+  lapply(ch4.sat.items$Field, function(f) Ch3MeanLong(d, f)),
+  ch4.sat.items$Field
+)
+ch4.gapSize <- Ch4GapNumbers(d, "D4i", "D4j")
+ch4.gapNum <- Ch4GapNumbers(d, "D4k", "D4l")
+
+GLo <- function(t, g) sprintf("%.2f", round(t$Gap[t$RawLabel == g] - t$CI[t$RawLabel == g], 2) + 0)
+G4 <- function(t, g) sprintf("%.2f", round(t$Gap[t$RawLabel == g], 2) + 0)
+G4ci <- function(t, g) sprintf("%.2f", t$CI[t$RawLabel == g])
+G4n <- function(t, g) t$N[t$RawLabel == g]
+GapSet <- function(t, dir = c("pos", "neg")) {
+  dir <- match.arg(dir)
+  s <- t[t$Type != "Overall" & abs(t$Gap) > t$CI, ]
+  s$RawLabel[if (dir == "pos") s$Gap > 0 else s$Gap < 0]
+}
+OvB <- function(f) {
+  b <- Ch3Bounds(tt4[[f]])
+  b[b$RawLabel == "Overall", ]
+}
+
+ch4.ov <- vapply(tt4, function(t) V3(t, "Overall"), numeric(1))
+stopifnot(
+  # Harvestable items above their caught counterparts, intervals apart
+  OvB("D4j")$lo > OvB("D4i")$hi,
+  OvB("D4l")$lo > OvB("D4k")$hi,
+  # Season rating above every preferred-fish item; success and number caught lowest
+  ch4.ov["A9rev"] > max(ch4.ov[c("D4a", "D4i", "D4j", "D4k", "D4l")]),
+  setequal(names(sort(ch4.ov[c("D4a", "D4i", "D4j", "D4k", "D4l")]))[1:2], c("D4a", "D4k")),
+  OvB("D4a")$hi > OvB("D4k")$lo
+)
+
+ch3.claim(tt4$A9rev, hi = c("Bluegill / Sunfish", "Wiper", "Trout"), lo = "Walleye / Sauger",
+          hi_only = TRUE, lo_only = TRUE)
+ch3.claim(tt4$D4a, hi = c("Channel catfish", "White bass", "Trout"), lo = "Walleye / Sauger",
+          hi_only = TRUE, lo_only = TRUE)
+ch3.claim(tt4$D4i, hi = "Wiper", lo = c("Bass", "Largemouth bass"), hi_only = TRUE, lo_only = TRUE)
+ch3.claim(tt4$D4j, hi = "Bluegill / Sunfish", lo = c("Northern pike", "No preference"),
+          hi_only = TRUE, lo_only = TRUE)
+ch3.claim(tt4$D4k, hi = "Channel catfish", hi_only = TRUE)
+stopifnot(length(SepLo(tt4$D4k)) == 0, length(SepLo(tt4$D4l)) == 0)
+ch3.claim(tt4$D4l, hi = c("Panfish / Sunfish", "Bluegill / Sunfish"), hi_only = TRUE)
+stopifnot(!("Walleye / Sauger" %in% unlist(lapply(tt4[c("D4i", "D4j", "D4k", "D4l")],
+                                                 function(t) c(SepHi(t), SepLo(t))))))
+
+stopifnot(
+  ch4.gapCatch$Gap[1] > ch4.gapCatch$CI[1],
+  setequal(GapSet(ch4.gapCatch, "pos"), c("Walleye / Sauger", "Catfish", "Flathead catfish", "Wiper")),
+  setequal(GapSet(ch4.gapCatch, "neg"), c("Bass", "Largemouth bass")),
+  !("Channel catfish" %in% c(GapSet(ch4.gapCatch, "pos"), GapSet(ch4.gapCatch, "neg"))),
+  abs(ch4.gapHarvest$Gap[1]) <= ch4.gapHarvest$CI[1],
+  length(GapSet(ch4.gapHarvest, "pos")) == 0,
+  setequal(GapSet(ch4.gapHarvest, "neg"), "No preference"),
+  # Size caught minus size allowed: negative overall, Wiper the only positive
+  ch4.gapSize$Gap[1] < -ch4.gapSize$CI[1],
+  setequal(GapSet(ch4.gapSize, "pos"), "Wiper")
+)
+
+# Caught versus allowed, every group, size and number (D4i-D4j, D4k-D4l).
+# Negative means the allowed side is rated above the caught side.
+stopifnot(
+  ch4.gapNum$Gap[1] < -ch4.gapNum$CI[1],
+  setequal(GapSet(ch4.gapSize, "neg"),
+           c("Walleye / Sauger", "Bass", "Largemouth bass", "Panfish / Sunfish", "Crappie", "Bluegill / Sunfish")),
+  length(GapSet(ch4.gapNum, "pos")) == 0,
+  length(GapSet(ch4.gapNum, "neg")) == 11,
+  !any(c("Wiper", "Bluegill / Sunfish", "Trout", "Northern pike") %in% GapSet(ch4.gapNum, "neg")),
+  # Walleye / Sauger: larger on number than on size. Bass: larger on size than on number.
+  ch4.gapNum$Gap[ch4.gapNum$RawLabel == "Walleye / Sauger"] < ch4.gapSize$Gap[ch4.gapSize$RawLabel == "Walleye / Sauger"],
+  ch4.gapSize$Gap[ch4.gapSize$RawLabel == "Bass"] < ch4.gapNum$Gap[ch4.gapNum$RawLabel == "Bass"],
+  # Catfish: a number gap only
+  !("Catfish" %in% GapSet(ch4.gapSize, "neg")), "Catfish" %in% GapSet(ch4.gapNum, "neg"),
+  # Wiper: positive on size with the interval above zero, not flagged on number
+  ch4.gapSize$Gap[ch4.gapSize$RawLabel == "Wiper"] - ch4.gapSize$CI[ch4.gapSize$RawLabel == "Wiper"] > 0,
+  !("Wiper" %in% c(GapSet(ch4.gapNum, "pos"), GapSet(ch4.gapNum, "neg"))),
+  D4Top("D4i") == "Wiper", D4Top("D4c") == "Wiper", D4Top("D4e") == "Wiper"
+)
+```
+
+Managers usually want to know how satisfied anglers are, but one satisfaction score does not say what is behind it. The survey therefore asks about satisfaction in several ways, and this chapter is organised around what each way can tell apart. One item (A9) asks about the season as a whole. Another (D4a) asks about success at catching the angler's preferred fish. Four more (D4i to D4l) form a two-by-two: satisfaction with the size or the number of the preferred fish, for the fish the angler catches or the fish the angler is allowed to harvest. The pairs are there to answer two questions. Is an unhappy group short of large fish or of many fish? And is the complaint about what the water produces or about what the rules let anglers keep? The chapter reports the six items together by preferred group, then compares size with numbers within each angler, first for the catch and then for the harvest, and finally compares what each angler catches with what the same angler is allowed to keep. As in Chapter 3, a group is described as different from the overall only when its interval lies entirely outside the Overall interval. A within-angler difference is described only when the interval around that difference excludes zero.
+
 `r paste0("The survey measures satisfaction in two places that this report has so far kept apart. A9 asks how satisfied the angler was with fishing in Nebraska during 2025 and is reported in Chapter 3. Five items in the D4 battery ask about the one type of fish the angler prefers to fish for and are reported one at a time in Chapter 2. This chapter puts all six in one place, pointing the same direction, across the same preferred groups. No cell is computed differently here: the same summary functions, the same universe, and the same row set are used, so a value in this chapter and its counterpart in Chapter 2 or 3 are the same number.")`
 
 `r caption.ch4a9`
@@ -1375,11 +1766,15 @@ stopifnot(
 
 ## The satisfaction items
 
+The six items are listed below with the short names used in the rest of the chapter. Each is scored so that a higher mean means a more satisfied angler.
+
 `r paste0("The six items, with the question text as it appears in the instrument, the short name used in the tables that follow, and the chapter that reports the item in full. N is the raw unweighted number of respondents in the analysis sample who answered the item; the mean is weighted, with a 95 percent confidence interval. ", caption.raked)`
 
 ```{r ch4items}
 CreateFlex(Ch4ItemTable(d, q))
 ```
+
+Anglers rate the season as a whole highest (`r M3(tt4$A9rev, "Overall")`) and their preferred fish lower. Success (`r M3(tt4$D4a, "Overall")`) and the number caught (`r M3(tt4$D4k, "Overall")`) are the lowest of the five preferred-fish items, and their intervals overlap. The season item is worded differently from the D4 items, so the distance between it and the rest is only a rough guide. The four size and number items share their wording, and among those the comparison is cleaner. Anglers rate what the rules allow them to keep above what they catch, for size (`r M3(tt4$D4j, "Overall")` harvestable against `r M3(tt4$D4i, "Overall")` caught) and for number (`r M3(tt4$D4l, "Overall")` against `r M3(tt4$D4k, "Overall")`), and the intervals do not overlap in either pair. On average, then, the harvest side draws less complaint than the catch side.
 
 `r run_pagebreak()`
 
@@ -1387,11 +1782,17 @@ CreateFlex(Ch4ItemTable(d, q))
 
 ## Satisfaction by preferred group
 
+The table sets the six items side by side for every preferred group. Higher is more satisfied on every item.
+
 `r paste0("All six items across the preferred groups. ", caption.ch3means, " ", caption.ch3rows, " ", caption.raked)`
 
 ```{r ch4matrix}
 CreateFlex(Ch3MeansTable(d, ch4.sat.items$Field, ch4.sat.items$Short))
 ```
+
+Walleye / Sauger anglers are the only group below the overall on the season (`r M3(tt4$A9rev, "Walleye / Sauger")` against `r M3(tt4$A9rev, "Overall")`) and on success (`r M3(tt4$D4a, "Walleye / Sauger")` against `r M3(tt4$D4a, "Overall")`). They do not separate from the overall on any of the four size and number items, so this screen cannot place the shortfall in one of them. The next section looks at it directly. On the positive side, Wiper (`r M3(tt4$A9rev, "Wiper")`), Bluegill / Sunfish (`r M3(tt4$A9rev, "Bluegill / Sunfish")`) and Trout (`r M3(tt4$A9rev, "Trout")`) anglers rate the season above the overall. Trout (`r M3(tt4$D4a, "Trout")`), Channel catfish (`r M3(tt4$D4a, "Channel catfish")`) and White bass (`r M3(tt4$D4a, "White bass")`) anglers are above it on success, and Channel catfish anglers are also above on the number caught (`r M3(tt4$D4k, "Channel catfish")`). Wiper anglers alone are above on the size caught (`r M3(tt4$D4i, "Wiper")`).
+
+The remaining separations are specific to one item. Bass anglers, and Largemouth bass anglers in particular, are below the overall on the size caught (`r M3(tt4$D4i, "Bass")` and `r M3(tt4$D4i, "Largemouth bass")` against `r M3(tt4$D4i, "Overall")`). Chapter 3 shows the same anglers above the overall on the size-of-fish attitude scale, so this is a group that cares about size and is less satisfied with the size it catches. On the size allowed to harvest, Northern pike (`r M3(tt4$D4j, "Northern pike")`) and No preference anglers (`r M3(tt4$D4j, "No preference")`) are below the overall (`r M3(tt4$D4j, "Overall")`), and Bluegill / Sunfish anglers are above it (`r M3(tt4$D4j, "Bluegill / Sunfish")`). Panfish / Sunfish (`r M3(tt4$D4l, "Panfish / Sunfish")`) and Bluegill / Sunfish (`r M3(tt4$D4l, "Bluegill / Sunfish")`) anglers are above the overall on the number allowed. Most cells have no flag at all. That does not show those groups are typical, because the smaller groups have wide intervals and a real difference could sit inside one.
 
 <!--
 
@@ -1423,6 +1824,8 @@ CreateFlex(Ch4GroupCorrTable(ch4.groupMeans))
 
 ## Size and numbers: the fish anglers catch
 
+Each angler answered one item on the size of the preferred fish caught and one on the number caught, so the two answers can be compared within the angler. A positive difference means the angler is happier with size than with numbers.
+
 `r paste0("D4i and D4k ask the same question about the same fish, one about the size caught and one about the number caught, so the two can be compared within an angler rather than across anglers. ", caption.ch4gap, " ", caption.ch3rows)`
 
 ```{r ch4gapCatch}
@@ -1439,9 +1842,17 @@ Ch4DumbbellPlot(
 
 `r paste0("Reading the difference column against its own interval, and without any adjustment for the number of groups compared: the interval lies above zero, with size rated higher than numbers, for ", Ch4GapNames(ch4.gapCatch, "positive"), "; it lies below zero, with numbers rated higher than size, for ", Ch4GapNames(ch4.gapCatch, "negative"), ". For the remaining ", sum(ch4.gapCatch$Type != "Overall" & abs(ch4.gapCatch$Gap) <= ch4.gapCatch$CI), " groups the interval includes zero. Overall the difference is ", FmtMeanGap(ch4.gapCatch$Gap[1], ch4.gapCatch$CI[1]), ".")`
 
+Across all anglers the difference is small (`r G4(ch4.gapCatch, "Overall")` ± `r G4ci(ch4.gapCatch, "Overall")`). The interval only just clears zero, so the average angler is about equally content with size and numbers. The groups are where the separation shows up.
+
+Four groups rate size above numbers: Wiper (`r G4(ch4.gapCatch, "Wiper")`), Flathead catfish (`r G4(ch4.gapCatch, "Flathead catfish")`), Catfish as a family (`r G4(ch4.gapCatch, "Catfish")`) and Walleye / Sauger (`r G4(ch4.gapCatch, "Walleye / Sauger")`). For these anglers the weaker side of the catch is how many fish they get, not how large they are. That agrees with Chapter 2, where Flathead catfish anglers had the lowest satisfaction with the number caught of any group, and with Chapter 3, where Walleye / Sauger anglers score above the overall on the numbers attitude. It also gives the walleye result in the previous section somewhere to land: the season and success ratings are low, and among the catch items it is the number of fish that trails. Two groups go the other way, Bass (`r G4(ch4.gapCatch, "Bass")`) and Largemouth bass (`r G4(ch4.gapCatch, "Largemouth bass")`). Bass anglers are comparatively content with how many fish they catch and less so with how large, which matches their size-focused attitudes.
+
+The Wiper and Flathead catfish differences are the largest, but they rest on `r G4n(ch4.gapCatch, "Wiper")` and `r G4n(ch4.gapCatch, "Flathead catfish")` respondents and their intervals are about ± `r G4ci(ch4.gapCatch, "Wiper")` and ± `r G4ci(ch4.gapCatch, "Flathead catfish")`. The direction is more dependable than the size. Channel catfish anglers, the larger part of the catfish family, are not flagged (`r G4(ch4.gapCatch, "Channel catfish")` ± `r G4ci(ch4.gapCatch, "Channel catfish")`), so the family result leans on Flathead catfish. None of these intervals is adjusted for the number of groups compared.
+
 `r run_pagebreak()`
 
 ## Size and numbers: the fish anglers may harvest
+
+The same comparison follows for the fish an angler is allowed to keep. These items describe the rules rather than the catch, so a difference here says something about regulation and not about the fishery.
 
 `r paste0("D4j and D4l repeat the comparison for the fish an angler is allowed to keep rather than the fish caught. ", caption.ch4gap, " ", caption.ch3rows)`
 
@@ -1458,6 +1869,60 @@ Ch4DumbbellPlot(
 ```
 
 `r paste0("On the same reading: the interval lies above zero for ", Ch4GapNames(ch4.gapHarvest, "positive"), ", and below zero for ", Ch4GapNames(ch4.gapHarvest, "negative"), ". For the remaining ", sum(ch4.gapHarvest$Type != "Overall" & abs(ch4.gapHarvest$Gap) <= ch4.gapHarvest$CI), " groups the interval includes zero. Overall the difference is ", FmtMeanGap(ch4.gapHarvest$Gap[1], ch4.gapHarvest$CI[1]), ".")`
+
+The overall difference is `r G4(ch4.gapHarvest, "Overall")` ± `r G4ci(ch4.gapHarvest, "Overall")`, so the average angler is as satisfied with the size allowed as with the number allowed. One group is flagged, No preference (`r G4(ch4.gapHarvest, "No preference")` ± `r G4ci(ch4.gapHarvest, "No preference")`, `r G4n(ch4.gapHarvest, "No preference")` respondents), who are happier with the number allowed. With `r nrow(ch4.gapHarvest) - 1` groups compared and no adjustment, one flagged group is about what chance alone would produce, so this result should carry little weight.
+
+The contrast with the previous section is the useful part. The groups that leaned toward size or toward numbers on the catch (walleye, catfish, Wiper and bass anglers) show no lean on the harvest items. Their differences are about what the fishery delivers, not about how the rules balance size against number. For management that separates the two readings: the catch differences look like a signal about fishery performance, while satisfaction with the harvest rules is fairly even across groups on this comparison.
+
+Even fairness between size and number does not mean every group is equally content with the rules. The next section sets what anglers catch against what they may keep, and there one group, Wiper, stands apart from the rest.
+
+`r run_pagebreak()`
+
+## Caught versus allowed
+
+This section compares each angler's rating of the fish caught with the same angler's rating of the fish that may be harvested, once for size and once for number. A negative difference means the angler is happier with what the rules allow than with what the water gives.
+
+### Size
+
+`r paste0("D4i and D4j ask about the size of the preferred fish, one for the fish caught and one for the fish that may be harvested. The difference is size caught minus size harvestable. ", caption.ch4gap, " ", caption.ch3rows)`
+
+```{r ch4gapSizeCvA}
+CreateFlex(Ch4GapTable(d, "D4i", "D4j", "Size caught", "Size harvestable"))
+```
+
+```{r ch4gapSizeCvAPlot, fig.width=6.5, fig.height=5}
+Ch4DumbbellPlot(
+  d, "D4i", "D4j", "Size of fish caught", "Size allowed to harvest",
+  titleText = "Satisfaction with the size of the preferred fish caught, and with the size that may be harvested",
+  subtitleText = "1 = Strongly Disagree to 5 = Strongly Agree. Rows are sorted by the caught-minus-allowed difference"
+)
+```
+
+`r run_pagebreak()`
+
+### Number
+
+`r paste0("D4k and D4l repeat the comparison for the number of fish. The difference is number caught minus number harvestable. ", caption.ch4gap, " ", caption.ch3rows)`
+
+```{r ch4gapNumCvA}
+CreateFlex(Ch4GapTable(d, "D4k", "D4l", "Number caught", "Number harvestable"))
+```
+
+```{r ch4gapNumCvAPlot, fig.width=6.5, fig.height=5}
+Ch4DumbbellPlot(
+  d, "D4k", "D4l", "Number of fish caught", "Number allowed to harvest",
+  titleText = "Satisfaction with the number of the preferred fish caught, and with the number that may be harvested",
+  subtitleText = "1 = Strongly Disagree to 5 = Strongly Agree. Rows are sorted by the caught-minus-allowed difference"
+)
+```
+
+Across all anglers the allowed side is rated above the catch side, for size (`r G4(ch4.gapSize, "Overall")` ± `r G4ci(ch4.gapSize, "Overall")`) and for number (`r G4(ch4.gapNum, "Overall")` ± `r G4ci(ch4.gapNum, "Overall")`). The pattern is broad rather than driven by a few groups. On size, `r length(GapSet(ch4.gapSize, "neg"))` groups are flagged (Walleye / Sauger, Bass, Largemouth bass, Panfish / Sunfish, Crappie and Bluegill / Sunfish) and every one goes the same way. On number, `r length(GapSet(ch4.gapNum, "neg"))` of the `r nrow(ch4.gapNum) - 1` groups are flagged, and again none goes the other way. For most of the survey the harvest rules draw less complaint than the catch does, which is the reading that has run through this chapter: where anglers are dissatisfied, the place to look first is the fishery.
+
+The size of the gap depends on the group in a way that matches the catch results above. Walleye / Sauger anglers have a larger gap on number (`r G4(ch4.gapNum, "Walleye / Sauger")`) than on size (`r G4(ch4.gapSize, "Walleye / Sauger")`), which fits their shortfall in numbers caught. Bass anglers show the reverse, a larger gap on size (`r G4(ch4.gapSize, "Bass")`) than on number (`r G4(ch4.gapNum, "Bass")`), which fits their lower satisfaction with the size they catch. Catfish anglers are not flagged on size (`r G4(ch4.gapSize, "Catfish")` ± `r G4ci(ch4.gapSize, "Catfish")`) but are on number (`r G4(ch4.gapNum, "Catfish")` ± `r G4ci(ch4.gapNum, "Catfish")`), so their gap is a numbers gap only.
+
+Wiper anglers are the exception, and only on size. They rate the size they catch above the size they may keep (`r G4(ch4.gapSize, "Wiper")` ± `r G4ci(ch4.gapSize, "Wiper")`, `r G4n(ch4.gapSize, "Wiper")` respondents), and they are the only group with a positive size difference. On number they are not separated from zero (`r G4(ch4.gapNum, "Wiper")` ± `r G4ci(ch4.gapNum, "Wiper")`). The result sits comfortably with the rest of the Wiper profile. They are the group most satisfied with the size of fish they catch (`r M3(tt4$D4i, "Wiper")`), the most supportive of regulations to increase size and the most willing to harvest fewer fish for larger ones (both in Chapter 2). Their rating of the size they may keep is lower, at `r M3(tt4$D4j, "Wiper")`. What falls short for this group is the size that can be taken home, which is a question about length limits more than about the fishery, and worth having in view when wiper length limits are reviewed.
+
+Two cautions apply. The Wiper estimate rests on `r G4n(ch4.gapSize, "Wiper")` respondents, and although its interval stays above zero (the lower end is `r GLo(ch4.gapSize, "Wiper")`), the direction is more dependable than the size. And these are `r 2 * (nrow(ch4.gapSize) - 1)` comparisons (`r nrow(ch4.gapSize) - 1` groups, two items) with no adjustment, so a handful of flagged groups could appear by chance alone. The number flagged here is far larger than that, which is why the overall pattern can be trusted, and Wiper stands out because every other flagged group points the other way.
 
 `r run_pagebreak()`
 
