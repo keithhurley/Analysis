@@ -1063,3 +1063,11 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-09-30 — Prompt 179
 
 > Add the Step 5 reading rule and the Caught versus allowed comparisons to Appendix B before restarting.
+
+## 2026-09-30 — Prompt 180
+
+> Commit the Appendix B update and tracking files without settings.json.
+>
+> Delete the stale correlation-tables sentence from Appendix B (Q59).
+>
+> Rewrite the Chapter 2 closing synthesis under the interval rule (Q60).

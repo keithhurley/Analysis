@@ -2662,3 +2662,20 @@ Step 5 state by chapter: Ch 1 done (D206-D207); Ch 2 framing done, per-item para
 | Q59 | Appendix B Chapter 4 multiplicity paragraph mentions correlation tables that are commented out of the report (F121): delete that sentence, or restore the tables? |
 | Q60 | Chapter 2 closing synthesis uses point estimates and rankings with no interval screen (F122): leave as described in Appendix B, or rewrite under the Chapter 3-4 interval rule? |
 | — | Review outstanding: open `PreferredSpeciesReport.docx` (close Word first, F91) and read the Step 5 text, the Chapter 4 "Caught versus allowed" tables and figures, and the Chapter 5 cards |
+
+## Q59 and Q60 closed (2026-09-30, prompt 180)
+
+| # | Decision / finding |
+|---|---|
+| D219 | **Appendix B and tracking committed as `fb19bfd`** (settings.json left out). Then **Q59 closed: the stale correlation-tables sentence deleted** from the Chapter 4 multiplicity paragraph in Appendix B (the tables have been commented out since `17cf703`, F45/F121). The commented-out report block itself is untouched |
+| D220 | **Q60 closed: the Chapter 2 closing synthesis rewritten under the interval rule.** A new opening line states the rule and that the per-item paragraphs above do not use it. Claims that failed the screen were cut or reframed: the 12-of-15 numbers-over-size count (gone; replaced by the overall D4d-vs-D4c intervals-apart statement), Flathead catfish D4k/D4f ranks (gone; Chapter 4's paired section covers Flathead), Wiper below overall on D4j (now explicitly "does not separate by this screen, but the sharper paired comparison in Chapter 4..."), Northern pike D4i/D4m/D4c ranks (now "among the highest printed, but neither clears the screen" on n = 31), Smallmouth-vs-Largemouth D4b (gone; intervals overlap), Bass low on D4m (gone). Surviving separations kept and one added (Wiper high on D4h). `ch2Helpers` rewritten: `d4.tt` full tables, `D4SepHi/D4SepLo`, `d4.claim()` with `hi_only`/`lo_only`, `D4OvApart()` for the two cross-item overall claims, non-separation assertions (Walleye on D4i-D4l; pike on D4c/D4m; White bass/Trout/Channel catfish on the regulation items; No preference separates on D4j only). `d4.gap.size` and `d4.nNumbersOverSize` removed; `D4Top`/`D4Bot` kept (used by `ch4TextHelpers`). Appendix B's "where the rule is not applied" sentence updated: per-item paragraphs unscreened, closing section screened |
+| F123 | Verification: `ch2Helpers` and `ch4TextHelpers` assertions pass; 40 inline expressions in the closing section evaluate with no errors or NAs; no stale references to the removed helpers. Full render 7.1 min (second slow render in a row, ~7 min against the earlier ~3-4; cause not investigated), **`DocxCounts()` 98 / 96 / 10 / 0, baseline held**; rule line, rewritten Wiper/pike/No-preference sentences and the Appendix B update present in the docx, old rank-based claims and the correlation sentence absent, no leaked markup |
+
+### Open for the user (complete list, 2026-09-30, after prompt 180)
+
+| # | Question |
+|---|---|
+| Q22 | Implemented and verified; closes once the docx has been reviewed in Word |
+| Q56 | Chapter 5 text scope: chapter introduction plus closing synthesis across the six profiles, or read the existing class and card text first? |
+| Q58 | Keep or trim the management-pointed sentences in Chapters 1-4 (e.g. wiper length limits)? |
+| — | Review outstanding: open `PreferredSpeciesReport.docx` (close Word first, F91) and read the Step 5 text, the Chapter 4 "Caught versus allowed" tables and figures, and the Chapter 5 cards. Render time has drifted to ~7 min (F123); investigate if it persists |

@@ -447,41 +447,76 @@ stopifnot(
 
 ```{r ch2Helpers, echo=FALSE}
 # Group-by-item means for the chapter narrative, from the same builder as the
-# tables, so every quoted figure is live. Claims made in the closing section are
-# asserted here (F99 style: by rank, not by name lookup) so the render stops if
-# the data stop supporting them.
-d4.mat <- sapply(d4.items, function(i) {
-  x <- D4MeansLong(d, i, includeOverall = TRUE)
-  setNames(x$Mean, x$RawLabel)
-})
+# tables, so every quoted figure is live. The closing section claims a group
+# differs from the overall only when the group's 95% interval lies entirely
+# outside the Overall interval (D4SepHi / D4SepLo); every claim is asserted
+# here so the render stops if the data stop supporting it.
+d4.tt <- setNames(
+  lapply(d4.items, function(i) D4MeansLong(d, i, includeOverall = TRUE)),
+  d4.items
+)
+d4.mat <- sapply(d4.tt, function(x) setNames(x$Mean, x$RawLabel))
 d4.grp <- d4.mat[rownames(d4.mat) != "Overall", , drop = FALSE]
 D4M <- function(g, i) sprintf("%.1f", d4.mat[g, i])
 D4Rng <- function(i) sprintf("%.1f to %.1f", min(d4.grp[, i]), max(d4.grp[, i]))
 D4Top <- function(i, k = 1) names(sort(d4.grp[, i], decreasing = TRUE))[k]
 D4Bot <- function(i, k = 1) names(sort(d4.grp[, i]))[k]
-D4N <- function(g) { x <- D4MeansLong(d, "D4a"); x$N[x$RawLabel == g] }
-d4.gap.size <- d4.grp[, "D4j"] - d4.grp[, "D4i"]
-d4.nNumbersOverSize <- sum(d4.grp[, "D4d"] > d4.grp[, "D4c"])
+D4N <- function(g) { x <- d4.tt$D4a; x$N[x$RawLabel == g] }
+D4SepHi <- function(i) {
+  t <- d4.tt[[i]]; ov <- t[t$RawLabel == "Overall", ]; g <- t[t$RawLabel != "Overall", ]
+  g$RawLabel[g$Mean - g$CI > ov$Mean + ov$CI]
+}
+D4SepLo <- function(i) {
+  t <- d4.tt[[i]]; ov <- t[t$RawLabel == "Overall", ]; g <- t[t$RawLabel != "Overall", ]
+  g$RawLabel[g$Mean + g$CI < ov$Mean - ov$CI]
+}
+d4.claim <- function(i, hi = character(), lo = character(),
+                     hi_only = FALSE, lo_only = FALSE) {
+  stopifnot(all(hi %in% D4SepHi(i)), all(lo %in% D4SepLo(i)))
+  if (hi_only) stopifnot(setequal(D4SepHi(i), hi))
+  if (lo_only) stopifnot(setequal(D4SepLo(i), lo))
+  invisible(TRUE)
+}
+# Overall mean of one item above the overall mean of another, intervals apart
+D4OvApart <- function(iHi, iLo) {
+  a <- d4.tt[[iHi]][d4.tt[[iHi]]$RawLabel == "Overall", ]
+  b <- d4.tt[[iLo]][d4.tt[[iLo]]$RawLabel == "Overall", ]
+  a$Mean - a$CI > b$Mean + b$CI
+}
+
 stopifnot(
   setequal(names(sort(d4.mat["Overall", ]))[1:2], c("D4b", "D4h")),
-  D4Bot("D4a") == "Walleye / Sauger", d4.mat["Walleye / Sauger", "D4a"] < 3,
-  D4Top("D4f") == "Walleye / Sauger", D4Top("D4f", 2) == "Flathead catfish",
-  setequal(c(D4Top("D4g"), D4Top("D4g", 2)), c("Walleye / Sauger", "Trout")),
-  d4.mat["Walleye / Sauger", "D4h"] > d4.mat["Overall", "D4h"],
-  d4.mat["Walleye / Sauger", "D4m"] > d4.mat["Overall", "D4m"],
-  abs(d4.mat["Walleye / Sauger", "D4j"] - d4.mat["Overall", "D4j"]) < 0.1,
-  abs(d4.mat["Walleye / Sauger", "D4l"] - d4.mat["Overall", "D4l"]) < 0.1,
-  D4Bot("D4k") == "Flathead catfish",
-  D4Top("D4c") == "Wiper", D4Top("D4e") == "Wiper", D4Bot("D4g") == "Wiper", D4Top("D4i") == "Wiper",
-  d4.mat["Wiper", "D4j"] < d4.mat["Overall", "D4j"],
-  d4.gap.size["Wiper"] < -0.5, all(d4.gap.size[names(d4.gap.size) != "Wiper"] > -0.1),
-  D4Bot("D4i") == "Northern pike", D4Bot("D4j") == "Northern pike",
-  D4Bot("D4b") == "Northern pike", D4Top("D4m") == "Northern pike", D4Top("D4c", 2) == "Northern pike",
-  d4.mat["Bass", "D4h"] < d4.mat["Overall", "D4h"], d4.mat["Bass", "D4m"] < d4.mat["Overall", "D4m"],
-  d4.mat["Smallmouth bass", "D4b"] - d4.mat["Largemouth bass", "D4b"] > 0.3,
-  D4Top("D4j") == "Bluegill / Sunfish", D4Top("D4l") == "Bluegill / Sunfish",
-  D4Bot("D4h") == "Bluegill / Sunfish", D4Bot("D4m") == "Bluegill / Sunfish", D4Bot("D4f") == "Bluegill / Sunfish",
-  setequal(names(sort(d4.grp[, "D4a"], decreasing = TRUE))[1:3], c("White bass", "Trout", "Channel catfish")),
+  D4OvApart("D4d", "D4c"), D4OvApart("D4e", "D4b"),
+  all(d4.grp[, "D4c"] > 3), all(d4.grp[, "D4d"] > 3),
+  d4.mat["Walleye / Sauger", "D4a"] < 3
+)
+d4.claim("D4c", hi = "Wiper", hi_only = TRUE, lo_only = TRUE)
+d4.claim("D4d", hi_only = TRUE, lo_only = TRUE)
+d4.claim("D4a", hi = c("Channel catfish", "White bass", "Trout"), lo = "Walleye / Sauger",
+         hi_only = TRUE, lo_only = TRUE)
+d4.claim("D4f", hi = "Walleye / Sauger", lo = "Bluegill / Sunfish", hi_only = TRUE)
+d4.claim("D4g", hi = "Walleye / Sauger", lo = c("Bass", "Wiper"), hi_only = TRUE)
+d4.claim("D4h", hi = c("Walleye / Sauger", "Wiper"), lo = c("Bass", "Bluegill / Sunfish"),
+         hi_only = TRUE)
+d4.claim("D4e", hi = c("Bass", "Wiper"))
+d4.claim("D4i", hi = "Wiper", hi_only = TRUE)
+d4.claim("D4j", hi = "Bluegill / Sunfish", lo = c("Northern pike", "No preference"),
+         hi_only = TRUE, lo_only = TRUE)
+d4.claim("D4b", lo = "Northern pike", lo_only = TRUE)
+d4.claim("D4l", hi = "Bluegill / Sunfish")
+d4.claim("D4m", lo = "Bluegill / Sunfish")
+# Non-separations the text relies on
+stopifnot(
+  !("Walleye / Sauger" %in% unlist(lapply(c("D4i", "D4j", "D4k", "D4l"),
+                                          function(i) c(D4SepHi(i), D4SepLo(i))))),
+  !("Northern pike" %in% c(D4SepHi("D4c"), D4SepHi("D4m"))),
+  !any(c("White bass", "Trout", "Channel catfish") %in%
+         unlist(lapply(c("D4b", "D4c", "D4d", "D4e", "D4g"),
+                       function(i) c(D4SepHi(i), D4SepLo(i))))),
+  sum(vapply(d4.items,
+             function(i) "No preference" %in% c(D4SepHi(i), D4SepLo(i)),
+             logical(1))) == 1,
+  "No preference" %in% D4SepLo("D4j"),
   D4N("No preference") < 0.2 * Rn("I do not prefer any particular type of fish")
 )
 ```
@@ -804,17 +839,19 @@ D4SlopePlot(d, d2018, "D4m", titleText = ItemQuestionText("D4m", q))
 
 ## Reading Across the Items
 
-Support for regulation is the most uniform result in the battery. Every preferred group agrees, on average, with regulations to increase the size of its preferred fish (group means `r D4Rng("D4c")`, overall `r D4M("Overall", "D4c")`) and with regulations to increase their numbers (`r D4Rng("D4d")`, overall `r D4M("Overall", "D4d")`), and support for number regulations exceeds support for size regulations in `r d4.nNumbersOverSize` of the `r nrow(d4.grp)` groups. The trade-off items are less generous. Willingness to accept smaller fish in exchange for more of them (`r D4M("Overall", "D4b")`) is, with travelling too far, one of the two lowest-scoring statements in the battery, while willingness to harvest fewer fish for larger ones scores `r D4M("Overall", "D4e")`. Anglers want more and bigger fish, and will give up harvest to gain size more readily than they will give up size to gain harvest.
+This section reads across the thirteen items by preferred group, under the same rule as Chapters 3 and 4: a group is described as differing from the overall only when its 95 percent confidence interval lies entirely outside the Overall interval. The per-item paragraphs above describe the printed means without that screen.
 
-Walleye / Sauger anglers, the largest preferred group, are the least satisfied with their fishing success (`r D4M("Walleye / Sauger", "D4a")` against `r D4M("Overall", "D4a")` overall, and below the neutral point) and the most likely to say their preferred fish is becoming harder to catch (`r D4M("Walleye / Sauger", "D4f")`, the highest of any group). They sit above average on travelling too far (`r D4M("Walleye / Sauger", "D4h")`) and on not having enough places (`r D4M("Walleye / Sauger", "D4m")`), and with Trout anglers are the most inclined to rank harvest opportunity above size (`r D4M("Walleye / Sauger", "D4g")`). Their satisfaction with the size and number of fish they are allowed to harvest sits at the overall mean, so the discontent is with catch rates and access rather than with harvest rules. For a group of this size, a success-satisfaction mean below the neutral point is the most consequential single figure in the chapter. Flathead catfish anglers share part of the pattern: the lowest satisfaction with the number of fish caught of any group (`r D4M("Flathead catfish", "D4k")`) and a harder-to-catch score (`r D4M("Flathead catfish", "D4f")`) second only to Walleye / Sauger, on `r D4N("Flathead catfish")` respondents.
+Support for regulation is the most uniform result in the battery. Every preferred group's mean sits on the agree side for regulations to increase the size of its preferred fish (group means `r D4Rng("D4c")`, overall `r D4M("Overall", "D4c")`) and for regulations to increase their numbers (`r D4Rng("D4d")`, overall `r D4M("Overall", "D4d")`). Overall, number regulations draw more support than size regulations, with the two intervals apart, and the only group to separate from the overall on either item is Wiper, above it on size regulations. The trade-off items are less generous. Willingness to accept smaller fish in exchange for more of them (`r D4M("Overall", "D4b")`) is, with travelling too far, one of the two lowest-scoring statements in the battery, while willingness to harvest fewer fish for larger ones scores `r D4M("Overall", "D4e")`, again with the intervals apart. Anglers want more and bigger fish, and will give up harvest to gain size more readily than they will give up size to gain harvest.
 
-Wiper anglers are the most size-oriented group on every measure: the highest support for size regulations (`r D4M("Wiper", "D4c")`), the greatest willingness to harvest fewer fish for larger ones (`r D4M("Wiper", "D4e")`) and the lowest ranking of harvest opportunity above size (`r D4M("Wiper", "D4g")`). They are also the group most satisfied with the size of fish they catch (`r D4M("Wiper", "D4i")`), yet their satisfaction with the size they are allowed to harvest (`r D4M("Wiper", "D4j")`) falls below the overall mean (`r D4M("Overall", "D4j")`). They are the only group whose satisfaction with the size allowed is materially below its satisfaction with the size caught; in every other group the two are within a tenth of a point or the allowed size scores higher. Chapter 4 quantifies that gap. Read with Chapter 1, where Wiper anglers separated from White bass anglers on exactly these attitudes, this is a constituency that strongly supports size regulation yet is among the least content with what current rules let it keep, a tension worth having in view when wiper length limits are reviewed. The group has `r D4N("Wiper")` respondents in this battery, so its intervals are wide.
+Walleye / Sauger anglers, the largest preferred group, are the only group below the overall on satisfaction with fishing success (`r D4M("Walleye / Sauger", "D4a")` against `r D4M("Overall", "D4a")` overall, and below the neutral point) and the only group above it on saying their preferred fish is becoming harder to catch (`r D4M("Walleye / Sauger", "D4f")`). They are above the overall on travelling too far (`r D4M("Walleye / Sauger", "D4h")`) and are the only group above it on ranking harvest opportunity ahead of size (`r D4M("Walleye / Sauger", "D4g")`). On none of the four size and number satisfaction items do they separate from the overall, so the discontent is with catch rates and access rather than with harvest rules; the paired comparison in Chapter 4 places it more precisely, in the number of fish caught. For a group of this size, a success-satisfaction mean below the neutral point is the most consequential single figure in the chapter.
 
-Northern pike anglers are the least satisfied with the size of fish they catch (`r D4M("Northern pike", "D4i")`) and the size they are allowed to harvest (`r D4M("Northern pike", "D4j")`), the least willing to trade size for numbers (`r D4M("Northern pike", "D4b")`), and the most likely to report not enough places to fish (`r D4M("Northern pike", "D4m")`). Their support for size regulations (`r D4M("Northern pike", "D4c")`) is second only to Wiper. The profile is of a size-focused group for which neither the fishery nor the current rules deliver the fish it wants, with the caveat that it rests on `r D4N("Northern pike")` respondents.
+Wiper anglers are the battery's size-oriented outlier. They are the only group above the overall on support for size regulations (`r D4M("Wiper", "D4c")`) and on satisfaction with the size of fish they catch (`r D4M("Wiper", "D4i")`), above it on willingness to harvest fewer fish for larger ones (`r D4M("Wiper", "D4e")`) and on travelling too far (`r D4M("Wiper", "D4h")`), and below it on ranking harvest opportunity ahead of size (`r D4M("Wiper", "D4g")`). Their rating of the size they are allowed to harvest (`r D4M("Wiper", "D4j")`) does not separate from the overall by this screen, but the sharper paired comparison in Chapter 4 shows them to be the only group that rates the size it catches above the size it may keep. Read with Chapter 1, where Wiper anglers separated from White bass anglers on exactly these attitudes, this is a constituency that strongly supports size regulation and rates what the rules let it keep below what it catches, a tension worth having in view when wiper length limits are reviewed. The group has `r D4N("Wiper")` respondents in this battery, so its intervals are wide.
 
-Bass anglers, the second-largest preferred group, favour size over harvest (`r D4M("Bass", "D4e")` on harvesting fewer for larger, `r D4M("Bass", "D4g")` on harvest over size) and report fewer access problems than average, on both travel (`r D4M("Bass", "D4h")` against `r D4M("Overall", "D4h")`) and places (`r D4M("Bass", "D4m")` against `r D4M("Overall", "D4m")`). Smallmouth bass anglers are more willing than Largemouth bass anglers to take smaller fish for more of them (`r D4M("Smallmouth bass", "D4b")` against `r D4M("Largemouth bass", "D4b")`), the one item on which the two bass species differ noticeably. Bluegill / Sunfish anglers are the most satisfied with the size (`r D4M("Bluegill / Sunfish", "D4j")`) and number (`r D4M("Bluegill / Sunfish", "D4l")`) they are allowed to harvest and report the least travel (`r D4M("Bluegill / Sunfish", "D4h")`), the fewest place shortages (`r D4M("Bluegill / Sunfish", "D4m")`) and the least sense that their fish is harder to catch (`r D4M("Bluegill / Sunfish", "D4f")`): the least constrained constituency in the battery, on `r D4N("Bluegill / Sunfish")` respondents. White bass, Trout and Channel catfish anglers report the highest satisfaction with fishing success (`r D4M("White bass", "D4a")`, `r D4M("Trout", "D4a")` and `r D4M("Channel catfish", "D4a")`) without standing out on the regulation items.
+Northern pike anglers are below the overall on satisfaction with the size they are allowed to harvest (`r D4M("Northern pike", "D4j")` against `r D4M("Overall", "D4j")`) and are the only group below it on willingness to trade size for numbers (`r D4M("Northern pike", "D4b")`). Their means on size regulations (`r D4M("Northern pike", "D4c")`) and on not having enough places to fish (`r D4M("Northern pike", "D4m")`) are among the highest printed, but on `r D4N("Northern pike")` respondents neither clears the interval screen. What the screen does support is a size-focused reading: a group unwilling to give up size and dissatisfied with the size the rules let it keep.
 
-Anglers with no single preferred fish track the overall mean on most items and, as the item paragraphs note, carry the largest neutral shares. Their row deserves a caution of its own: because the statements presuppose a preferred fish, only `r D4N("No preference")` of the `r Rn("I do not prefer any particular type of fish")` anglers in this group answered the first item, so the row describes a small, self-selected subset of them rather than the group as a whole.
+Bass anglers, the second-largest preferred group, favour size over harvest: above the overall on harvesting fewer fish for larger ones (`r D4M("Bass", "D4e")`) and below it on ranking harvest ahead of size (`r D4M("Bass", "D4g")`). They are also below the overall on travelling too far (`r D4M("Bass", "D4h")` against `r D4M("Overall", "D4h")`). Bluegill / Sunfish anglers are the battery's least constrained constituency: above the overall on satisfaction with the size (`r D4M("Bluegill / Sunfish", "D4j")`) and number (`r D4M("Bluegill / Sunfish", "D4l")`) they are allowed to harvest, and below it on travelling too far (`r D4M("Bluegill / Sunfish", "D4h")`), on lacking places to fish (`r D4M("Bluegill / Sunfish", "D4m")`) and on finding their fish harder to catch (`r D4M("Bluegill / Sunfish", "D4f")`), on `r D4N("Bluegill / Sunfish")` respondents. White bass, Trout and Channel catfish anglers are above the overall on satisfaction with fishing success (`r D4M("White bass", "D4a")`, `r D4M("Trout", "D4a")` and `r D4M("Channel catfish", "D4a")`) without separating on any of the regulation items.
+
+Anglers with no single preferred fish separate from the overall on one item only, below it on satisfaction with the size they are allowed to harvest (`r D4M("No preference", "D4j")`), and, as the item paragraphs note, carry the largest neutral shares. Their row deserves a caution of its own: because the statements presuppose a preferred fish, only `r D4N("No preference")` of the `r Rn("I do not prefer any particular type of fish")` anglers in this group answered the first item, so the row describes a small, self-selected subset of them rather than the group as a whole.
 
 # Chapter 3: Crosstabs by Preferred Species
 
@@ -2563,7 +2600,7 @@ The narrative in Chapters 3 and 4 describes a preferred group as different from 
 
 A percentage of 0 or 100 has a Wald interval of zero width, so the screen carries no information for such a cell. The text reports those cells descriptively, as groups in which no respondent gave the response, and not as screened differences.
 
-`r paste0("The rule is not applied everywhere. The Chapter 1 narrative reports the Bonferroni-adjusted family tests described above. The Chapter 2 narrative describes group means and their ordering as printed in the item tables and applies no interval screen; the interval for any group is in the table. Chapter 5 is described in its own section below. In Chapters 1 to 4 every value quoted in the narrative is computed from the same objects as the tables, and each claim is checked against its rule when the report is built, so the build stops if the data no longer support a statement.")`
+`r paste0("The rule is not applied everywhere. The Chapter 1 narrative reports the Bonferroni-adjusted family tests described above. The Chapter 2 per-item paragraphs describe group means and their ordering as printed in the item tables and apply no interval screen; the interval for any group is in the table. The closing section of Chapter 2, Reading Across the Items, applies the interval screen above. Chapter 5 is described in its own section below. In Chapters 1 to 4 every value quoted in the narrative is computed from the same objects as the tables, and each claim is checked against its rule when the report is built, so the build stops if the data no longer support a statement.")`
 
 ## Satisfaction comparisons in Chapter 4
 
@@ -2575,7 +2612,7 @@ A percentage of 0 or 100 has a Wald interval of zero width, so the screen carrie
 
 `r paste0("Chapter 4 also compares what each angler catches with what the same angler is allowed to harvest, for size (D4i and D4j) and for number (D4k and D4l). The method is the paired method above. The difference is the caught item minus the harvestable item, so a negative value means the harvestable item is rated higher. It is computed for every row of the table, Overall and the ", nrow(banner.definition), " preferred groups, for both pairs: ", 2 * nrow(banner.definition), " group comparisons, none adjusted for multiplicity. The size comparison was added after the Chapter 2 item paragraphs suggested a difference for one group, Wiper. It is reported for every group so that the group is read against the others and not alone.")`
 
-`r paste0("No significance test is reported in Chapter 4, and no adjustment for multiple comparisons is applied. Each interval is a 95 percent interval for its own group taken alone. ", nrow(banner.definition), " groups are shown for each pair, and the groups overlap, since a family row contains the respondents in its own species rows; reading every interval at once is therefore a weaker exercise than reading any one of them, and a group whose interval just excludes zero should be read with that in mind. The correlation tables are likewise descriptive summaries with no test attached, and the group-level correlations are computed across ", nrow(banner.definition), " overlapping groups rather than across independent observations.")`
+`r paste0("No significance test is reported in Chapter 4, and no adjustment for multiple comparisons is applied. Each interval is a 95 percent interval for its own group taken alone. ", nrow(banner.definition), " groups are shown for each pair, and the groups overlap, since a family row contains the respondents in its own species rows; reading every interval at once is therefore a weaker exercise than reading any one of them, and a group whose interval just excludes zero should be read with that in mind.")`
 
 ## Angler type profiles in Chapter 5
 
