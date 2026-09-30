@@ -8,16 +8,16 @@
 <!-- RESTART-BRIEF:START -->
 ## 0. Start here (restart brief, 2026-09-30, sixth checkpoint)
 
-**Last commit:** `da59b72` Step 5 guided text, Chapters 1-4 (D205-D216). Working tree: `AGENTS.md`, `PROGRESS.md`, `PROMPTS.md`, `PreferredSpeciesReport.rmd` and `PreferredSpeciesReport.docx` (Appendix B update D218 and the restart checkpoints, uncommitted) plus `.posit/assistant/settings.json`, which is not ours (leave it).
+**Last commit:** `b4a5628` Q59 and Q60 closed (D219-D220), on `fb19bfd` Appendix B reading rule (D217-D218) and `da59b72` Step 5 text Chapters 1-4 (D205-D216). Working tree clean except `.posit/assistant/settings.json`, which is not ours (leave it).
 **Where we are:** Step 5 (guided text) is **done for Chapters 1-4** and committed; **Chapter 5 is the only part not started**. The user overrode the technician-voice rule for this step (D205): interpretive text for fisheries biologists, specialists and administrators, plain natural prose, no em dashes or stock phrases. Workflow per section: propose the thrust, user approves, draft and insert, verify, render. The report renders at the baseline `DocxCounts()` **98 tables / 96 images / 10 landscape / 0 leaked** (F117, 3.9 min). Each chapter's narrative runs from live values, and every claim is asserted in a helper chunk (`ch1Helpers`, `ch2Helpers`, `ch3TextHelpers`, `ch4TextHelpers`) so the render stops if the data stop supporting it. Reading rule in Chapters 3-4: a group is described as different only if its interval lies wholly outside the Overall interval; a within-angler gap only if its interval excludes zero.
 
 **Read before doing anything** (in this order, only these):
 1. This file: §0, §1 (note the D205 override on rule 2), §6.
-2. `PROGRESS.md` from "## Step 5: guided text, Chapter 1" (line ~2558) to the end: D205-D218, F105-F122, open list, environment notes.
+2. `PROGRESS.md` from "## Step 5: guided text, Chapter 1" (line ~2558) to the end: D205-D220, F105-F123, open list, environment notes.
 3. Only when editing: `PreferredSpeciesReport.rmd` (Chapter 5 starts ~L1929, Appendix B ~L2429) and `Ch5LPA.R`; the helper chunks above for the assertion pattern to copy.
 
-**Open questions for the user:** Q56 Chapter 5 text scope (introduction plus closing synthesis, or read the existing class and card text first); Q58 keep or trim the management-pointed sentences in Chapters 1-4 (e.g. wiper length limits); Q59 Appendix B Chapter 4 paragraph still mentions correlation tables that are commented out of the report (F121): delete the sentence or restore the tables; Q60 Chapter 2 closing synthesis uses no interval screen (F122): leave as Appendix B now describes it, or rewrite under the Chapter 3-4 rule; Q22 closes after the docx review. (Q57 closed by D218.)
-**Unverified / pending:** the docx has not been viewed in Word (Step 5 text, Chapter 4 new tables and figures, Chapter 1 tables, Chapter 5 cards and landscape layout); the user has not read the Chapter 5 class and card text (D204), nor the Chapter 3-4 narrative; the 26 Chapter 2 per-item paragraphs are intentionally untouched.
+**Open questions for the user:** Q56 Chapter 5 text scope (introduction plus closing synthesis, or read the existing class and card text first); Q58 keep or trim the management-pointed sentences in Chapters 1-4 (e.g. wiper length limits); Q22 closes after the docx review. (Q57 closed by D218; Q59-Q60 closed by D219-D220.)
+**Unverified / pending:** the docx has not been viewed in Word (Step 5 text, Chapter 4 new tables and figures, Chapter 1 tables, Chapter 5 cards and landscape layout); the user has not read the Chapter 5 class and card text (D204), nor the Chapter 3-4 narrative; the 26 Chapter 2 per-item paragraphs are intentionally untouched. Render time has drifted to ~7 min in the last two renders (F123); investigate if it persists.
 **Environment notes:** `source("DocxCounts.R")` before verifying a render. Close Word before a render (F91). Evaluate a chapter's inline `r` expressions in the console before rendering (errors otherwise surface only at render). Mixed CRLF/LF line endings in the `.rmd`. Docx heading styles are French (`Titre1`-`Titre3`). A `stopifnot(x[Column == "Name"] == 0)` passes silently on an empty result (F99).
 
 **First action in the new conversation:** summarise this brief in a few lines and ask the user Q56 (how to proceed on Chapter 5 text), offering the two options. Change no files until the user says so.
@@ -266,5 +266,5 @@ Three structural facts that are easy to get wrong and are already settled:
 3. **Scale scores carry the `*_AnsweredAll` listwise gate** per scale (D19), or the Overall
    column will not reproduce.
 
-Read `PROGRESS.md` for decisions D1-D218, findings F1-F122, and open questions (complete list in the latest restart checkpoint); `ANALYSIS_PLAN.md`
+Read `PROGRESS.md` for decisions D1-D220, findings F1-F123, and open questions (complete list in the latest restart checkpoint); `ANALYSIS_PLAN.md`
 for the executable spec (written for steps 1-3; §8 records that Chapters 4 and 5 sit outside it).
