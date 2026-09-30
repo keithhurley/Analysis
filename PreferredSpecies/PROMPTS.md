@@ -1051,3 +1051,15 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-09-30 — Prompt 176
 
 > Build the global "Caught versus allowed" section for size and number, and rewrite the Wiper paragraph around it.
+
+## 2026-09-30 — Prompt 177
+
+> Commit the Step 5 text work for Chapters 1 to 4.
+
+## 2026-09-30 — Prompt 178
+
+> Prepare a restart brief so the next conversation starts from the committed Step 5 state.
+
+## 2026-09-30 — Prompt 179
+
+> Add the Step 5 reading rule and the Caught versus allowed comparisons to Appendix B before restarting.

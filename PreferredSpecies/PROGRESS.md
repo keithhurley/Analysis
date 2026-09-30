@@ -2614,3 +2614,51 @@ Open: user review of the Chapter 4 wording; Chapter 5 thrust next (card text D20
 | F117 | **Full render 3.9 min, `DocxCounts()` 98 tables / 96 images / 10 landscape / 0 leaked: the new baseline** (+2 tables, +2 images for the new section). 26 inline expressions evaluate with no errors or NAs; the new heading, Wiper paragraph and pointer sentence are in the docx; the old "not tabulated" sentence is gone; no leaked markup |
 
 Open: user review of the Chapter 4 wording; Chapter 5 thrust next.
+
+## Step 5 checkpoint and restart (2026-09-30, prompts 177-178)
+
+| # | Decision / finding |
+|---|---|
+| D217 | **Step 5 text for Chapters 1-4 committed as `da59b72`** (AGENTS, PROGRESS, PROMPTS, `.rmd`, rendered `.docx`; not pushed; `.posit/assistant/settings.json` left out, not ours). Commit message lists D205-D216 |
+| F118 | **Appendix B has not been updated for Step 5.** It does not describe (a) the Chapter 3 and Chapter 4 reading rule used in the narrative (a group is described as different only when its interval lies wholly outside the Overall interval; a within-angler gap only when its interval excludes zero), nor (b) the new "Caught versus allowed" paired comparisons (D4i-D4j, D4k-D4l, 30 unadjusted comparisons). The existing Chapter 4 paragraph there still mentions correlation tables that are commented out in the report (check against D181) |
+| F119 | **Step 5 scope left:** Chapter 5 (class descriptions and six family cards already carry interpretive text from D160-D175 / D204, which the user has not read; no chapter introduction or closing synthesis), plus the 26 Chapter 2 per-item paragraphs, which were deliberately left for the user to edit by hand (D208) |
+
+Step 5 state by chapter: Ch 1 done (D206-D207); Ch 2 framing done, per-item paragraphs untouched (D208-D209); Ch 3 done, 22 section paragraphs and a preamble (D210-D212); Ch 4 done, intro, four section discussions and the new global "Caught versus allowed" section (D213-D216); Ch 5 not started.
+
+### Open for the user (complete list, 2026-09-30)
+
+| # | Question |
+|---|---|
+| Q22 | Implemented and verified; closes once the docx has been reviewed in Word |
+| Q56 | Chapter 5 text scope: chapter introduction plus closing synthesis across the six profiles, or read the existing class and card text first? |
+| Q57 | Appendix B: add the Step 5 reading rule and the "Caught versus allowed" comparisons (F118)? |
+| Q58 | Chapter 4 Wiper sentence "worth having in view when wiper length limits are reviewed" and the other management-pointed lines in Chapters 1-4: keep as drafted, or trim? (the user approved two Chapter 1 judgement calls; the rest unreviewed) |
+| — | Review outstanding: open `PreferredSpeciesReport.docx` (close Word before any re-render, F91) and read the Step 5 text in Chapters 1-4, the Chapter 4 "Caught versus allowed" tables and figures, Chapter 1 new tables, and the Chapter 5 cards. The Phase 4 leftovers (full-document stale-wording scan was done, F104) are otherwise closed |
+
+### Environment notes (2026-09-30)
+
+- Render about 3.9 min. **Baseline `DocxCounts()` 98 tables / 96 images / 10 landscape / 0 leaked** (F117). `source("DocxCounts.R")` first.
+- Narrative helpers live in the report, not in files: `ch1Helpers`, `ch2Helpers`, `ch3TextHelpers`, `ch4TextHelpers` chunks. Each carries `stopifnot` assertions for every claim, so a data change stops the render. `ch3.claim()`, `SepHi/SepLo` (interval rule), `GapSet()` are defined there; later chunks depend on earlier ones (Chapter 4 helpers use `V3`, `Ch3Bounds`, `ch3.claim`, `D4Top`).
+- A missing name in a narrative expression shows up as an inline error only at render time; evaluate the chapter's inline expressions in the console first (the approach used for F105, F109, F112, F115).
+- Mixed line endings in the `.rmd`: the edit tool works for single-line and multi-line edits so far; scripted multi-line edits must try both.
+- The user's voice preference for Step 5 text: plain and natural, same voice as prior chapters, no em dashes or stock phrases; interpretive text for fisheries biologists, specialists and administrators (D205).
+
+## Appendix B updated for Step 5 (2026-09-30, prompt 179)
+
+| # | Decision / finding |
+|---|---|
+| D218 | **Appendix B updated (closes Q57, F118).** New section "How differences are described in the text" before the Chapter 4 section: the interval rule (group interval wholly outside the Overall interval; within-angler gap only when its interval excludes zero), what the screen is and is not (no p-value; more conservative than a 5% test for one comparison; unadjusted; comparisons nested in Overall and not independent), zero-width Wald intervals at 0 or 100 percent, where the rule is not applied (Chapter 1 uses the Bonferroni family tests; Chapter 2 narrative applies no interval screen; Chapter 5 has its own section), and the render-time assertions. The Chapter 4 section gained a paragraph on the caught-versus-allowed comparisons (paired, caught minus harvestable, 15 groups x 2 items = 30 comparisons, unadjusted) that discloses the size comparison was added after Chapter 2 suggested a Wiper difference. Numbers-only voice kept |
+| F120 | **Verification.** The 7 new inline paragraphs evaluate without error (15 groups, 30 comparisons). Full render **7.5 min** (slower than the usual 3-4 min; cause not investigated) and `DocxCounts()` **98 / 96 / 10 / 0**, baseline held; heading, rule sentence, caught-versus-allowed paragraph and "30 group comparisons" present in the docx, no leaked markup |
+| F121 | **Appendix B's Chapter 4 multiplicity paragraph still says "The correlation tables are likewise descriptive summaries...".** Those tables have been commented out of the report since `17cf703` (F45), so the sentence describes content the report does not show. Left unchanged pending the user (Q59) |
+| F122 | **Chapter 2's closing synthesis and orientation quote group means and rankings without the interval screen** (D208-D209 assert ranks, not intervals). Appendix B now says so. This differs from the Chapter 3-4 reading rule; raise as Q60 |
+
+### Open for the user (complete list, 2026-09-30, after prompt 179)
+
+| # | Question |
+|---|---|
+| Q22 | Implemented and verified; closes once the docx has been reviewed in Word |
+| Q56 | Chapter 5 text scope: chapter introduction plus closing synthesis across the six profiles, or read the existing class and card text first? |
+| Q58 | Keep or trim the management-pointed sentences in Chapters 1-4 (e.g. wiper length limits)? |
+| Q59 | Appendix B Chapter 4 multiplicity paragraph mentions correlation tables that are commented out of the report (F121): delete that sentence, or restore the tables? |
+| Q60 | Chapter 2 closing synthesis uses point estimates and rankings with no interval screen (F122): leave as described in Appendix B, or rewrite under the Chapter 3-4 interval rule? |
+| — | Review outstanding: open `PreferredSpeciesReport.docx` (close Word first, F91) and read the Step 5 text, the Chapter 4 "Caught versus allowed" tables and figures, and the Chapter 5 cards |
