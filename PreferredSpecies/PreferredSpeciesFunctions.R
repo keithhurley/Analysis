@@ -22,6 +22,20 @@ caption.banner <-
 caption.contrasts <-
   "Each row compares two species on the outcome named. Difference is the weighted mean of the second species minus the first, with a 95% confidence interval; it is a design-based comparison on weights rescaled to the sample size. g is Hedges' g computed on effective sample sizes. Family p multiplies the unadjusted p-value by the number of tests in the whole family (species pairs times nine outcomes) and is capped at 1. A dagger on n marks a comparison in which one species has fewer than 30 respondents."
 
+# Presentation fixes to inherited captions. The crosstab files are read-only,
+# so the corrections are applied here after they are sourced.
+caption.percents <- sub("+-", "\u00b1", caption.percents, fixed = TRUE)
+caption.means <- sub("+-", "\u00b1", caption.means, fixed = TRUE)
+if (!grepl("\\.$", caption.medians)) caption.medians <- paste0(caption.medians, ".")
+# Wrapping twice is harmless: a note that already ends in a period is returned as is.
+ReversedItemsNote <- local({
+  inherited <- ReversedItemsNote
+  function(...) {
+    s <- inherited(...)
+    if (nzchar(s) && !grepl("\\.$", s)) paste0(s, ".") else s
+  }
+})
+
 # Banner definition -------------------------------------------------------
 
 # Chapter 1 group-selection rules (D184-D190) ------------------------------
@@ -652,7 +666,7 @@ ContrastTable <- function(tests, outcomeVars, labels) {
         formatC(CIupper, format = "f", digits = 3),
         ")"
       ),
-      g = formatC(G, format = "f", digits = 2),
+      g = sub("^-(0\\.0+)$", "\\1", formatC(G, format = "f", digits = 2)),
       `p` = FmtP(P),
       `Family p` = FmtP(PFamily)
     )
@@ -672,7 +686,7 @@ EffortContrastTable <- function(tests) {
         formatC(CIupper, format = "f", digits = 1),
         ")"
       ),
-      g = formatC(G, format = "f", digits = 2),
+      g = sub("^-(0\\.0+)$", "\\1", formatC(G, format = "f", digits = 2)),
       `p` = FmtP(P),
       `Family p` = FmtP(PFamily)
     )
@@ -794,7 +808,7 @@ DeriveBanner <- function(mydata, disposition) {
 caption.d4item <-
   "Cells are the weighted percentage of the row group giving that response, with a 95 percent confidence interval. Mean scores the five responses from 1 (Strongly Disagree) to 5 (Strongly Agree). N is the raw unweighted number of respondents in the row group who answered the item."
 caption.d4gate <-
-  "The battery was routed to anglers who named a preferred species, so respondents in the No preference row were not asked these items; the few who answered anyway are reported as they stand rather than dropped."
+  "The battery was routed away from anglers who chose the answer that they do not prefer any particular type of fish, so respondents in the No preference row were not asked these items; the few who answered anyway are reported as they stand rather than dropped."
 
 d4.items <- paste0("D4", letters[1:13])
 
@@ -1886,11 +1900,9 @@ ch4.sat.items <- tibble::tibble(
 # (D93): the overall catch gap is 0.07, which 1 dp would render as 0.1 next to
 # an interval of 0.06. Gap columns therefore carry 2 dp (D115).
 FmtMeanGap <- function(value, ci) {
-  paste0(
-    formatC(value, format = "f", digits = 2),
-    " \u00b1 ",
-    formatC(ci, format = "f", digits = 2)
-  )
+  # A gap that rounds to zero would print as -0.00; show it as 0.00
+  gap <- sub("^-(0\\.0+)$", "\\1", formatC(value, format = "f", digits = 2))
+  paste0(gap, " \u00b1 ", formatC(ci, format = "f", digits = 2))
 }
 
 ch4.lab.meanci <- "Overall mean \u00b1 CI"

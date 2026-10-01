@@ -1071,3 +1071,41 @@ here. The user appended the following, which is the actual definition of the cha
 > Delete the stale correlation-tables sentence from Appendix B (Q59).
 >
 > Rewrite the Chapter 2 closing synthesis under the interval rule (Q60).
+
+## 2026-09-30 — Prompt 181
+
+> New conversation for the PreferredSpecies report. Read the "0. Start here" restart brief in AGENTS.md and the PROGRESS.md section it points to, then summarise where we are and list the open questions. Don't change any files until I say so.
+
+## 2026-09-30 — Prompt 182
+
+> (Answer to Q56: "Review existing text first".)
+>
+> creat the introduction,.....let the rest of the chapter flow as it currently does
+
+## 2026-09-30 — Prompt 183
+
+> sounds good, go ahead
+
+## 2026-09-30 — Prompt 184
+
+> closed...render confirm....and then process the entire report's text for 1) accuracy, 2) consistancy, 3) style and depth....create a file in the project listing any interpretative statements outside of analysis and rescitation and their location in the document for an audit of expert opinions......include a synopsis of the textual part of the report and any recommendations for polish
+
+## 2026-09-30 — Prompt 185
+
+> Fix the two wrong Chapter 2 numbers (A1, A2) and reword the Appendix B sentence (A3).
+>
+> Make the 26 Chapter 2 per-item paragraphs live and asserted like the other chapters.
+
+## 2026-10-01 — Prompt 186
+
+> Do the consistency pass (C1 to C12): scale names, US spelling, dashes and repeated phrases.
+>
+> (Answer to the scale-name question: "Use the table and figure labels".)
+
+## 2026-10-01 — Prompt 187
+
+> Work through the remaining accuracy fixes A4 to A12 from TEXT_AUDIT.md.
+>
+> Settle Q58 on the management-pointed sentences using the audit register.
+>
+> (Answer to Q58: "Apply the proposed handling".)
