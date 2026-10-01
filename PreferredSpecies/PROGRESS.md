@@ -2734,3 +2734,18 @@ Step 5 state by chapter: Ch 1 done (D206-D207); Ch 2 framing done, per-item para
 |---|---|
 | Q22 | Implemented and verified; closes once the docx has been reviewed in Word |
 | — | Left from `TEXT_AUDIT.md`: the front summary and cross-chapter synthesis recommendation, and tempering of the higher-risk persona and inference lines (E8, E31, E33, E45, E46, E50). Register line numbers have shifted. Nothing from prompts 181-187 is committed |
+
+## Commit, push and restart checkpoint (2026-10-01, prompt 188)
+
+| # | Decision / finding |
+|---|---|
+| D231 | **Work of prompts 181-187 committed as `6042111`** (`.rmd`, `.docx`, `PreferredSpeciesFunctions.R`, `TEXT_AUDIT.md`, `PROGRESS.md`, `PROMPTS.md`; `.posit/assistant/settings.json` left out, not ours). The tracking update for this checkpoint (restart brief, AGENTS.md build state) is a second commit, then everything was pushed to `origin/master` (https://github.com/keithhurley/Analysis.git; the branch was 8 commits ahead, so the earlier Step 5 commits went with it). Pushed at the user's explicit request (prompt 188) |
+| F130 | **Environment facts learned this session.** (a) `git` from the shell fails with "dubious ownership" on `F:/Survey/Analysis` (the file system does not record ownership); use `git -c safe.directory=F:/Survey/Analysis ...` per command, do not edit the global config. (b) `render()` runs in the global environment, so any console helper left there can break or mask the render: a helper named `n` masked `dplyr::n()` (F129), and an `exists()` guard around a sourced override was satisfied by a stale console copy (F128). Remove ad hoc helpers before rendering and never guard sourced overrides with `exists()`. (c) The `.rmd` has no CR bytes now; line-level edits by `readBin` splice or the edit tool both work. (d) Renders take about 3.8 to 3.9 min again (the 7 min drift of F123 did not persist). (e) A stray `PreferredSpeciesReport - Copy.rmd` (46 KB, 2026-09-18) is in the project folder; it is not used. Ask before deleting |
+
+### Open for the user (complete list, 2026-10-01, after prompt 188)
+
+| # | Question |
+|---|---|
+| Q22 | Implemented and verified; closes once the docx has been reviewed in Word |
+| — | **Next-task candidates from `TEXT_AUDIT.md`, none decided:** (1) a front summary and a cross-chapter synthesis for administrators (thrust to be proposed first, D205 workflow); (2) tempering the higher-risk persona and inference lines (register E8, E31, E33, E45, E46, E50); (3) deciding what to do with the stray `PreferredSpeciesReport - Copy.rmd`. Register line numbers predate the later edits and have shifted |
+| — | **Unverified:** the docx has not been viewed in Word (landscape layout, Chapter 5 cards, new Chapter 2 and Chapter 4 text); the user has not read the new Chapter 5 introduction, the live Chapter 2 per-item wording, or the Chapter 3-4 narrative |

@@ -6,21 +6,21 @@
 > Companion files: `PROGRESS.md` (decisions + step status), `PROMPTS.md` (verbatim prompt log).
 
 <!-- RESTART-BRIEF:START -->
-## 0. Start here (restart brief, 2026-09-30, sixth checkpoint)
+## 0. Start here (restart brief, 2026-10-01, seventh checkpoint)
 
-**Last commit:** `b4a5628` Q59 and Q60 closed (D219-D220), on `fb19bfd` Appendix B reading rule (D217-D218) and `da59b72` Step 5 text Chapters 1-4 (D205-D216). Working tree clean except `.posit/assistant/settings.json`, which is not ours (leave it).
-**Where we are:** Step 5 (guided text) is **done for Chapters 1-4** and committed; **Chapter 5 is the only part not started**. The user overrode the technician-voice rule for this step (D205): interpretive text for fisheries biologists, specialists and administrators, plain natural prose, no em dashes or stock phrases. Workflow per section: propose the thrust, user approves, draft and insert, verify, render. The report renders at the baseline `DocxCounts()` **98 tables / 96 images / 10 landscape / 0 leaked** (F117, 3.9 min). Each chapter's narrative runs from live values, and every claim is asserted in a helper chunk (`ch1Helpers`, `ch2Helpers`, `ch3TextHelpers`, `ch4TextHelpers`) so the render stops if the data stop supporting it. Reading rule in Chapters 3-4: a group is described as different only if its interval lies wholly outside the Overall interval; a within-angler gap only if its interval excludes zero.
+**Last commit:** `6042111` Step 5 text finished (D221-D230), on `cf04d02`; a second commit carries this brief. Pushed to `origin/master` (https://github.com/keithhurley/Analysis.git). Working tree clean except `.posit/assistant/settings.json`, which is not ours (leave it).
+**Where we are:** **Step 5 (guided text) is finished for the whole report and committed.** Chapter 5 got an introduction only; the rest of Chapter 5 flows as it was (D221). Since the last brief: `TEXT_AUDIT.md` was written (synopsis, accuracy A1-A12, consistency C1-C12, 56-entry register of interpretive statements, polish list); the Chapter 2 per-item paragraphs are now live and asserted (`ch2ItemHelpers`, about 100 assertions, D223); the consistency pass (scale names follow the printed table and figure labels, US spelling, no dashes, repeated phrases cut, captions fixed locally in `PreferredSpeciesFunctions.R`, D225-D228) and accuracy fixes (D229) are done; Q56 and Q58 are closed (D221, D230). The report renders at the baseline `DocxCounts()` **98 tables / 96 images / 10 landscape / 0 leaked** (3.8 min). Voice rule for narrative text: D205 (interpretive, plain, no em dashes); reading rule in Chapters 3-4: a group differs only if its interval lies wholly outside the Overall interval, a within-angler gap only if its interval excludes zero.
 
 **Read before doing anything** (in this order, only these):
 1. This file: §0, §1 (note the D205 override on rule 2), §6.
-2. `PROGRESS.md` from "## Step 5: guided text, Chapter 1" (line ~2558) to the end: D205-D220, F105-F123, open list, environment notes.
-3. Only when editing: `PreferredSpeciesReport.rmd` (Chapter 5 starts ~L1929, Appendix B ~L2429) and `Ch5LPA.R`; the helper chunks above for the assertion pattern to copy.
+2. `PROGRESS.md` from "## Chapter 5 introduction, text audit, Chapter 2 per-item paragraphs live" (line ~2683) to the end: D221-D231, F124-F130, open list.
+3. Only when editing: `TEXT_AUDIT.md` section 5 (register) and 6 (polish); `PreferredSpeciesReport.rmd` helper chunks (`ch1Helpers`, `ch2Helpers`, `ch2ItemHelpers`, `ch3TextHelpers`, `ch4TextHelpers`) for the assertion pattern to copy.
 
-**Open questions for the user:** Q56 Chapter 5 text scope (introduction plus closing synthesis, or read the existing class and card text first); Q58 keep or trim the management-pointed sentences in Chapters 1-4 (e.g. wiper length limits); Q22 closes after the docx review. (Q57 closed by D218; Q59-Q60 closed by D219-D220.)
-**Unverified / pending:** the docx has not been viewed in Word (Step 5 text, Chapter 4 new tables and figures, Chapter 1 tables, Chapter 5 cards and landscape layout); the user has not read the Chapter 5 class and card text (D204), nor the Chapter 3-4 narrative; the 26 Chapter 2 per-item paragraphs are intentionally untouched. Render time has drifted to ~7 min in the last two renders (F123); investigate if it persists.
-**Environment notes:** `source("DocxCounts.R")` before verifying a render. Close Word before a render (F91). Evaluate a chapter's inline `r` expressions in the console before rendering (errors otherwise surface only at render). Mixed CRLF/LF line endings in the `.rmd`. Docx heading styles are French (`Titre1`-`Titre3`). A `stopifnot(x[Column == "Name"] == 0)` passes silently on an empty result (F99).
+**Open questions for the user:** Q22 closes after the docx review in Word. No other numbered question is open. Next-task candidates (none decided): front summary and cross-chapter synthesis for administrators; tempering the higher-risk persona and inference lines (register E8, E31, E33, E45, E46, E50); what to do with the stray `PreferredSpeciesReport - Copy.rmd`.
+**Unverified / pending:** the docx has not been viewed in Word (landscape layout, Chapter 5 cards, new Chapter 2 and 4 text); the user has not read the new Chapter 5 introduction, the live Chapter 2 per-item wording, or the Chapter 3-4 narrative. Register line numbers in `TEXT_AUDIT.md` have shifted.
+**Environment notes:** `source("DocxCounts.R")` before verifying a render. Close Word before a render (F91). `render()` runs in the global environment: remove ad hoc console helpers first (a helper named `n` once masked `dplyr::n()`, F129) and never guard sourced overrides with `exists()` (F128). Shell git needs `git -c safe.directory=F:/Survey/Analysis ...` (F130). Docx heading styles are French (`Titre1`-`Titre3`). A `stopifnot(x[Column == "Name"] == 0)` passes silently on an empty result (F99). Evaluate a chapter's inline `r` expressions in the console before rendering.
 
-**First action in the new conversation:** summarise this brief in a few lines and ask the user Q56 (how to proceed on Chapter 5 text), offering the two options. Change no files until the user says so.
+**First action in the new conversation:** summarise this brief in a few lines and ask the user which next-task candidate to take (or whether to review the docx in Word first). Change no files until the user says so.
 <!-- RESTART-BRIEF:END -->
 
 ---
@@ -219,12 +219,13 @@ ask**, never change the other report.
 
 ---
 
-## 6. Build state (as of 2026-09-29)
+## 6. Build state (as of 2026-10-01)
 
 | File | Role |
 |---|---|
 | `PreferredSpeciesReport.rmd` | The report. Renders to `PreferredSpeciesReport.docx` |
-| `PreferredSpeciesFunctions.R` | Banner definition, table builders, pairwise contrast helpers |
+| `PreferredSpeciesFunctions.R` | Banner definition, table builders, pairwise contrast helpers; local presentation fixes to inherited captions and signed-zero formatting (D228) |
+| `TEXT_AUDIT.md` | Step 5 text audit (2026-09-30): synopsis, accuracy A1-A12 (done), consistency C1-C12 (done), register E1-E56 of interpretive statements for expert audit, polish list (D222) |
 | `.gitignore` | Ignores build artifacts and Word lock files. **The rendered `.docx` IS tracked** (D109), via a negation against the repo-root `*.docx` rule (F36) |
 | `Ch5LPA.R` | Chapter 5 LPA layer and all Chapter 5 report builders (tables, figures, icon header rows, photo overlay, family cards). Sourced by the report; never fits |
 | `Ch5Images.R` | Run by hand: writes `angler_profile_images_derived/` (1600 px photos, cleaned 300 px icons) from the untracked originals in `angler_profile_pictures/` and `angler_profile_icons/` (D167) |
@@ -238,10 +239,10 @@ ask**, never change the other report.
 | Step | State |
 |---|---|
 | 1 — species groupings (Chapter 1) | **Done.** 23 tables, renders clean |
-| 2 — species-linked scale questions (Chapter 2) | **Done.** 13 items, each with a table, 3 figures, and 2 verified summary paragraphs; item-level, not composite (D63) |
+| 2 — species-linked scale questions (Chapter 2) | **Done.** 13 items, each with a table, 3 figures, and 2 summary paragraphs, now live and asserted (`ch2ItemHelpers`, D223); item-level, not composite (D63) |
 | 3 — crosstabs by species (Chapter 3) | **Done.** 21 sections, 39 tables, coverage per D86. The age table carries a weighted mean-age column (D108) |
 | 4 — visualizations | **Done.** No chapter of its own (D34) — 39 figures in Chapter 2, 14 in Chapter 3 (D101) |
-| 5 — guided text development | **Chapters 1-4 done and committed (`da59b72`, D205-D217).** Chapter 5 not started; Chapter 2 per-item paragraphs left for the user to edit by hand (D208). Interpretive override in force for this step (D205) |
+| 5 — guided text development | **Done for the whole report and committed (`da59b72`, `6042111`; D205-D230).** Chapter 5 has an introduction only, the rest of that chapter flows as it was (D221). Chapter 2 per-item paragraphs are live and asserted (D223). Consistency and accuracy passes done (D225-D229); management-pointed sentences trimmed per Q58 (D230). Interpretive override in force for this step (D205) |
 | 6 — appendices | **Done.** Appendix A blank for hand-pasted instrument; Appendix B drafted; weighting wording reworded and Q25 closed (D182); Appendix A heading reads 2025 (D178) |
 | **Chapter 1 — restructure (D184-D193)** | **Phase 2 built 2026-09-29; Chapter 1 renders (31 tables in a Chapter-1-only render).** Rule-based group selection: Table 1 unchanged; Table 2 = proposed family groupings; family-wide Bonferroni tests incl. Moronides (D186); raw n >= 30 (D188); disposition and final-groups tables; 15 columns (6 family + 9 species; Esocids and Moronides do not combine); `bannerRuleCheck` chunk stops the render if `banner.definition` disagrees with the rules (D190). Executable plan: `ANALYSIS_PLAN.md` §9. **Phase 3 done 2026-09-29/30 (D194-D201): Chapters 2-5 and Appendix B follow the 15-column banner, the full report renders, new baseline 102 / 94 / 10 / 0 (F101-F102). Chapter 5 keeps its effective-N floor of 30 (D200). Remaining: review the docx, text scan, commit** |
 | **Chapter 4 — Satisfaction** | **Done 2026-09-18 (D111-D118); Step 5 text and a global "Caught versus allowed" section (size and number, all groups) added 2026-09-30 (D213-D216); the new section added 2 tables and 2 images to the render baseline.** Six items (`A9` reversed, `D4a`, `D4i`, `D4j`, `D4k`, `D4l`) in one place: inventory, a landscape matrix by group, respondent- and group-level correlations, and the size-vs-numbers paired comparison for the catch pair and the harvest pair. 6 tables, 2 dumbbell figures. The reliability (alpha) note and its Appendix B sentence were removed 2026-09-29 (D181, supersedes D117) |
@@ -261,10 +262,10 @@ and its own Appendix B section.
 Three structural facts that are easy to get wrong and are already settled:
 
 1. **Universe:** `filter(surveyYear == 2025)` then `filter(!is.na(B1))` → **n = 1,915** (D23).
-2. **The banner overlaps and is not a partition** (D31): 17 columns, family columns contain their
-   own species columns, counts sum to 2,695 against 1,874 distinct. Never total them.
+2. **The banner overlaps and is not a partition** (D31): 15 columns since the Chapter 1 restructure (D184-D193),
+   family columns contain their own species columns, counts sum to 2,637 against 1,855 distinct. Never total them.
 3. **Scale scores carry the `*_AnsweredAll` listwise gate** per scale (D19), or the Overall
    column will not reproduce.
 
-Read `PROGRESS.md` for decisions D1-D220, findings F1-F123, and open questions (complete list in the latest restart checkpoint); `ANALYSIS_PLAN.md`
+Read `PROGRESS.md` for decisions D1-D231, findings F1-F130, and open questions (complete list in the latest restart checkpoint); `ANALYSIS_PLAN.md`
 for the executable spec (written for steps 1-3; §8 records that Chapters 4 and 5 sit outside it).
