@@ -1232,6 +1232,37 @@ caption.ch3medians <-
   "Cells are the lower 95 percent confidence limit, the weighted median, and the upper 95 percent confidence limit, followed by the raw unweighted number of respondents. Median confidence limits come from the inherited 1,000-replicate weighted bootstrap."
 caption.ch3indicator <-
   "Each column is a separate indicator computed on its own universe: cells are the weighted percentage of the row group falling in that category, with a 95 percent confidence interval, followed by the raw unweighted number of respondents in that column's universe. Columns overlap and must not be totalled."
+# Figure captions, same paragraph-above form as the table captions.
+# Chapter 2 D4 figures:
+caption.figd4percent <-
+  "Bars show the weighted percentage of each row group giving each response, with sample size given in parenthesis."
+caption.figd4means <-
+  "Values represent mean response \u00b1 95% confidence intervals with sample size given in parenthesis. Groups are ordered from highest to lowest mean."
+caption.figd4slope <-
+  "Values represent mean response in 2018 and 2025 for the groups whose 95% confidence intervals do not overlap between years, with each year's sample size given in parenthesis."
+# Chapter 3 figures:
+caption.figstack <-
+  "Bars show the weighted percentage of each row group giving each response, with sample size given in parenthesis."
+caption.figrate <-
+  "Points are weighted percentages \u00b1 95% confidence intervals with sample size given in parenthesis. The dashed line is the Overall value."
+caption.figmean <-
+  "Points are weighted means \u00b1 95% confidence intervals with sample size given in parenthesis. The dashed line is the Overall value."
+caption.figmedian <-
+  "Points are weighted medians with 95% bootstrap confidence limits and sample size given in parenthesis. The dashed line is the Overall value."
+caption.figscales <-
+  "Points are weighted mean scale scores \u00b1 95% confidence intervals, one panel per scale, with rows in the same order as the table above. Sample sizes differ by scale and are given in the table above."
+# Captions for the effort-contrast table and the Chapter 4 and 5 figures,
+# same paragraph-above form as the table captions.
+caption.effortcontrast <-
+  "Values represent the difference in mean days fished, second species minus first, with the 95% confidence interval in parenthesis. n gives the raw number of respondents for each species in the order compared, and a dagger marks a comparison in which one species has fewer than 30 respondents. g, p and Family p are defined as in the contrast table above."
+caption.figdumbbell <-
+  "Points are weighted mean responses (1 to 5) for the two items named in the legend, joined by a line, with the number of respondents who answered both items given in parenthesis. Rows are sorted by the difference between the two points. Confidence intervals are in the table above."
+caption.figprofilelines <-
+  "Points are weighted mean scale scores (1 to 5) \u00b1 95% confidence intervals for the respondents assigned to each profile, with the profiles side by side within each scale and the scales grouped by domain."
+caption.figprofilefacets <-
+  "Points are weighted mean scale scores (1 to 5) \u00b1 95% confidence intervals for the respondents assigned to each profile, one panel per scale. The dashed line is the Overall weighted mean."
+caption.figfamilymix <-
+  "Bars are the weighted percentage of each family group's respondents assigned to each profile \u00b1 95% confidence intervals, with the family group's sample size given in its panel title. The dashed mark is the Overall share of that profile. Unassigned respondents are not shown."
 caption.ch3rows <-
   "Rows are the preferred groups from Chapter 1, with individual species indented beneath the family group that contains them. Family rows include the respondents in their species rows, so rows overlap and must not be totalled."
 

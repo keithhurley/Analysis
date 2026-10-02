@@ -1113,3 +1113,39 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-10-01 — Prompt 188
 
 > commit and push all changes ...then prepare for a restartcommit changes to the git and push to the remote repo....then prepare the project for a new conversation
+
+## 2026-10-02 — Prompt 189
+
+> New conversation for the PreferredSpecies report. Read the "0. Start here" restart brief in AGENTS.md and the PROGRESS.md section it points to, then summarise where we are and list the open questions. Don't change any files until I say so.
+
+## 2026-10-02 — Prompt 190
+
+> can you please provide table/figure captions in the same manner and style as they were used in the crosstabs and trends reports?
+>
+> (Answer to the scope question: "Audit first".)
+
+## 2026-10-02 — Prompt 191
+
+> Add own-caption lines above the D4 figures and the Chapter 3 figures, in the trends-report style.
+
+## 2026-10-02 — Prompt 192
+
+> please also caption the tables in the crosstabs report style and format
+
+## 2026-10-02 — Prompt 193
+
+> Reword the remaining ad hoc table captions (effort contrasts, Group Selection, assignment certainty) into the crosstabs form. Add captions to the Chapter 4 dumbbell figures and the Chapter 5 profile figures.
+
+## 2026-10-02 — Prompt 194
+
+> Reword the Chapter 5 profile, comparison and class-by-species table introductions into the crosstabs caption form. Check the Chapter 3 figures in the docx to confirm the dashed Overall line appears as the captions say. also on 4.3 and 4.4 and 4.5 we treate the first two as separate headings and on 4.5 we treat them as two subheadings and I'd like to be consistant
+>
+> (Answer to the heading question: "Group 4.3 and 4.4 under one H2".)
+
+## 2026-10-02 — Prompt 195
+
+> Render now that Word is closed and verify the baseline, headings and the three new introductions.
+>
+> Commit the caption and heading changes, and log them in PROGRESS.md and PROMPTS.md.
+>
+> View the five remaining Chapter 3 dotted-line figures to complete the dashed-line check.

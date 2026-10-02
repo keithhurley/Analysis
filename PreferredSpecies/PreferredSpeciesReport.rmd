@@ -219,7 +219,7 @@ CreateFlex(GenusEffortTable(d, "Bass"))
 CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Bass"), c(motivation.vars, attitude.vars), l))
 ```
 
-`r paste("Days fished, same species comparisons. The columns are defined as in the contrast table above.", sep="")`
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.effortcontrast, "  ", caption.raked, sep="")`
 
 ```{r bassEffortContrasts}
 CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Bass")))
@@ -253,7 +253,7 @@ CreateFlex(GenusEffortTable(d, "Panfish / Sunfish"))
 CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Panfish / Sunfish"), c(motivation.vars, attitude.vars), l))
 ```
 
-`r paste("Days fished, same species comparisons. The columns are defined as in the contrast table above.", sep="")`
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.effortcontrast, "  ", caption.raked, sep="")`
 
 ```{r panfishEffortContrasts}
 CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Panfish / Sunfish")))
@@ -287,7 +287,7 @@ CreateFlex(GenusEffortTable(d, "Catfish"))
 CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Catfish"), c(motivation.vars, attitude.vars), l))
 ```
 
-`r paste("Days fished, same species comparisons. The columns are defined as in the contrast table above.", sep="")`
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.effortcontrast, "  ", caption.raked, sep="")`
 
 ```{r catfishEffortContrasts}
 CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Catfish")))
@@ -321,7 +321,7 @@ CreateFlex(GenusEffortTable(d, "Moronides"))
 CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Moronides"), c(motivation.vars, attitude.vars), l))
 ```
 
-`r paste("Days fished, same species comparisons. The columns are defined as in the contrast table above.", sep="")`
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.effortcontrast, "  ", caption.raked, sep="")`
 
 ```{r moronidesEffortContrasts}
 CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Moronides")))
@@ -355,7 +355,7 @@ CreateFlex(GenusEffortTable(d, "Esocids"))
 CreateFlex(ContrastTable(dplyr::filter(family.tests, Family == "Esocids"), c(motivation.vars, attitude.vars), l))
 ```
 
-`r paste("Days fished, same species comparisons. The columns are defined as in the contrast table above.", sep="")`
+`r paste("Total days fished in Nebraska during 2025.", "  ", caption.effortcontrast, "  ", caption.raked, sep="")`
 
 ```{r esocidEffortContrasts}
 CreateFlex(EffortContrastTable(dplyr::filter(family.tests, Family == "Esocids")))
@@ -365,13 +365,13 @@ Northern pike and Muskellunge / Tiger musky were not combined. Muskellunge angle
 
 ## Group Selection Results
 
-`r paste0("Test results and size rule for every candidate group. Tests is the number of species pairs times nine outcomes. Differences counts the tests with a family p below ", family.alpha, ". Family column is Yes only when the group may be combined and has at least ", min.group.n, " respondents.")`
+`r paste0("Test results and size rule for every candidate group.  Values represent counts of tests and the raw unweighted number of respondents.  Tests is the number of species pairs times nine outcomes. Differences counts the tests with a family p below ", family.alpha, ". Family column is Yes only when the group may be combined and has at least ", min.group.n, " respondents.  ", caption.raked)`
 
 ```{r familyDisposition}
 CreateFlex(FamilyDispositionTable(family.disp))
 ```
 
-`r paste0("Size rule for each species in a candidate family. A species column is independent of whether its family is combined.")`
+`r paste0("Size rule for each species in a candidate family.  Values represent the raw unweighted number of respondents who prefer each species.  A species column is independent of whether its family is combined, and requires at least ", min.group.n, " respondents.")`
 
 ```{r speciesDisposition}
 CreateFlex(SpeciesDispositionTable(d))
@@ -412,7 +412,7 @@ Of the `r nrow(fd)` candidate families, `r nrow(fd_comb)` were combined: `r FamL
 CreateFlex(FinalGroupsTable(d, popTotalAll))
 ```
 
-`r paste0("Preferred species outside every preferred group. These ", nBannerExcluded, " respondents remain in the Overall column of every table but receive no preferred-group column.")`
+`r paste0("Preferred species outside every preferred group.  Values represent the raw unweighted number of respondents.  These ", nBannerExcluded, " respondents remain in the Overall column of every table but receive no preferred-group column.")`
 
 ```{r bannerExclusions}
 CreateFlex(BannerExclusionTable(d))
@@ -729,13 +729,19 @@ The thirteen statements fall into three themes. Five ask about satisfaction: wit
 CreateFlex(D4ItemTable(d, "D4a", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4aPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4a", d4.categories, titleText = ItemQuestionText("D4a", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4aMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4a", titleText = ItemQuestionText("D4a", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4aSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4a", titleText = ItemQuestionText("D4a", q))
@@ -753,13 +759,19 @@ D4SlopePlot(d, d2018, "D4a", titleText = ItemQuestionText("D4a", q))
 CreateFlex(D4ItemTable(d, "D4b", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4bPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4b", d4.categories, titleText = ItemQuestionText("D4b", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4bMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4b", titleText = ItemQuestionText("D4b", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4bSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4b", titleText = ItemQuestionText("D4b", q))
@@ -777,13 +789,19 @@ D4SlopePlot(d, d2018, "D4b", titleText = ItemQuestionText("D4b", q))
 CreateFlex(D4ItemTable(d, "D4c", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4cPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4c", d4.categories, titleText = ItemQuestionText("D4c", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4cMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4c", titleText = ItemQuestionText("D4c", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4cSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4c", titleText = ItemQuestionText("D4c", q))
@@ -801,13 +819,19 @@ D4SlopePlot(d, d2018, "D4c", titleText = ItemQuestionText("D4c", q))
 CreateFlex(D4ItemTable(d, "D4d", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4dPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4d", d4.categories, titleText = ItemQuestionText("D4d", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4dMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4d", titleText = ItemQuestionText("D4d", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4dSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4d", titleText = ItemQuestionText("D4d", q))
@@ -825,13 +849,19 @@ D4SlopePlot(d, d2018, "D4d", titleText = ItemQuestionText("D4d", q))
 CreateFlex(D4ItemTable(d, "D4e", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4ePercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4e", d4.categories, titleText = ItemQuestionText("D4e", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4eMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4e", titleText = ItemQuestionText("D4e", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4eSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4e", titleText = ItemQuestionText("D4e", q))
@@ -849,13 +879,19 @@ D4SlopePlot(d, d2018, "D4e", titleText = ItemQuestionText("D4e", q))
 CreateFlex(D4ItemTable(d, "D4f", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4fPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4f", d4.categories, titleText = ItemQuestionText("D4f", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4fMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4f", titleText = ItemQuestionText("D4f", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4fSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4f", titleText = ItemQuestionText("D4f", q))
@@ -873,13 +909,19 @@ D4SlopePlot(d, d2018, "D4f", titleText = ItemQuestionText("D4f", q))
 CreateFlex(D4ItemTable(d, "D4g", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4gPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4g", d4.categories, titleText = ItemQuestionText("D4g", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4gMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4g", titleText = ItemQuestionText("D4g", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4gSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4g", titleText = ItemQuestionText("D4g", q))
@@ -897,13 +939,19 @@ D4SlopePlot(d, d2018, "D4g", titleText = ItemQuestionText("D4g", q))
 CreateFlex(D4ItemTable(d, "D4h", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4hPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4h", d4.categories, titleText = ItemQuestionText("D4h", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4hMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4h", titleText = ItemQuestionText("D4h", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4hSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4h", titleText = ItemQuestionText("D4h", q))
@@ -921,13 +969,19 @@ D4SlopePlot(d, d2018, "D4h", titleText = ItemQuestionText("D4h", q))
 CreateFlex(D4ItemTable(d, "D4i", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4iPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4i", d4.categories, titleText = ItemQuestionText("D4i", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4iMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4i", titleText = ItemQuestionText("D4i", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4iSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4i", titleText = ItemQuestionText("D4i", q))
@@ -945,13 +999,19 @@ D4SlopePlot(d, d2018, "D4i", titleText = ItemQuestionText("D4i", q))
 CreateFlex(D4ItemTable(d, "D4j", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4jPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4j", d4.categories, titleText = ItemQuestionText("D4j", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4jMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4j", titleText = ItemQuestionText("D4j", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4jSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4j", titleText = ItemQuestionText("D4j", q))
@@ -969,13 +1029,19 @@ D4SlopePlot(d, d2018, "D4j", titleText = ItemQuestionText("D4j", q))
 CreateFlex(D4ItemTable(d, "D4k", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4kPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4k", d4.categories, titleText = ItemQuestionText("D4k", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4kMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4k", titleText = ItemQuestionText("D4k", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4kSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4k", titleText = ItemQuestionText("D4k", q))
@@ -993,13 +1059,19 @@ D4SlopePlot(d, d2018, "D4k", titleText = ItemQuestionText("D4k", q))
 CreateFlex(D4ItemTable(d, "D4l", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4lPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4l", d4.categories, titleText = ItemQuestionText("D4l", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4lMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4l", titleText = ItemQuestionText("D4l", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4lSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4l", titleText = ItemQuestionText("D4l", q))
@@ -1017,13 +1089,19 @@ D4SlopePlot(d, d2018, "D4l", titleText = ItemQuestionText("D4l", q))
 CreateFlex(D4ItemTable(d, "D4m", d4.categories))
 ```
 
+`r paste(caption.figd4percent, "  ", caption.raked, sep="")`
+
 ```{r d4mPercentPlot, fig.width=6.5, fig.height=6}
 D4PercentStackPlot(d, "D4m", d4.categories, titleText = ItemQuestionText("D4m", q))
 ```
 
+`r paste(caption.figd4means, "  ", caption.raked, sep="")`
+
 ```{r d4mMeansPlot, fig.width=6.5, fig.height=5}
 D4MeansOrderedPlot(d, "D4m", titleText = ItemQuestionText("D4m", q))
 ```
+
+`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
 
 ```{r d4mSlopePlot, fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4m", titleText = ItemQuestionText("D4m", q))
@@ -1312,6 +1390,8 @@ Just under half of anglers (`r P3(ch3.t$a11, "Overall")`) also fished outside Ne
 CreateFlex(Ch3SelectOneTable(d, "A11"))
 ```
 
+`r paste(trimws(GetQuestion(q, A11, 2025)), "  ", caption.figrate, "  ", caption.raked, sep="")`
+
 ```{r ch3A11Plot, fig.width=6.5, fig.height=5}
 Ch3RatePlot(
   d, "A11", "Yes", "Percent answering Yes",
@@ -1330,6 +1410,8 @@ Among anglers who fished out of state, `r P3(ch3.t$a12, "Overall")` took a boat 
 ```{r ch3A12}
 CreateFlex(Ch3SelectOneTable(d %>% filter(A11 == "Yes"), "A12"))
 ```
+
+`r paste(trimws(GetQuestion(q, A12, 2025)), "  ", caption.figrate, "  ", "Only respondents who fished out of state are included in this calculation.", "  ", caption.raked, sep="")`
 
 ```{r ch3A12Plot, fig.width=6.5, fig.height=5}
 Ch3RatePlot(
@@ -1361,6 +1443,8 @@ Tournament fishing is rare: `r P3(ch3.t$tourn, "Overall")` of anglers fished at 
 ```{r ch3Tourney}
 CreateFlex(Ch3SelectOneTable(dTourney, "fishedTourney"))
 ```
+
+`r paste(paste("Percent of respondents who participated in at least one fishing tournament (derived from ", trimws(GetQuestion(q, A13, 2025)), ").", sep=""), "  ", caption.figrate, "  ", caption.raked, sep="")`
 
 ```{r ch3TourneyPlot, fig.width=6.5, fig.height=5}
 Ch3RatePlot(
@@ -1430,6 +1514,8 @@ Crowding perceptions barely differ by preferred species: `r P3(ch3.t$q11n, "Over
 CreateFlex(Ch3SelectOneTable(d %>% filter(!is.na(Q11)), "Q11"))
 ```
 
+`r paste(trimws(GetQuestion(q, Q11, 2025)), "  ", caption.figstack, "  ", caption.raked, sep="")`
+
 ```{r ch3Q11Plot, fig.width=6.5, fig.height=6}
 Ch3StackPlot(
   d %>% filter(!is.na(Q11)), "Q11",
@@ -1479,6 +1565,8 @@ CreateFlex(Ch3SelectOneTable(d, "A7"))
 CreateFlex(Ch3MediansTable(d, "A7_miles", "Median one-way miles", digits = 0))
 ```
 
+`r paste("Distance in miles to the favorite water body, using the midpoint of the band each respondent selected.", "  ", caption.figmedian, "  ", caption.raked, sep="")`
+
 ```{r ch3A7milesPlot, fig.width=6.5, fig.height=5}
 Ch3MedianPlot(
   d, "A7_miles", "Median one-way miles",
@@ -1509,6 +1597,8 @@ CreateFlex(Ch3SelectOneTable(d, "A8"))
 CreateFlex(Ch3MediansTable(d, "A8_miles", "Median one-way miles", digits = 0))
 ```
 
+`r paste("Distance in miles to the most-visited water body, using the midpoint of the band each respondent selected.", "  ", caption.figmedian, "  ", caption.raked, sep="")`
+
 ```{r ch3A8milesPlot, fig.width=6.5, fig.height=5}
 Ch3MedianPlot(
   d, "A8_miles", "Median one-way miles",
@@ -1529,12 +1619,16 @@ Mean satisfaction here is scored from 1 (Very satisfied) to 5 (Very dissatisfied
 CreateFlex(Ch3SelectOneTable(d, "A9", includeMean = TRUE))
 ```
 
+`r paste(trimws(GetQuestion(q, A9, 2025)), "  ", caption.figstack, "  ", caption.raked, sep="")`
+
 ```{r ch3A9Plot, fig.width=6.5, fig.height=6}
 Ch3StackPlot(
   d %>% filter(!is.na(A9)), "A9",
   titleText = trimws(GetQuestion(q, A9, 2025))
 )
 ```
+
+`r paste(trimws(GetQuestion(q, A9, 2025)), "  ", caption.figmean, "  ", "Mean scores the five responses from 1 (Very satisfied) to 5 (Very dissatisfied).", "  ", caption.raked, sep="")`
 
 ```{r ch3A9MeanPlot, fig.width=6.5, fig.height=5}
 Ch3MeanPlot(
@@ -1556,6 +1650,8 @@ Ch3MeanPlot(
 ```{r ch3Q16}
 CreateFlex(Ch3SelectOneTable(d %>% filter(!is.na(Q16)), "Q16"))
 ```
+
+`r paste(trimws(GetQuestion(q, Q16, 2025)), "  ", caption.figrate, "  ", caption.raked, sep="")`
 
 ```{r ch3Q16Plot, fig.width=6.5, fig.height=5}
 Ch3RatePlot(
@@ -1637,6 +1733,8 @@ left_join(
   CreateFlex()
 ```
 
+`r paste(trimws(GetQuestion(q, C1, 2025)), "  ", caption.figmean, "  ", "Total days fished across all months.", "  ", caption.raked, sep="")`
+
 ```{r ch3DaysPlot, fig.width=6.5, fig.height=5}
 Ch3MeanPlot(
   dDays, "C1Total_days", "Mean days fished",
@@ -1659,6 +1757,8 @@ CreateFlex(Ch3SelectOneTable(
 ))
 ```
 
+`r paste(trimws(GetQuestion(q, Q26, 2025)), "  ", caption.figrate, "  ", caption.raked, sep="")`
+
 ```{r ch3Q26Plot, fig.width=6.5, fig.height=5}
 Ch3RatePlot(
   d %>% filter(!is.na(Q26)), "Q26", "Yes", "Percent answering Yes",
@@ -1676,12 +1776,16 @@ Across the four motivation sub-scales, the natural environment (`r M3(ch3.t$mn, 
 
 ### Natural environment
 
+`r paste(paste(trimws(GetQuestion(q, C2, 2025)), " Sub-scale: Natural environment.", sep=""), "  ", caption.ch3means, "  ", caption.raked, sep="")`
+
 ```{r ch3C2natural}
 f <- SubScaleFields(s, "Motivations", "Natural Environment")
 CreateFlex(Ch3MeansTable(d, f, Ch3ItemLabels(f, "Motivations")))
 ```
 
 ### Physical and psychological
+
+`r paste(paste(trimws(GetQuestion(q, C2, 2025)), " Sub-scale: Physical and psychological.", sep=""), "  ", caption.ch3means, "  ", caption.raked, sep="")`
 
 ```{r ch3C2pp}
 f <- SubScaleFields(s, "Motivations", "Psychological and Physiological")
@@ -1690,12 +1794,16 @@ CreateFlex(Ch3MeansTable(d, f, Ch3ItemLabels(f, "Motivations")))
 
 ### Social
 
+`r paste(paste(trimws(GetQuestion(q, C2, 2025)), " Sub-scale: Social.", sep=""), "  ", caption.ch3means, "  ", caption.raked, sep="")`
+
 ```{r ch3C2social}
 f <- SubScaleFields(s, "Motivations", "Social")
 CreateFlex(Ch3MeansTable(d, f, Ch3ItemLabels(f, "Motivations")))
 ```
 
 ### Fishery resource
+
+`r paste(paste(trimws(GetQuestion(q, C2, 2025)), " Sub-scale: Fishery resource.", sep=""), "  ", caption.ch3means, "  ", caption.raked, sep="")`
 
 ```{r ch3C2resource}
 f <- SubScaleFields(s, "Motivations", "Fishery Resource")
@@ -1710,6 +1818,8 @@ CreateFlex(Ch3MeansTable(d, f, Ch3ItemLabels(f, "Motivations")))
 v <- c("motivation_pp", "motivation_natural", "motivation_social", "motivation_resource")
 CreateFlex(Ch3MeansTable(d, v, ScaleLabel(v, l), gates = paste0(v, "_AnsweredAll")))
 ```
+
+`r paste("Each scale score is the mean of its items, computed only for respondents who answered every item in that scale.", "  ", caption.figscales, "  ", caption.raked, sep="")`
 
 ```{r ch3C2scalesPlot, fig.width=6.5, fig.height=7.5}
 Ch3ScaleFacetPlot(
@@ -1737,12 +1847,16 @@ The regulation scales separate few groups. On the Comprehension scale (`r M3(ch3
 
 ### Comprehension
 
+`r paste(paste(trimws(GetQuestion(q, Q31, 2025)), " Sub-scale: Comprehension.", sep=""), "  ", caption.ch3means, "  ", caption.raked, sep="")`
+
 ```{r ch3Q31comp}
 f <- SubScaleFields(s, "Regulations", "Comprehension and Confidence")
 CreateFlex(Ch3MeansTable(d, f, Ch3ItemLabels(f, "Regulations")))
 ```
 
 ### Site-specific
+
+`r paste(paste(trimws(GetQuestion(q, Q31, 2025)), " Sub-scale: Site-specific.", sep=""), "  ", caption.ch3means, "  ", caption.raked, sep="")`
 
 ```{r ch3Q31site}
 f <- SubScaleFields(s, "Regulations", "Site-Specific Support")
@@ -1752,6 +1866,8 @@ CreateFlex(Ch3MeansTable(d, f, Ch3ItemLabels(f, "Regulations")))
 `r sect_portrait()`
 
 ### Simplification
+
+`r paste(paste(trimws(GetQuestion(q, Q31, 2025)), " Sub-scale: Simplification.", sep=""), "  ", caption.ch3means, "  ", caption.raked, sep="")`
 
 ```{r ch3Q31uniform}
 f <- SubScaleFields(s, "Regulations", "Uniform Preference")
@@ -1778,6 +1894,8 @@ v <- c("reg_comprehension", "reg_sitesupport", "reg_uniform")
 CreateFlex(Ch3MeansTable(d, v, ScaleLabel(v, l), gates = paste0(v, "_AnsweredAll")))
 ```
 
+`r paste("Each scale score is the mean of its items, computed only for respondents who answered every item in that scale.", "  ", caption.figscales, "  ", caption.raked, sep="")`
+
 ```{r ch3Q31scalesPlot, fig.width=6.5, fig.height=5}
 Ch3ScaleFacetPlot(
   d, v, ScaleLabel(v, l), gates = paste0(v, "_AnsweredAll"),
@@ -1797,12 +1915,16 @@ The four attitude scales reprise the evidence behind Chapter 1's groupings. Wall
 
 ### Catch something
 
+`r paste(paste(trimws(GetQuestion(q, E1, 2025)), " Sub-scale: Catch something.", sep=""), "  ", caption.ch3means, "  ", ReversedItemsNote("Attitudes"), "  ", caption.raked, sep="")`
+
 ```{r ch3E1catch}
 f <- SubScaleFields(s, "Attitudes", "Catch something")
 CreateFlex(Ch3MeansTable(d, f, Ch3ItemLabels(f, "Attitudes")))
 ```
 
 ### Numbers
+
+`r paste(paste(trimws(GetQuestion(q, E1, 2025)), " Sub-scale: Numbers.", sep=""), "  ", caption.ch3means, "  ", ReversedItemsNote("Attitudes"), "  ", caption.raked, sep="")`
 
 ```{r ch3E1numbers}
 f <- SubScaleFields(s, "Attitudes", "Numbers of fish")
@@ -1811,12 +1933,16 @@ CreateFlex(Ch3MeansTable(d, f, Ch3ItemLabels(f, "Attitudes")))
 
 ### Size
 
+`r paste(paste(trimws(GetQuestion(q, E1, 2025)), " Sub-scale: Size.", sep=""), "  ", caption.ch3means, "  ", ReversedItemsNote("Attitudes"), "  ", caption.raked, sep="")`
+
 ```{r ch3E1size}
 f <- SubScaleFields(s, "Attitudes", "Size of fish")
 CreateFlex(Ch3MeansTable(d, f, Ch3ItemLabels(f, "Attitudes")))
 ```
 
 ### Harvest
+
+`r paste(paste(trimws(GetQuestion(q, E1, 2025)), " Sub-scale: Harvest.", sep=""), "  ", caption.ch3means, "  ", ReversedItemsNote("Attitudes"), "  ", caption.raked, sep="")`
 
 ```{r ch3E1harvest}
 f <- SubScaleFields(s, "Attitudes", "Harvesting fish")
@@ -1831,6 +1957,8 @@ CreateFlex(Ch3MeansTable(d, f, Ch3ItemLabels(f, "Attitudes")))
 v <- c("attitude_catch", "attitude_numbers", "attitude_size", "attitude_harvest")
 CreateFlex(Ch3MeansTable(d, v, ScaleLabel(v, l), gates = paste0(v, "_AnsweredAll")))
 ```
+
+`r paste("Each scale score is the mean of its items, computed only for respondents who answered every item in that scale. Reverse-coded items are reversed before the scale score is formed.", "  ", caption.figscales, "  ", caption.raked, sep="")`
 
 ```{r ch3E1scalesPlot, fig.width=6.5, fig.height=7.5}
 Ch3ScaleFacetPlot(
@@ -2055,15 +2183,19 @@ CreateFlex(Ch4GroupCorrTable(ch4.groupMeans))
 
 `r run_pagebreak()` -->
 
-## Size and numbers: the fish anglers catch
+## Size and numbers
 
 Each angler answered one item on the size of the preferred fish caught and one on the number caught, so the two answers can be compared within the angler. A positive difference means the angler is happier with size than with numbers.
+
+### The fish anglers catch
 
 `r paste0("D4i and D4k ask the same question about the same fish, one about the size caught and one about the number caught, so the two can be compared within an angler rather than across anglers. ", caption.ch4gap, " ", caption.ch3rows)`
 
 ```{r ch4gapCatch}
 CreateFlex(Ch4GapTable(d, "D4i", "D4k", "Size caught", "Number caught"))
 ```
+
+`r paste("Satisfaction with the size, and with the number, of the preferred fish caught.", "  ", caption.figdumbbell, "  ", caption.raked, sep="")`
 
 ```{r ch4gapCatchPlot, fig.width=6.5, fig.height=5}
 Ch4DumbbellPlot(
@@ -2083,7 +2215,7 @@ The Wiper and Flathead catfish differences are the largest, but they rest on `r 
 
 `r run_pagebreak()`
 
-## Size and numbers: the fish anglers may harvest
+### The fish anglers may harvest
 
 The same comparison follows for the fish an angler is allowed to keep. These items describe the rules rather than the catch, so a difference here says something about regulation and not about the fishery.
 
@@ -2092,6 +2224,8 @@ The same comparison follows for the fish an angler is allowed to keep. These ite
 ```{r ch4gapHarvest}
 CreateFlex(Ch4GapTable(d, "D4j", "D4l", "Size harvestable", "Number harvestable"))
 ```
+
+`r paste("Satisfaction with the size, and with the number, of the preferred fish that may be harvested.", "  ", caption.figdumbbell, "  ", caption.raked, sep="")`
 
 ```{r ch4gapHarvestPlot, fig.width=6.5, fig.height=5}
 Ch4DumbbellPlot(
@@ -2105,7 +2239,7 @@ Ch4DumbbellPlot(
 
 The overall difference is `r G4(ch4.gapHarvest, "Overall")` ± `r G4ci(ch4.gapHarvest, "Overall")`, so the average angler is as satisfied with the size allowed as with the number allowed. One group is flagged, No preference (`r G4(ch4.gapHarvest, "No preference")` ± `r G4ci(ch4.gapHarvest, "No preference")`, `r G4n(ch4.gapHarvest, "No preference")` respondents), who are happier with the number allowed. With `r nrow(ch4.gapHarvest) - 1` groups compared and no adjustment, one flagged group is about what chance alone would produce, so this result should carry little weight.
 
-The contrast with the previous section is the useful part. The groups that leaned toward size or toward numbers on the catch (walleye, catfish, Wiper and bass anglers) show no lean on the harvest items. Their differences are about what the fishery delivers, not about how the rules balance size against number. For management that separates the two readings: the catch differences look like a signal about fishery performance, while satisfaction with the harvest rules is fairly even across groups on this comparison.
+The contrast with the fish-caught comparison above is the useful part. The groups that leaned toward size or toward numbers on the catch (walleye, catfish, Wiper and bass anglers) show no lean on the harvest items. Their differences are about what the fishery delivers, not about how the rules balance size against number. For management that separates the two readings: the catch differences look like a signal about fishery performance, while satisfaction with the harvest rules is fairly even across groups on this comparison.
 
 Even fairness between size and number does not mean every group is equally content with the rules. The next section sets what anglers catch against what they may keep, and there one group, Wiper, stands apart from the rest.
 
@@ -2122,6 +2256,8 @@ This section compares each angler's rating of the fish caught with the same angl
 ```{r ch4gapSizeCvA}
 CreateFlex(Ch4GapTable(d, "D4i", "D4j", "Size caught", "Size harvestable"))
 ```
+
+`r paste("Satisfaction with the size of the preferred fish caught, and with the size that may be harvested.", "  ", caption.figdumbbell, "  ", caption.raked, sep="")`
 
 ```{r ch4gapSizeCvAPlot, fig.width=6.5, fig.height=5}
 Ch4DumbbellPlot(
@@ -2140,6 +2276,8 @@ Ch4DumbbellPlot(
 ```{r ch4gapNumCvA}
 CreateFlex(Ch4GapTable(d, "D4k", "D4l", "Number caught", "Number harvestable"))
 ```
+
+`r paste("Satisfaction with the number of the preferred fish caught, and with the number that may be harvested.", "  ", caption.figdumbbell, "  ", caption.raked, sep="")`
 
 ```{r ch4gapNumCvAPlot, fig.width=6.5, fig.height=5}
 Ch4DumbbellPlot(
@@ -2241,7 +2379,7 @@ CreateFlex(Ch5LPADiagnosticsTable(ch5.diag, ch5.selected))
 
 ## Assignment certainty
 
-`r paste0("Each fitted respondent is assigned to the profile with the highest estimated membership probability. The table below shows how certain those assignments are, by the number of scales the respondent answered. The values are unweighted model quantities for the ", FmtCount(ch5.nFitted), " fitted respondents.")`
+`r paste0("Assignment certainty by the number of scales answered.  Values represent the mean estimated membership probability of the assigned profile and the percentage of respondents assigned with a probability below 0.70, with the raw number of respondents (n) in each band.  Each fitted respondent is assigned to the profile with the highest estimated membership probability.  Values are unweighted model quantities for the ", FmtCount(ch5.nFitted), " fitted respondents.")`
 
 ```{r ch5Certainty}
 CreateFlex(Ch5LPACertaintyTable(d))
@@ -2253,11 +2391,15 @@ CreateFlex(Ch5LPACertaintyTable(d))
 
 `r paste0("The two figures below show the weighted mean of each scale for the respondents assigned to each profile, with 95 percent confidence intervals. These are weighted means of the assigned respondents, not the unweighted means the model estimated for each profile. The first figure places the profiles side by side across the eleven scales.")`
 
+`r paste(caption.figprofilelines, "  ", caption.raked, sep="")`
+
 ```{r ch5ProfileLines, fig.width=6.5, fig.height=5.5}
 Ch5LPAProfileLinePlot(ch5.prof, "Scale means by profile")
 ```
 
 `r paste0("The second figure shows one panel per scale, with the profiles along the horizontal axis and the Overall weighted mean for every respondent who answered that scale as a dashed line.")`
+
+`r paste(caption.figprofilefacets, "  ", caption.raked, sep="")`
 
 ```{r ch5ProfileFacets, fig.width=6.5, fig.height=7}
 Ch5LPAProfileFacetPlot(ch5.prof, "Scale means by profile, one panel per scale")
@@ -2265,7 +2407,7 @@ Ch5LPAProfileFacetPlot(ch5.prof, "Scale means by profile, one panel per scale")
 
 `r sect_portrait()`
 
-`r paste0("The values behind both figures are below. The Overall column is computed on every respondent in the universe who answered the scale, including Unassigned respondents, and equals the Overall row of the Chapter 3 scale tables.  ", caption.ch3means, "  ", caption.raked)`
+`r paste0("Scale means by profile, the values behind both figures above.  ", caption.ch3means, "  The Overall column is computed on every respondent in the universe who answered the scale, including Unassigned respondents, and equals the Overall row of the Chapter 3 scale tables.  ", caption.raked)`
 
 ```{r ch5ProfileTable}
 stopifnot(Ch5ImagesPresent())
@@ -2299,7 +2441,7 @@ stopifnot(
 )
 ```
 
-`r paste0("The table below compares the profiles on other survey questions. Each question keeps the universe it has in Chapter 3, so N differs by row, and the Overall column equals the Overall row of the corresponding Chapter 3 table. Unassigned respondents are counted in Overall only and have no column of their own. The river and stream row counts a respondent who fished the Missouri River, the Platte River, or other streams, rivers, and canals; it combines three Chapter 3 waterbody types and has no single Chapter 3 counterpart. Percentage and mean cells show the weighted value with a 95 percent confidence interval, followed by N. Median cells show the lower limit, the weighted median and the upper limit, followed by N, as in Chapter 3. Satisfaction is scored from 1, Very satisfied, to 5, Very dissatisfied, as in Chapter 3.  ", caption.raked)`
+`r paste0("Profiles compared on other survey questions.  Percentage and mean cells show the weighted value with a 95 percent confidence interval, followed by N. Median cells show the lower limit, the weighted median and the upper limit, followed by N, as in Chapter 3.  Each question keeps the universe it has in Chapter 3, so N differs by row, and the Overall column equals the Overall row of the corresponding Chapter 3 table. Unassigned respondents are counted in Overall only and have no column of their own.  The river and stream row counts a respondent who fished the Missouri River, the Platte River, or other streams, rivers, and canals; it combines three Chapter 3 waterbody types and has no single Chapter 3 counterpart.  Satisfaction is scored from 1, Very satisfied, to 5, Very dissatisfied, as in Chapter 3.  ", caption.raked)`
 
 ```{r ch5Compare}
 CreateFlex(Ch5LPACompareTable(ch5.cmp)) %>% Ch5IconHeader()
@@ -2512,7 +2654,7 @@ Ch5PhotoWithIcon(6)
 
 ## Profiles by preferred species
 
-`r paste0("The table below gives, for each preferred-species row, the weighted percentage of its respondents assigned to each profile, with Unassigned as a column so that each row sums to 100. The rows overlap, as elsewhere in this report, and must not be totalled. Where a row has no respondents in a profile, the percentage is 0.0 and the interval has zero width. ", Ch5SuppressedNote(ch5.long), " This is the only chapter of the report that withholds rows; the effective-N floor was set before the model was fitted.  ", caption.ch3selectone, "  ", caption.raked)`
+`r paste0("Profiles by preferred species.  ", caption.ch3selectone, "  Unassigned is shown as a column so that each row sums to 100. Where a row has no respondents in a profile, the percentage is 0.0 and the interval has zero width.  ", caption.ch3rows, "  ", Ch5SuppressedNote(ch5.long), " This is the only chapter of the report that withholds rows; the effective-N floor was set before the model was fitted.  ", caption.raked)`
 
 ```{r ch5ClassBySpecies}
 CreateFlex(Ch5ClassBySpeciesTable(d, ch5.long)) %>% Ch5IconHeader()
@@ -2618,6 +2760,8 @@ Card <- function(i) {
 ```
 
 `r paste0("The figure below shows the profile makeup of each family group against the Overall share of each profile. Unassigned respondents, between ", formatC(min(fam.unassigned$Value), format = 'f', digits = 1), " and ", formatC(max(fam.unassigned$Value), format = 'f', digits = 1), " percent of each family group, are not shown, so the bars in a panel sum to less than 100. ", knitr::combine_words(ch5.splitSpecies), " are reported as individual species because their families were not combined, and are not in the figure.")`
+
+`r paste(caption.figfamilymix, "  ", caption.raked, sep="")`
 
 ```{r ch5FamilyMix, fig.width=9, fig.height=5.5}
 Ch5FamilyMixPlot(ch5.long, "Profile makeup of each family group")
