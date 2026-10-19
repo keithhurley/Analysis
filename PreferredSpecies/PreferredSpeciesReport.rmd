@@ -566,6 +566,11 @@ D4OvSlope <- function(i) {
   s <- d4.slope[[i]]
   s$Overlap[s$RawLabel == "Overall"] %in% FALSE
 }
+# An item gets a 2018-2025 figure only when some group (or Overall) has
+# non-overlapping intervals; otherwise a sentence says no change was found.
+D4SlopeAny <- function(i) any(d4.slope[[i]]$Overlap %in% FALSE)
+d4.slope.none <- "Between 2018 and 2025 no group showed a change on this item: for every group compared, including the Overall mean, the two years' 95% confidence intervals overlap, so no 2018 to 2025 figure is shown."
+stopifnot(setequal(d4.items[vapply(d4.items, D4SlopeAny, logical(1))], c("D4f", "D4m")))
 
 local({
   mu <- d4.mat
@@ -717,7 +722,7 @@ local({
 })
 ```
 
-The thirteen statements fall into three themes. Five ask about satisfaction: with fishing success (D4a) and with the size and number of fish caught and the size and number allowed to be harvested (D4i to D4l); Chapter 4 returns to those five, together with the season item (A9), as a set. Five ask about regulation and the trade-off between size and harvest: support for regulations that increase size (D4c) or numbers (D4d), willingness to take smaller fish for more of them (D4b) or fewer fish for larger ones (D4e), and whether harvest opportunity matters more than size (D4g). Three ask about the fishery and access to it: whether the preferred fish is becoming harder to catch (D4f), whether the angler travels too far (D4h) and whether there are enough places to fish (D4m). Each item is presented with its table, a stacked-percentage figure, a figure of group means ordered from lowest to highest, and a comparison with 2018 for any group whose change is large enough to show. Apart from Flathead catfish on the places-to-fish item, no group's change between 2018 and 2025 was large enough to show on any item, so the item paragraphs mention 2018 only where the change across all anglers shows (the difficulty-of-catching and places-to-fish items). Means are printed to one decimal, as in the tables, and to two only where two groups would otherwise print as equal. The closing section of the chapter reads across the items by preferred group.
+The thirteen statements fall into three themes. Five ask about satisfaction: with fishing success (D4a) and with the size and number of fish caught and the size and number allowed to be harvested (D4i to D4l); Chapter 4 returns to those five, together with the season item (A9), as a set. Five ask about regulation and the trade-off between size and harvest: support for regulations that increase size (D4c) or numbers (D4d), willingness to take smaller fish for more of them (D4b) or fewer fish for larger ones (D4e), and whether harvest opportunity matters more than size (D4g). Three ask about the fishery and access to it: whether the preferred fish is becoming harder to catch (D4f), whether the angler travels too far (D4h) and whether there are enough places to fish (D4m). Each item is presented with its table, a stacked-percentage figure, a figure of group means ordered from lowest to highest, and a comparison with 2018 for any group whose change is large enough to show, or a sentence saying that no group changed where none is. Apart from Flathead catfish on the places-to-fish item, no group's change between 2018 and 2025 was large enough to show on any item, so the item paragraphs mention 2018 only where the change across all anglers shows (the difficulty-of-catching and places-to-fish items). Means are printed to one decimal, as in the tables, and to two only where two groups would otherwise print as equal. The closing section of the chapter reads across the items by preferred group.
 
 `r paste(caption.d4gate, sep="")`
 
@@ -741,9 +746,9 @@ D4PercentStackPlot(d, "D4a", d4.categories, titleText = ItemQuestionText("D4a", 
 D4MeansOrderedPlot(d, "D4a", titleText = ItemQuestionText("D4a", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4a")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4aSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4aSlopePlot, eval=D4SlopeAny("D4a"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4a", titleText = ItemQuestionText("D4a", q))
 ```
 
@@ -771,9 +776,9 @@ D4PercentStackPlot(d, "D4b", d4.categories, titleText = ItemQuestionText("D4b", 
 D4MeansOrderedPlot(d, "D4b", titleText = ItemQuestionText("D4b", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4b")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4bSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4bSlopePlot, eval=D4SlopeAny("D4b"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4b", titleText = ItemQuestionText("D4b", q))
 ```
 
@@ -801,9 +806,9 @@ D4PercentStackPlot(d, "D4c", d4.categories, titleText = ItemQuestionText("D4c", 
 D4MeansOrderedPlot(d, "D4c", titleText = ItemQuestionText("D4c", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4c")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4cSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4cSlopePlot, eval=D4SlopeAny("D4c"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4c", titleText = ItemQuestionText("D4c", q))
 ```
 
@@ -831,9 +836,9 @@ D4PercentStackPlot(d, "D4d", d4.categories, titleText = ItemQuestionText("D4d", 
 D4MeansOrderedPlot(d, "D4d", titleText = ItemQuestionText("D4d", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4d")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4dSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4dSlopePlot, eval=D4SlopeAny("D4d"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4d", titleText = ItemQuestionText("D4d", q))
 ```
 
@@ -861,9 +866,9 @@ D4PercentStackPlot(d, "D4e", d4.categories, titleText = ItemQuestionText("D4e", 
 D4MeansOrderedPlot(d, "D4e", titleText = ItemQuestionText("D4e", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4e")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4eSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4eSlopePlot, eval=D4SlopeAny("D4e"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4e", titleText = ItemQuestionText("D4e", q))
 ```
 
@@ -891,9 +896,9 @@ D4PercentStackPlot(d, "D4f", d4.categories, titleText = ItemQuestionText("D4f", 
 D4MeansOrderedPlot(d, "D4f", titleText = ItemQuestionText("D4f", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4f")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4fSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4fSlopePlot, eval=D4SlopeAny("D4f"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4f", titleText = ItemQuestionText("D4f", q))
 ```
 
@@ -921,9 +926,9 @@ D4PercentStackPlot(d, "D4g", d4.categories, titleText = ItemQuestionText("D4g", 
 D4MeansOrderedPlot(d, "D4g", titleText = ItemQuestionText("D4g", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4g")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4gSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4gSlopePlot, eval=D4SlopeAny("D4g"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4g", titleText = ItemQuestionText("D4g", q))
 ```
 
@@ -951,9 +956,9 @@ D4PercentStackPlot(d, "D4h", d4.categories, titleText = ItemQuestionText("D4h", 
 D4MeansOrderedPlot(d, "D4h", titleText = ItemQuestionText("D4h", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4h")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4hSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4hSlopePlot, eval=D4SlopeAny("D4h"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4h", titleText = ItemQuestionText("D4h", q))
 ```
 
@@ -981,9 +986,9 @@ D4PercentStackPlot(d, "D4i", d4.categories, titleText = ItemQuestionText("D4i", 
 D4MeansOrderedPlot(d, "D4i", titleText = ItemQuestionText("D4i", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4i")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4iSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4iSlopePlot, eval=D4SlopeAny("D4i"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4i", titleText = ItemQuestionText("D4i", q))
 ```
 
@@ -1011,9 +1016,9 @@ D4PercentStackPlot(d, "D4j", d4.categories, titleText = ItemQuestionText("D4j", 
 D4MeansOrderedPlot(d, "D4j", titleText = ItemQuestionText("D4j", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4j")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4jSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4jSlopePlot, eval=D4SlopeAny("D4j"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4j", titleText = ItemQuestionText("D4j", q))
 ```
 
@@ -1041,9 +1046,9 @@ D4PercentStackPlot(d, "D4k", d4.categories, titleText = ItemQuestionText("D4k", 
 D4MeansOrderedPlot(d, "D4k", titleText = ItemQuestionText("D4k", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4k")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4kSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4kSlopePlot, eval=D4SlopeAny("D4k"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4k", titleText = ItemQuestionText("D4k", q))
 ```
 
@@ -1071,9 +1076,9 @@ D4PercentStackPlot(d, "D4l", d4.categories, titleText = ItemQuestionText("D4l", 
 D4MeansOrderedPlot(d, "D4l", titleText = ItemQuestionText("D4l", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4l")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4lSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4lSlopePlot, eval=D4SlopeAny("D4l"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4l", titleText = ItemQuestionText("D4l", q))
 ```
 
@@ -1101,9 +1106,9 @@ D4PercentStackPlot(d, "D4m", d4.categories, titleText = ItemQuestionText("D4m", 
 D4MeansOrderedPlot(d, "D4m", titleText = ItemQuestionText("D4m", q))
 ```
 
-`r paste(caption.figd4slope, "  ", caption.raked, sep="")`
+`r if (D4SlopeAny("D4m")) paste(caption.figd4slope, "  ", caption.raked, sep="") else d4.slope.none`
 
-```{r d4mSlopePlot, fig.width=6.5, fig.height=4}
+```{r d4mSlopePlot, eval=D4SlopeAny("D4m"), fig.width=6.5, fig.height=4}
 D4SlopePlot(d, d2018, "D4m", titleText = ItemQuestionText("D4m", q))
 ```
 

@@ -1149,3 +1149,11 @@ here. The user appended the following, which is the actual definition of the cha
 > Commit the caption and heading changes, and log them in PROGRESS.md and PROMPTS.md.
 >
 > View the five remaining Chapter 3 dotted-line figures to complete the dashed-line check.
+
+## 2026-10-02 — Prompt 196
+
+> in the crosstabs chapter....if there are no results for the 2018 vs 2025 plot, I want to remove the plot but make sure to state that no change existed between 2018 and 2025 in the text
+
+## 2026-10-02 — Prompt 197
+
+> Update the AGENTS.md restart brief for prompts 189 to 196.
