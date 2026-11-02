@@ -1157,3 +1157,39 @@ here. The user appended the following, which is the actual definition of the cha
 ## 2026-10-02 — Prompt 197
 
 > Update the AGENTS.md restart brief for prompts 189 to 196.
+
+## 2026-11-02 — Prompt 198
+
+> in chapter 3, we've avoiding analysis the "species sought" questions...I'd like to add a few things in....for each species preferred, I'd like to know the top three other species that the preferred group sought (outside family group if family) along with the rate; also the total number of other species sought; and I'd also like a table in the report (it might make more sense in chapter 1 as it doesn't break down by preferred species (or maybe a column in the exisiting table) but I'd like angler population estimates like the preferred-species breakedown for the species sought (which is probably a longer list of species)
+>
+> (Answers to the scope questions: weighted % of group with CI and raw n; exclude "any" and "Other" from the top three and the count; mean with CI plus median with bootstrap CI; new Chapter 1 table separate from the preferred table; one new section in Chapter 3.)
+
+## 2026-11-02 — Prompt 199
+
+> or should that be a separate chapter?
+
+## 2026-11-02 — Prompt 200
+
+> Insert the new chapter right after Chapter 3 and renumber Chapters 4 and 5, including cross-references and Appendix B. List every affected reference first.
+
+## 2026-11-02 — Prompt 201
+
+> no, just show the top 3 regardless of intervall, update the numbering ...and then come back and work on content
+
+## 2026-11-02 — Prompt 202
+
+> I need to insert this into an existing draft....can you produce a document of all the numbering and references that need to change?
+
+## 2026-11-02 — Prompt 203
+
+> Inspect the B2 species-sought variables and propose the Chapter 4 content plan before any code.
+
+## 2026-11-02 — Prompt 204
+
+> so not add to the appendix; 1) option A, 2)total named species sought excluding the preferred one, 3) no, 4) do it the same as we did for preffered species estimates and represent total population of 200000+ anglers; don't chanbge other chapters
+
+## 2026-11-02 — Prompt 205
+
+> Write the interpretive text for Chapter 4 in the report's usual voice, and update PROGRESS.md, AGENTS.md and TEXT_AUDIT.md with the new numbering and decisions.
+>
+> Re-render to the real docx file, close Word first, and confirm the 101 / 88 / 11 / 0 baseline.

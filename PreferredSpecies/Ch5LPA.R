@@ -1,4 +1,4 @@
-# Chapter 5 — latent profile analysis layer (D140-D148).
+# Chapter 6 — latent profile analysis layer (D140-D148).
 # Sourced after PreferredSpeciesFunctions.R. Replaces Ch5Functions.R (k-means,
 # D120), deleted 2026-09-24 (prompt 120); recoverable from git history.
 
@@ -47,7 +47,7 @@ Ch5LPAFrame <- function(mydata) {
 
 # Storage (D152). Full MxModels embed the respondent-level data, so they live
 # in a local folder, one file per model; the report reads only the slim
-# results file, which carries everything Chapter 5 needs.
+# results file, which carries everything Chapter 6 needs.
 ch5.lpa.fit.dir <- "Ch5LPA_fits"
 ch5.lpa.log <- "Ch5LPA_fit.log"
 
@@ -814,7 +814,7 @@ Ch5CmpRank <- function(cmp, v, kind, fun) {
 # points more of a class than of all assigned respondents.
 ch5.mix.gap <- 5
 
-# hidden: groups whose row is below the Chapter 5 floor; they are never named.
+# hidden: groups whose row is below the Chapter 6 floor; they are never named.
 Ch5MixCaveat <- function(mix, cls, hidden = character()) {
   x <- mix %>%
     filter(

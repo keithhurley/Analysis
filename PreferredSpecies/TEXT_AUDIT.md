@@ -202,3 +202,21 @@ Housekeeping noticed, not acted on: `PreferredSpeciesReport - Copy.rmd` (46 KB, 
 - Numbers quoted in live text are assumed correct where the build asserts them; I re-checked only the items named in section 2 against the rendered tables. The Chapter 2 per-item paragraphs (26) were checked selectively, not exhaustively: A1 and A2 were found by cross-reading, so others may exist. A full check needs the paragraphs made live.
 - Accuracy here means agreement between text and the report's own tables. Whether the survey items measure what the interpretive statements say they do is for the expert reviewer.
 - I did not judge statements as significant or causal; the register records how far each goes beyond its stated basis.
+
+---
+
+## 8. Addendum 2026-11-02: new Chapter 4 (Species Sought)
+
+Numbering note: this audit was written before the renumbering. Its "Chapter 4" (Satisfaction) is now Chapter 5 and its "Chapter 5" (Profiles) is now Chapter 6. The new Chapter 4 text (lines 2150-2210 of `PreferredSpeciesReport.rmd`) is not covered by sections 1-4; the interpretive statements are registered here. Every ordering or separation claim is asserted in the `soughtSetup` chunk.
+
+| ID | Line | Statement (short) | Type | Basis | Risk |
+|---|---|---|---|---|---|
+| E57 | 2174 | "What anglers seek is much broader than what they prefer"; the preferred-species table "understates how many anglers a program for any of these species reaches". | I | Sought % (B2 answerers) vs preferred % (all with B1), five species, at least twice | Low to moderate; the two percentages use different denominators (1,764 vs 1,915) and "tried to catch" is not effort |
+| E58 | 2184 | "The preferred groups are not separate constituencies in what they pursue." | I | Seven species fill all 45 top-three places | Moderate; shares of anglers sought, not days or intensity, and small groups have wide intervals |
+| E59 | 2182 | Largemouth bass heading the panfish lists and White bass appearing once "come from the family exclusion rather than from angler behavior". | J | Exclusion rule (D241) | Low |
+| E60 | 2184 | "A second or third place is often not firmly established" (first-place interval reaches third-place interval in most groups). | J | Interval overlap, live count | Low |
+| E61 | 2198 | Bluegill / Sunfish and Trout anglers "appear to concentrate their fishing on fewer species", "consistent with the distinct profile of Trout anglers in Chapter 3". | I | Count below Overall; n = 40 and 80 | Moderate; small groups, Bluegill not otherwise examined |
+| E62 | 2198 | The counts "describe how widely anglers fish beyond their favorite, not how many species they fish in total". | J | Count definition (D242) | Low |
+| E63 | 2170 | Total anglers assumes B2 and B1 non-response is unrelated to which species an angler tries to catch. | J | Same assumption as Chapter 1 | Low; 8 percent of the weighted sample did not answer B2 |
+
+Also noted: Flathead catfish is described as above the Overall mean although its interval clears the Overall interval by 0.01; the text says "only narrowly", and the render stops if the margin exceeds 0.05.

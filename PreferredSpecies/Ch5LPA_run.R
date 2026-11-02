@@ -1,4 +1,4 @@
-# Fits the Chapter 5 LPA grid and builds Ch5LPA_results.rds. Run detached so
+# Fits the Chapter 6 LPA grid and builds Ch5LPA_results.rds. Run detached so
 # a console restart cannot kill it (the first attempt died that way):
 #   system2(file.path(R.home("bin"), "Rscript.exe"), "Ch5LPA_run.R",
 #           stdout = "Ch5LPA_job.out", stderr = "Ch5LPA_job.out", wait = FALSE)

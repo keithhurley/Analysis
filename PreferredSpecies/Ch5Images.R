@@ -1,4 +1,4 @@
-# Derived copies of the Chapter 5 profile images (prompt 126, D167-D168).
+# Derived copies of the Chapter 6 profile images (prompt 126, D167-D168).
 # The originals in angler_profile_pictures/ and angler_profile_icons/ are
 # never modified. Run by hand when an original changes; the report only reads
 # the derived files and stops if any is missing.

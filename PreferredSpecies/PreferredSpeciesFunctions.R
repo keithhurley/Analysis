@@ -1251,7 +1251,7 @@ caption.figmedian <-
   "Points are weighted medians with 95% bootstrap confidence limits and sample size given in parenthesis. The dashed line is the Overall value."
 caption.figscales <-
   "Points are weighted mean scale scores \u00b1 95% confidence intervals, one panel per scale, with rows in the same order as the table above. Sample sizes differ by scale and are given in the table above."
-# Captions for the effort-contrast table and the Chapter 4 and 5 figures,
+# Captions for the effort-contrast table and the Chapter 5 and 6 figures,
 # same paragraph-above form as the table captions.
 caption.effortcontrast <-
   "Values represent the difference in mean days fished, second species minus first, with the 95% confidence interval in parenthesis. n gives the raw number of respondents for each species in the order compared, and a dagger marks a comparison in which one species has fewer than 30 respondents. g, p and Family p are defined as in the contrast table above."
@@ -1904,12 +1904,75 @@ Ch3ScaleFacetPlot <- function(
   p
 }
 
+# Two scale scores on one axis, one row per group in table order, so the
+# overlap between the scales' intervals can be read within each row. Colour
+# identifies the scale (the figure has no other colour encoding). Counts are in
+# the scale-score table above the figure, per cell (D90).
+Ch3ScaleOverlayPlot <- function(
+  mydata,
+  vars,
+  labels,
+  gates = NULL,
+  xLab = "Mean scale score",
+  titleText = NULL,
+  subtitleText = NULL,
+  xExpand = NULL,
+  xBreaks = waiver()
+) {
+  df <- purrr::map_dfr(seq_along(vars), function(i) {
+    Ch3MeanLong(
+      mydata,
+      vars[i],
+      gate = if (is.null(gates)) NULL else gates[i]
+    ) %>%
+      mutate(Scale = labels[i])
+  })
+
+  rowOrder <- D4RowSpec(includeOverall = TRUE)$IndentedLabel
+
+  df <- df %>%
+    mutate(
+      Lower = Value - CI,
+      Upper = Value + CI,
+      Scale = factor(Scale, levels = labels),
+      Label = factor(IndentedLabel, levels = rev(rowOrder))
+    )
+
+  dodge <- position_dodge(width = 0.6)
+
+  p <- ggplot(df, aes(x = Value, y = Label, colour = Scale)) +
+    geom_linerange(aes(xmin = Lower, xmax = Upper), linewidth = 0.4, position = dodge) +
+    geom_point(size = 1.6, position = dodge) +
+    scale_colour_viridis_d(begin = 0.15, end = 0.7) +
+    scale_x_continuous(breaks = xBreaks) +
+    labs(x = xLab, y = NULL, colour = NULL) +
+    theme_minimal(base_size = 9) +
+    theme(
+      axis.text.y = element_text(hjust = 0),
+      panel.grid.major.y = element_blank(),
+      legend.position = "top",
+      plot.title = element_text(size = 9.5, face = "bold"),
+      plot.subtitle = element_text(size = 7, face = "italic")
+    )
+
+  if (!is.null(xExpand)) {
+    p <- p + expand_limits(x = xExpand)
+  }
+  if (!is.null(titleText)) {
+    p <- p + labs(title = str_wrap(titleText, width = 70))
+  }
+  if (!is.null(subtitleText)) {
+    p <- p + labs(subtitle = subtitleText)
+  }
+  p
+}
+
 # ============================================================================
 # CHAPTER 4 - SATISFACTION (D111)
 # ============================================================================
 # Collects the satisfaction measures that Chapters 2 and 3 report separately.
 # Nothing is recomputed differently here: the same base.summary.* functions and
-# the same D4RowSpec row set are used, so a Chapter 4 cell and its Chapter 2 or
+# the same D4RowSpec row set are used, so a Chapter 5 cell and its Chapter 2 or
 # 3 counterpart are the same number by construction. The single transformation
 # is A9, reversed so every column in the chapter runs the same direction (D113).
 
