@@ -220,3 +220,9 @@ Numbering note: this audit was written before the renumbering. Its "Chapter 4" (
 | E63 | 2170 | Total anglers assumes B2 and B1 non-response is unrelated to which species an angler tries to catch. | J | Same assumption as Chapter 1 | Low; 8 percent of the weighted sample did not answer B2 |
 
 Also noted: Flathead catfish is described as above the Overall mean although its interval clears the Overall interval by 0.01; the text says "only narrowly", and the render stops if the margin exceeds 0.05.
+
+Added after the Overall rows were removed from the Chapter 4 tables (commit a29558c):
+
+| ID | Line | Statement (short) | Type | Basis | Risk |
+|---|---|---|---|---|---|
+| E64 | 2198 | "The two ends of the range are far apart", Bluegill / Sunfish 2.8 against Flathead catfish 6.6 other species, "but the groups at both ends are small, so the size of that gap is imprecise". | J | Two group means, n = 40 and 46; the gap itself is not tested | Low; hedged in the sentence. The Overall mean, median and interval now appear in the text because the tables no longer carry an Overall row |
