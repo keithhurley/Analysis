@@ -156,6 +156,7 @@ SoughtTopLong <- function(mydata, n = 3) {
 
 SoughtTopTable <- function(topLong) {
   topLong %>%
+    filter(Group != "Overall") %>%
     mutate(
       Cell = paste0(Species, ": ", FmtPct(Percent, PercentCI)),
       RankName = paste("Rank", Rank)
@@ -220,6 +221,7 @@ SoughtCountLong <- function(mydata) {
 
 SoughtCountTable <- function(countLong) {
   op <- countLong %>%
+    filter(Group != "Overall") %>%
     transmute(
       `Preferred species` = Label,
       N = FmtCount(N),
@@ -238,6 +240,6 @@ SoughtCountTable <- function(countLong) {
 caption.soughtpop <-
   "Respondents is the raw unweighted number of anglers who said they tried to catch the species in 2025. The percentage is of anglers who answered the species-sought question, with a 95 percent confidence interval. Total anglers applies that percentage to the full weighted 2025 angler population. Rows overlap, because an angler can try to catch many species, and must not be totalled."
 caption.soughttop <-
-  "Cells give the three species most often sought, other than the group's own family, as the weighted percentage of the row group who said they tried to catch the species, with a 95 percent confidence interval. A group's own family is every species in the same Chapter 1 candidate family as its preferred species (Wiper and White bass exclude all three of Striped bass, Wiper and White bass). The Overall row excludes nothing. Answers of fishing for anything and Other are not ranked. N is the raw unweighted number of respondents in the row group who answered the question."
+  "Cells give the three species most often sought, other than the group's own family, as the weighted percentage of the row group who said they tried to catch the species, with a 95 percent confidence interval. A group's own family is every species in the same Chapter 1 candidate family as its preferred species (Wiper and White bass exclude all three of Striped bass, Wiper and White bass). The Overall ranking, which excludes nothing, is given in the text. Answers of fishing for anything and Other are not ranked. N is the raw unweighted number of respondents in the row group who answered the question."
 caption.soughtcount <-
   "Cells summarize the number of named species each angler tried to catch, not counting the angler's own preferred species or the answers of fishing for anything and Other. The mean has a 95 percent confidence interval; the median has the 1,000-replicate weighted bootstrap 95 percent confidence limits. N is the raw unweighted number of respondents in the row group who answered the question."
