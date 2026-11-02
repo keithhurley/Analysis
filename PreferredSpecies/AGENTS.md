@@ -270,5 +270,5 @@ Three structural facts that are easy to get wrong and are already settled:
 3. **Scale scores carry the `*_AnsweredAll` listwise gate** per scale (D19), or the Overall
    column will not reproduce.
 
-Read `PROGRESS.md` for decisions D1-D244, findings F1-F136, and open questions (complete list in the latest restart checkpoint); `ANALYSIS_PLAN.md`
+Read `PROGRESS.md` for decisions D1-D245, findings F1-F137, and open questions (complete list in the latest restart checkpoint); `ANALYSIS_PLAN.md`
 for the executable spec (written for steps 1-3; §8 records that Chapters 4 and 5 sit outside it).

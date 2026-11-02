@@ -2798,3 +2798,10 @@ Step 5 state by chapter: Ch 1 done (D206-D207); Ch 2 framing done, per-item para
 | — | Review Chapter 4 in Word; the register entries E57-E63 are for expert audit |
 | — | Decide whether to log the three Chapter 3 motivation figures (F135/F136) as a numbered decision |
 | — | Nothing committed or pushed from this session. Remaining next-task candidates are u
+
+### Addendum to the Chapter 4 section (2026-11-02, prompts 206-208)
+
+| # | Decision / finding |
+|---|---|
+| D245 | **Overall rows removed from the two Chapter 4 group tables** (user choice, prompt 206, "both tables"). `SoughtTopTable()` and `SoughtCountTable()` filter `Group != "Overall"` at display time only; `sought.top` and `sought.count` still carry Overall, so the `soughtSetup` assertions and the interval screen are unchanged. Captions say the Overall ranking is given in the text. The text now quotes the Overall top three (n = 1,764) and the Overall mean, median and interval (5.0 +- 0.21; 4.0, 4.0 to 5.0) because readers can no longer read them from the table, and adds one sentence on the gap between Bluegill / Sunfish and Flathead catfish (register E64). This supersedes the "Overall excludes nothing" row mentioned in D241 and the Overall row implied in D242. Population table (4.1) is unaffected |
+| F137 | **Verification.** Temp render and then the real docx (Word closed): `DocxCounts()` **101 / 88 / 11 / 0, baseline held**; no "Overall" cell remains in the Chapter 4 tables. Committed `a29558c`, register entry `2767372`, pushed to `origin/master` at the user's request (prompt 208). Only `.posit/assistant/settings.json` remains uncommitted (not ours) |

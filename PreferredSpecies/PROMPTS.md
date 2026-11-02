@@ -1193,3 +1193,19 @@ here. The user appended the following, which is the actual definition of the cha
 > Write the interpretive text for Chapter 4 in the report's usual voice, and update PROGRESS.md, AGENTS.md and TEXT_AUDIT.md with the new numbering and decisions.
 >
 > Re-render to the real docx file, close Word first, and confirm the 101 / 88 / 11 / 0 baseline.
+
+## 2026-11-02 — Prompt 206
+
+> Remove the overall row from the table, and add/polish any interpretive text
+>
+> (Answer to the scope question: "Both tables".)
+
+## 2026-11-02 — Prompt 207
+
+> Word is closed now: render to the real docx, confirm 101 / 88 / 11 / 0, and commit this change.
+
+## 2026-11-02 — Prompt 208
+
+> Add the new range sentence to the TEXT_AUDIT.md register and push the commits to origin/master.
+>
+> Add a decision entry rather than rewriting history.
