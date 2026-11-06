@@ -1,0 +1,444 @@
+---
+#title: "2025 Licensed Angler Survey — Challenges"
+#date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  officedown::rdocx_document:
+    toc: true
+always_allow_html: yes
+---
+
+```{r setup, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, fig.width=7.5, fig.height=7}
+knitr::opts_chunk$set(echo=FALSE, include=TRUE, warning=FALSE, error=FALSE, message=FALSE, ft.align="left")
+library(tictoc)
+tic("Report Took ")
+options(stringsAsFactors = FALSE)
+library(officedown)
+library(officer)
+
+library(rmarkdown)
+library(tidyverse)
+library(knitr)
+library(flextable)
+library(stringr)
+library(foreach)
+
+setwd("F:/Survey/Analysis/Challanges/")
+
+source("..\\BaseFunctions_2025_UPDATED.R") #load file of common functions
+# Sourced read-only to inherit the crosstab report's caption text and table
+# wrappers verbatim rather than duplicating them. Nothing in CrossTabTables/ is
+# modified. ChallengesFunctions.R is sourced last so it wins any conflict.
+source("..\\CrossTabTables\\CrossTabTableFunctions.R")
+source("ChallengesFunctions.R") #load file of challenges report functions
+```
+
+```{r getData, echo=FALSE}
+load(file="../../Data/DataAggregation1/aggregateData_20260624.rData")
+
+# Trend snapshot across all survey years, before filtering to 2025, so the
+# didn't-fish-reasons and out-of-state-boat trend chapters can compare years.
+# Same gating rules (GateA3/GateA12) applied here as in the 2025-only object.
+dTrend <- d %>%
+  GateA3() %>%
+  GateA12()
+
+d <- d %>% filter(surveyYear==2025)
+# Rebuild scale/subscale scores from raw item factors, applying reversals
+# flagged in Scales.csv (single source of truth) at report time.
+d <- add_scale_scores(d)
+
+# Report-specific derived variables (see ChallengesFunctions.R for
+# definitions and the gating rationale, repeated in the Methods Notes below).
+d <- d %>%
+  AddUrbanRural() %>%
+  AddWaterbodyGroups() %>%
+  GateA12() %>%
+  GateA3()
+
+q <- read.csv(file="../../Data/DataAggregation1/FactorLevels_aggregated.csv") %>% filter(Year==2025)
+l <- read.csv(file="../../Data/DataAggregation1/Labels.csv")
+```
+
+```{r createFunctions}
+CreateFlex<-function(x, mergeOnFirst=FALSE) {
+  require(officer)
+  require(flextable)
+
+  bigborder=officer:: fp_border(color="black", width = 1.5)
+  smallborder=officer:: fp_border(color="black", width=1.0)
+
+  myFlex<-  flextable(x) %>%
+    theme_zebra()
+
+  if(mergeOnFirst==TRUE) {
+    #merge first column cells
+    myFlex <-myFlex %>%
+        merge_v(j=1, part="body")
+      #add border below merged cells in first column
+      myFlex<-myFlex %>%
+        border(border.bottom = smallborder, i=rle(cumsum(myFlex$body$spans$columns[,1] ))$values, part="body")
+  }
+
+  myFlex <- myFlex %>%
+    border(border.bottom = bigborder, border.top = bigborder, part = "header") %>%
+    border(border.bottom = bigborder, i=nrow(myFlex$body$spans$rows), part = "body") %>%
+    padding(j=1, padding.left=3) %>%
+    align(align="left", part="all") %>%
+    fontsize(part = "header", size = 10) %>%
+    fontsize(part="body", size=8) %>%
+    bold(part="header") %>%
+    width(j = 1, width = 1.2) %>%
+    set_table_properties(layout = "autofit", width = 1)
+
+  myFlex
+}
+```
+
+`r officer::run_pagebreak()`
+
+# Introduction
+
+This report presents results of the 2025 Nebraska Licensed Angler Survey (LAS) relevant to a set of challenges facing fisheries management in Nebraska: declining or interrupted angler participation, crowding at fishing locations, low water levels, and the risk of aquatic invasive species introduction through anglers moving boats and other watercraft between waters. These topics were selected because each corresponds to a condition Nebraska Game and Parks Commission (NGPC) fisheries managers monitor and respond to, not because the survey data show which of them, if any, is driving angler behavior. Details on the design and administration of the LAS can be found in the companion report "Fishing Nebraska 2025-2026 Methodology Report" (BOSR 2026). Information on the responses and returns of the LAS can be found in the companion report "2026 Nebraska Licensed Angler Survey - Respondents and Responses" (Hurley 2026). When LAS returns were examined, it was determined that weighting results by age group and residency was warranted to better represent the Nebraska licensed angler population. In this report, question results that were weighted are notated in their caption, and all percentages reported in text and figures are weighted with 95% confidence intervals unless stated otherwise.
+
+This report is organized into four chapters, each corresponding to a management challenge: Chapter 1 covers the reasons anglers gave for not fishing in Nebraska during 2025 (a participation challenge), including a comparison across survey years. Chapter 2 covers crowding at fishing locations (a site-capacity challenge). Chapter 3 covers low water levels (a water-availability challenge). Chapter 4 covers fishing out of state and bringing a boat or other personal watercraft along (an aquatic-invasive-species introduction-risk challenge). Within each chapter, the 2025 results are broken down by: a) all respondents, b) residency, c) gender, d) age, e) the type of water body fished during 2025, and f) urban/rural home ZIP code, except in Chapter 1 (see note below). Text accompanying each table or figure describes patterns observed in the weighted estimates and their confidence intervals; it does not attempt to explain why those patterns exist. A breakdown by Nebraska Game and Parks Commission region or district was also requested for this report but is not included: no region or district variable exists in the aggregated LAS dataset, codebook, or any prior analysis script for this project, and building one would require a ZIP-code or county crosswalk that has not yet been supplied. This breakdown can be added once that crosswalk is available. Analytic decisions specific to a single chapter are noted within that chapter.
+
+`r officer::run_pagebreak()`
+
+# Chapter 1: Reasons Didn't Fish
+
+```{r ch1Data}
+a3_overall_2025 <- base.summary.percent.selectOne(d, A3_gated, myGroupVar=NA) %>%
+  arrange(-Value)
+a3_age <- base.summary.percent.selectOne(d, A3_gated, myGroupVar=E3)
+a3_trend <- base.summary.percent.selectOne(dTrend, A3_gated, myGroupVar=NA)
+a3_crowded_trend <- a3_trend %>% filter(Response == "Waters are too crowded") %>% mutate(Year = factor(Year))
+
+# Reasons shown in the by-age figure: the specific, non-"Other" reasons with
+# enough respondents to plot. Crowding is covered in its own chapter (and
+# cited by very few respondents of any age; see text below) so it is left out
+# of this figure.
+a3.age.reasons <- c("Lack of time", "Physically unable to fish",
+                     "Dissatisfied with past fishing trips", "No one to fish with",
+                     "Too expensive", "Complicated regulations")
+a3_age_top <- a3_age %>%
+  filter(Response %in% a3.age.reasons) %>%
+  mutate(Response = factor(Response, levels = a3.age.reasons))
+
+# A3 response options available by survey year (from FactorLevels_aggregated.csv):
+# "Complicated regulations" was not an option on the 2002 instrument, so its
+# 2002 value of 0% reflects an unavailable option rather than a response of
+# zero. "Waters are too crowded" was an option in all four years.
+a3_trend_other <- a3_trend %>%
+  filter(!Response %in% c("Waters are too crowded", "Complicated regulations")) %>%
+  mutate(lower = pmax(Value - CI, 0), upper = Value + CI)
+```
+
+`r paste0(trimws(GetQuestion(q, A3, 2025)), "  ", caption.percents, "  ", caption.raked)`
+
+`r caption.gatedA3`
+
+```{r}
+CreateFlex(CreateTableA_selectOne_percent(d, A3_gated, ordered=TRUE))
+```
+
+`r "....."`
+
+```{r}
+CreateFlex(CreateTableB_selectOne_percent(d, A3_gated, ordered=TRUE))
+```
+
+In 2025, the most commonly cited reason for not fishing in Nebraska was lack of time, at `r FmtPct(a3_overall_2025, "Lack of time")`, followed by "Other" at `r FmtPct(a3_overall_2025, "Other")`, physically unable to fish at `r FmtPct(a3_overall_2025, "Physically unable to fish")`, and dissatisfaction with past fishing trips at `r FmtPct(a3_overall_2025, "Dissatisfied with past fishing trips")`. The remaining reasons -- no one to fish with, lack of access to fishing areas, no longer enjoying fishing, cost, complicated regulations, and crowded waters -- were each cited by `r FmtPct(a3_overall_2025, "Waters are too crowded")` to `r FmtPct(a3_overall_2025, "No one to fish with")` of respondents who did not fish. "Waters are too crowded" was the least-cited reason offered on the list.
+
+## Reasons Didn't Fish by Age Group
+
+The table above breaks these reasons down by age group. Lack of time was the most-cited reason in every age group, but the weighted share citing it was higher among respondents age 35-44 (`r FmtPct(a3_age, "Lack of time", "35-44")`) than among respondents 65 and older (`r FmtPct(a3_age, "Lack of time", "65 and older")`); these two confidence intervals do not overlap. "Too expensive" was cited only by respondents age 35-44 (`r FmtPct(a3_age, "Too expensive", "35-44")`) and 45-54 (`r FmtPct(a3_age, "Too expensive", "45-54")`), alongside lack of time, and not by respondents in the other four age groups. "No one to fish with," "Physically unable to fish," and "Complicated regulations" were, by contrast, cited only by respondents age 55-64 and 65 and older: "physically unable to fish" was most common among respondents 65 and older (`r FmtPct(a3_age, "Physically unable to fish", "65 and older")`), and "no one to fish with" was cited by `r FmtPct(a3_age, "No one to fish with", "55-64")` of the 55-64 group and `r FmtPct(a3_age, "No one to fish with", "65 and older")` of the 65-and-older group. "Waters are too crowded" (covered in Chapter 2) was likewise only reported in the 55-64 and 65-and-older groups (`r FmtPct(a3_age, "Waters are too crowded", "55-64")` and `r FmtPct(a3_age, "Waters are too crowded", "65 and older")`, respectively), and is not shown in the figure below. So while the middle-age groups (35-44, 45-54) who gave a reason other than lack of time pointed mainly to cost, and the older groups (55-64 and older) who gave another reason pointed mainly to social (no one to fish with) or physical reasons, lack of time remained by far the most-cited reason within every age group, including these two.
+
+Sample sizes within each age group are small (ranging from `r min(a3_age %>% filter(Response=="Lack of time") %>% pull(Number))` to `r max(a3_age %>% filter(Response=="Lack of time") %>% pull(Number))` respondents per group for lack of time, and often 1-2 respondents or none for the less-cited reasons, since only `r nrow(d %>% filter(A2=="No"))` of `r nrow(d)` 2025 respondents reported not fishing). Confidence intervals for most age-by-reason combinations are correspondingly wide, and a reason's absence from an age group in this data does not establish that no one in that age group would give that reason. The age groupings described above are based on which age groups had any respondents citing a reason at all, not on confidence-interval comparisons between age groups, except for the lack-of-time comparison noted above.
+
+```{r ch1bPlot, fig.width=6.5, fig.height=4}
+CreateGroupedPercPlot(a3_age_top, groupLevels = levels(a3_age$Group),
+                       label_y="Percent Citing Reason for Not Fishing", label_x="Age Group") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+`r officer::run_pagebreak()`
+
+## Reasons Didn't Fish Across Survey Years
+
+The share of non-fishing respondents citing crowded waters as their main reason for not fishing has varied across survey years: `r FmtPct(a3_trend %>% filter(Year==2002), "Waters are too crowded")` in 2002, `r FmtPct(a3_trend %>% filter(Year==2012), "Waters are too crowded")` in 2012, `r FmtPct(a3_trend %>% filter(Year==2018), "Waters are too crowded")` in 2018, and `r FmtPct(a3_trend %>% filter(Year==2025), "Waters are too crowded")` in 2025. The 2012 estimate is the only one of the four whose confidence interval does not overlap with the others. "Waters are too crowded" (then worded "Waters too crowded") was an available response option on the survey instrument in all four years, so the 2002 value is a true zero -- no respondent selected it that year -- rather than reflecting an option that did not exist; the 2018 and 2025 estimates are likewise based on very small numbers of respondents (`r a3_trend %>% filter(Year==2018, Response=="Waters are too crowded") %>% pull(Number)` and `r a3_trend %>% filter(Year==2025, Response=="Waters are too crowded") %>% pull(Number)` respondents, respectively).
+
+```{r ch1Plot, fig.width=6.5, fig.height=3.5}
+ggplot(a3_crowded_trend, aes(x=Year, y=Value, group=1)) +
+  geom_line(linewidth=1.2, color=viridis::viridis(1, begin=0.3)) +
+  geom_point(size=3, color=viridis::viridis(1, begin=0.3)) +
+  geom_errorbar(aes(ymin=pmax(Value-CI,0), ymax=Value+CI), width=0.15) +
+  labs(y="Percent Citing Crowding as Main Reason Didn't Fish", x="Survey Year") +
+  theme_minimal()
+```
+
+Two of the other nine reasons also showed survey years whose confidence intervals did not overlap. "Other" was cited less often in 2012 (`r FmtPct(a3_trend %>% filter(Year==2012), "Other")`) than in 2002, 2018, or 2025 (`r FmtPct(a3_trend %>% filter(Year==2002), "Other")`, `r FmtPct(a3_trend %>% filter(Year==2018), "Other")`, and `r FmtPct(a3_trend %>% filter(Year==2025), "Other")`, respectively), and the 2012 confidence interval does not overlap with any of the other three years. "Too expensive" was cited less often in 2012 (`r FmtPct(a3_trend %>% filter(Year==2012), "Too expensive")`) than in 2018 (`r FmtPct(a3_trend %>% filter(Year==2018), "Too expensive")`); these two confidence intervals do not overlap, though the 2002 and 2025 estimates for this reason overlap with both. The remaining reasons -- lack of time, dissatisfaction with past fishing trips, no one to fish with, lack of access to fishing areas, physically unable to fish, and no longer enjoying fishing -- had overlapping confidence intervals across all four survey years, so no across-year difference is distinguishable for them in this data. "Complicated regulations" was not an available response option on the 2002 survey instrument (it was added starting in 2012), so 2002 is excluded from its comparison; among 2012, 2018, and 2025, its confidence intervals overlap across all three years.
+
+`r officer::run_pagebreak()`
+
+# Chapter 2: Crowding
+
+```{r ch2Data}
+q11_overall <- base.summary.percent.selectOne(d, Q11, myGroupVar=NA)
+q11_age <- base.summary.percent.selectOne(d, Q11, myGroupVar=E3)
+```
+
+As noted in Chapter 1, crowded waters was cited by `r FmtPct(a3_overall_2025, "Waters are too crowded")` of respondents who reported not fishing in Nebraska during 2025 as their main reason for not fishing. This chapter looks separately at how often crowding affected the fishing experience of respondents who did fish.
+
+`r paste0(trimws(GetQuestion(q, Q11, 2025)), "  ", caption.percents, "  ", caption.raked)`
+
+```{r}
+CreateFlex(CreateTableA_selectOne_percent(d, Q11))
+```
+
+`r "....."`
+
+```{r}
+CreateFlex(CreateTableB_selectOne_percent(d, Q11))
+```
+
+`r officer::run_pagebreak()`
+
+`r caption.waterbody`
+
+```{r}
+CreateFlex(CreateTableC_waterbody_selectOne_percent(d, Q11))
+```
+
+`r "....."`
+
+`r caption.urbanrural`
+
+```{r}
+CreateFlex(CreateTableD_urbanrural_selectOne_percent(d, Q11))
+```
+
+Overall, `r FmtPct(q11_overall, "Often")` of respondents said their fishing experiences were often negatively affected by the number of people at their fishing locations during 2025, and `r FmtPct(q11_overall, "Always")` said always. The combined "Often" and "Always" share was highest among the youngest age groups and lowest among the oldest: `r FmtPct(q11_age, "Often", "16-24")` of 16-24 year olds reported "Often" compared with `r FmtPct(q11_age, "Often", "65 and older")` of anglers 65 and older. These two age-group confidence intervals do not overlap. The "Always" response was uncommon and did not show a comparable pattern across age groups.
+
+```{r ch2Plot, fig.width=6.5, fig.height=3.5}
+p_q11_age <- q11_age %>% filter(Response %in% c("Often","Always")) %>%
+  mutate(Response = factor(Response, levels=c("Often","Always")))
+
+CreateStackedPercPlot(p_q11_age, groupLevels = levels(q11_age$Group),
+                       responseLevels = c("Often","Always"),
+                       label_y="Percent Negatively Affected by Crowding", label_x="Age Group")
+```
+
+`r officer::run_pagebreak()`
+
+# Chapter 3: Low Water Levels
+
+```{r ch3Data}
+q23_1_overall <- base.summary.percent.selectOne(d, Q23_1, myGroupVar=NA)
+q23_2_overall <- base.summary.percent.selectOne(d, Q23_2, myGroupVar=NA)
+q23_3_overall <- base.summary.percent.selectOne(d, Q23_3, myGroupVar=NA)
+
+q23_3_wb <- CreateTableC_waterbody_selectOne_percent(d, Q23_3)
+q23_3_wb_long <- foreach(v = c("WB_LakesReservoirs","WB_PondsSandpits","WB_RiversStreamsCanals","WB_SandhillLakes"), .combine="rbind") %do% {
+  base.summary.percent.selectOne(d, Q23_3, myGroupVar = !!rlang::sym(v))
+}
+```
+
+## How Often Low Water Levels Affected Whether Respondents Chose to Fish
+
+`r paste0(trimws(GetQuestion(q, Q23_1, 2025)), "  ", caption.percents, "  ", caption.raked)`
+
+```{r}
+CreateFlex(CreateTableA_selectOne_percent(d, Q23_1))
+```
+
+`r "....."`
+
+```{r}
+CreateFlex(CreateTableB_selectOne_percent(d, Q23_1))
+```
+
+`r officer::run_pagebreak()`
+
+`r caption.waterbody`
+
+```{r}
+CreateFlex(CreateTableC_waterbody_selectOne_percent(d, Q23_1))
+```
+
+`r "....."`
+
+`r caption.urbanrural`
+
+```{r}
+CreateFlex(CreateTableD_urbanrural_selectOne_percent(d, Q23_1))
+```
+
+`r officer::run_pagebreak()`
+
+## How Often Low Water Levels Affected Choice of Lakes, Reservoirs, Pits, or Ponds
+
+`r paste0(trimws(GetQuestion(q, Q23_2, 2025)), "  ", caption.percents, "  ", caption.raked)`
+
+```{r}
+CreateFlex(CreateTableA_selectOne_percent(d, Q23_2))
+```
+
+`r "....."`
+
+```{r}
+CreateFlex(CreateTableB_selectOne_percent(d, Q23_2))
+```
+
+`r officer::run_pagebreak()`
+
+`r caption.waterbody`
+
+```{r}
+CreateFlex(CreateTableC_waterbody_selectOne_percent(d, Q23_2))
+```
+
+`r "....."`
+
+`r caption.urbanrural`
+
+```{r}
+CreateFlex(CreateTableD_urbanrural_selectOne_percent(d, Q23_2))
+```
+
+`r officer::run_pagebreak()`
+
+## How Often Low Water Levels Affected Choice of Rivers, Streams, or Canals
+
+`r paste0(trimws(GetQuestion(q, Q23_3, 2025)), "  ", caption.percents, "  ", caption.raked)`
+
+```{r}
+CreateFlex(CreateTableA_selectOne_percent(d, Q23_3))
+```
+
+`r "....."`
+
+```{r}
+CreateFlex(CreateTableB_selectOne_percent(d, Q23_3))
+```
+
+`r officer::run_pagebreak()`
+
+`r caption.waterbody`
+
+```{r}
+CreateFlex(q23_3_wb)
+```
+
+`r "....."`
+
+`r caption.urbanrural`
+
+```{r}
+CreateFlex(CreateTableD_urbanrural_selectOne_percent(d, Q23_3))
+```
+
+Respondents who fished rivers, streams, or canals in 2025 reported a higher rate of "Often" low-water-level effects on their choice of rivers, streams, or canals (`r FmtPct(q23_3_wb_long, "Often", "Rivers, Streams, and Canals")`) than respondents who fished lakes and reservoirs (`r FmtPct(q23_3_wb_long, "Often", "Lakes and Reservoirs")`); these two confidence intervals do not overlap. Respondents who fished lakes and reservoirs were more likely than river/stream/canal anglers to report that they "did not experience low water levels in 2025" when asked about rivers, streams, or canals (`r FmtPct(q23_3_wb_long, "I did not experience low water levels in 2025", "Lakes and Reservoirs")` versus `r FmtPct(q23_3_wb_long, "I did not experience low water levels in 2025", "Rivers, Streams, and Canals")`).
+
+```{r ch3Plot, fig.width=6.5, fig.height=3.5}
+p_q23_3_wb <- q23_3_wb_long %>% filter(Response %in% c("Often","Always")) %>%
+  mutate(Group = factor(Group, levels = waterbody.group.levels))
+
+CreateStackedPercPlot(p_q23_3_wb, groupLevels = waterbody.group.levels,
+                       responseLevels = c("Often","Always"),
+                       label_y="Percent Reporting Effect on River/Stream Choice", label_x="Waterbody Type Fished")
+```
+
+`r officer::run_pagebreak()`
+
+# Chapter 4: Fishing Out of State and Bringing a Boat or Watercraft
+
+```{r ch4Data}
+a11_trend <- base.summary.percent.selectOne(dTrend %>% filter(surveyYear %in% c(2018,2025)), A11, myGroupVar=NA)
+a12_trend <- base.summary.percent.selectOne(dTrend %>% filter(surveyYear %in% c(2018,2025)), A12_gated, myGroupVar=NA)
+
+p4_data <- bind_rows(
+  a11_trend %>% filter(Response=="Yes") %>% mutate(Item="Fished out of state (A11)"),
+  a12_trend %>% filter(Response=="Yes") %>% mutate(Item="Brought a boat/watercraft (A12, of those who fished out of state)")
+) %>% mutate(Year=factor(Year))
+```
+
+## Fished Out of State
+
+`r paste0(trimws(GetQuestion(q, A11, 2025)), "  ", caption.percents, "  ", caption.raked)`
+
+```{r}
+CreateFlex(CreateTableA_selectOne_percent(d, A11))
+```
+
+`r "....."`
+
+```{r}
+CreateFlex(CreateTableB_selectOne_percent(d, A11))
+```
+
+The share of respondents who reported fishing in a state other than Nebraska rose from `r FmtPct(a11_trend %>% filter(Year==2018), "Yes")` in 2018 to `r FmtPct(a11_trend %>% filter(Year==2025), "Yes")` in 2025; these confidence intervals do not overlap.
+
+`r officer::run_pagebreak()`
+
+## Brought a Boat or Other Personal Watercraft When Fishing Out of State
+
+```{r ch4bData}
+a12_overall_2025 <- base.summary.percent.selectOne(d, A12_gated, myGroupVar=NA)
+a12_wb_long <- foreach(v = c("WB_LakesReservoirs","WB_PondsSandpits","WB_RiversStreamsCanals","WB_SandhillLakes"), .combine="rbind") %do% {
+  base.summary.percent.selectOne(d, A12_gated, myGroupVar = !!rlang::sym(v))
+}
+```
+
+`r paste0(trimws(GetQuestion(q, A12, 2025)), "  ", caption.percents, "  ", caption.raked)`
+
+`r caption.gatedA12`
+
+```{r}
+CreateFlex(CreateTableA_selectOne_percent(d, A12_gated))
+```
+
+`r "....."`
+
+```{r}
+CreateFlex(CreateTableB_selectOne_percent(d, A12_gated))
+```
+
+`r officer::run_pagebreak()`
+
+`r caption.waterbody`
+
+```{r}
+CreateFlex(CreateTableC_waterbody_selectOne_percent(d, A12_gated))
+```
+
+`r "....."`
+
+`r caption.urbanrural`
+
+```{r}
+CreateFlex(CreateTableD_urbanrural_selectOne_percent(d, A12_gated))
+```
+
+Among 2025 respondents who fished out of state, `r FmtPct(a12_overall_2025, "Yes")` reported bringing a boat or other personal watercraft along, little changed from `r FmtPct(a12_trend %>% filter(Year==2018), "Yes")` in 2018 (overlapping confidence intervals). By water body type fished in Nebraska, the "Yes" share ranged from `r FmtPct(a12_wb_long, "Yes", "Ponds and Sandpits")` among respondents who fished ponds and sandpits to `r FmtPct(a12_wb_long, "Yes", "Sandhill Lakes")` among respondents who fished Sandhill lakes; several of these water-body-type estimates have wide, overlapping confidence intervals given their smaller sample sizes.
+
+```{r ch4Plot, fig.width=6.5, fig.height=3.5}
+ggplot(p4_data, aes(x=Year, y=Value, color=Item, group=Item)) +
+  geom_line(linewidth=1.2) + geom_point(size=3) +
+  geom_errorbar(aes(ymin=pmax(Value-CI,0), ymax=Value+CI), width=0.15) +
+  scale_color_viridis_d(end=0.7) +
+  labs(y="Percent of Respondents", x="Survey Year") +
+  theme_minimal() + theme(legend.position="bottom", legend.title=element_blank()) +
+  guides(color=guide_legend(nrow=2))
+```
+
+`r officer::run_pagebreak()`
+
+# References
+
+Bureau of Sociological Research. 2026. Fishing Nebraska 2025-2026 Methodology Report. University of Nebraska-Lincoln.
+
+Hurley, Keith. 2026. 2026 Nebraska Licensed Angler Survey - Respondents and Responses. Nebraska Game and Parks Commission. (Hurley 2026).
+
+```{r}
+toc()
+```

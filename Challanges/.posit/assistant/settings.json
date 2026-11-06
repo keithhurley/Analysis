@@ -1,0 +1,24 @@
+{
+  "permission": {
+    "external_directory": {
+      "f:/Survey/Analysis/CrossTabTables/*": "allow",
+      "f:/Survey/Analysis/*": "allow"
+    },
+    "edit": {
+      "*.rmd": "allow",
+      "*.R": "allow"
+    },
+    "executeCode": {
+      "*": "allow"
+    },
+    "bash": {
+      "cd *": "allow",
+      "git status *": "allow",
+      "head *": "allow",
+      "echo *": "allow",
+      "git branch *": "allow",
+      "git remote *": "allow",
+      "git add *": "allow"
+    }
+  }
+}
